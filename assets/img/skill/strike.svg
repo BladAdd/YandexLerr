@@ -1,25 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="pl" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#2a1510"/>
-      <stop offset="100%" stop-color="#120705"/>
-    </linearGradient>
-    <radialGradient id="gl" cx="50%" cy="35%" r="75%">
-      <stop offset="0%" stop-color="#fb923c" stop-opacity="0.5"/>
-      <stop offset="100%" stop-color="#fb923c" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="met" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#fed7aa"/>
-      <stop offset="100%" stop-color="#ea580c"/>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fde047"/>
+      <stop offset="100%" stop-color="#eab308"/>
     </linearGradient>
   </defs>
-  <rect width="64" height="64" rx="16" fill="url(#pl)"/>
-  <rect width="64" height="64" rx="16" fill="url(#gl)"/>
-  <rect width="64" height="64" rx="16" fill="none" stroke="#fb923c" stroke-opacity="0.4" stroke-width="1.5"/>
-  <path d="M38 10 L52 26 L44 28 L34 48 L30 36 L20 30 L24 22 L34 20 Z" fill="url(#met)"/>
-  <path d="M38 10 L44 28 L34 20 Z" fill="#fff7ed" opacity="0.5"/>
-  <path d="M52 26 L44 28 L48 20 Z" fill="#7c2d12" opacity="0.5"/>
-  <circle cx="24" cy="44" r="2.5" fill="#fdba74"/>
-  <circle cx="50" cy="36" r="2" fill="#fdba74" opacity="0.8"/>
-  <path d="M14 14 L18 18 M50 50 L54 54" stroke="#fb923c" stroke-opacity="0.5" stroke-width="1.5" stroke-linecap="round"/>
+  <path d="M36 8 L16 36 L28 36 L24 56 L46 26 L33 26 L40 8 Z" fill="url(#g)"/>
 </svg>

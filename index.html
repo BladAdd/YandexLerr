@@ -51,7 +51,7 @@
         .text-shadow-md { text-shadow: 2px 2px 6px rgba(0,0,0,1), -1px -1px 3px rgba(0,0,0,0.6); }
         .text-glow { text-shadow: 0 0 15px currentColor; }
         
-        #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none; }
         #space-bg { position: fixed; inset: 0; z-index: 0; background: url('assets/img/ui/nebula.svg') center/cover no-repeat; pointer-events: none; opacity: 0.95; animation: spaceDrift 90s ease-in-out infinite alternate; }
         #ui-particles { position: absolute; top:0; left:0; width:100vw; height:100vh; pointer-events: none; z-index: 5; }
         #vignette { position: absolute; top:0; left:0; width:100vw; height:100vh; pointer-events: none; z-index: 2; box-shadow: inset 0 0 150px rgba(0,0,0,0.8); transition: box-shadow 0.3s ease; }
@@ -134,7 +134,7 @@
         
         .bld-icon { width: 48px; height: 48px; }
         .planet-icon { width: 56px; height: 56px; }
-        .crew-icon { width: 48px; height: 48px; border-radius: 50%; }
+        .crew-icon { width: 48px; height: 48px; }
         .skill-ico { width: 20px; height: 20px; }
         @media (min-width: 768px) { .bld-icon { width: 56px; height: 56px; } .skill-ico { width: 26px; height: 26px; } }
         

@@ -1,29 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <defs>
-    <linearGradient id="pl" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#1c1428"/>
-      <stop offset="100%" stop-color="#0a0612"/>
-    </linearGradient>
-    <radialGradient id="gl" cx="50%" cy="40%" r="70%">
-      <stop offset="0%" stop-color="#ff7b59" stop-opacity="0.55"/>
-      <stop offset="100%" stop-color="#ff7b59" stop-opacity="0"/>
+    <radialGradient id="gl" cx="50%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#e55934" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#e55934" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="met" x1="0" y1="0" x2="1" y2="1">
+    <radialGradient id="core" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#ffd7cc"/>
-      <stop offset="100%" stop-color="#ea580c"/>
-    </linearGradient>
-    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#ff9d80"/>
-      <stop offset="100%" stop-color="#c7411e"/>
-    </linearGradient>
+      <stop offset="55%" stop-color="#e55934"/>
+      <stop offset="100%" stop-color="#7c2d12"/>
+    </radialGradient>
   </defs>
-  <rect width="64" height="64" rx="16" fill="url(#pl)"/>
-  <rect width="64" height="64" rx="16" fill="url(#gl)"/>
-  <rect width="64" height="64" rx="16" fill="none" stroke="#e55934" stroke-opacity="0.4" stroke-width="1.5"/>
-  <circle cx="32" cy="32" r="17" fill="none" stroke="url(#ring)" stroke-opacity="0.55" stroke-width="2" stroke-dasharray="4 5"/>
-  <path d="M35 12 L50 30 L41 32 L30 52 L27 38 L18 31 L27 28 Z" fill="url(#met)"/>
-  <path d="M35 12 L41 32 L30 27 Z" fill="#fff7ed" opacity="0.55"/>
-  <path d="M50 30 L41 32 L45 22 Z" fill="#7c2d12" opacity="0.5"/>
-  <path d="M32 38 L32 44 M32 24 L32 28" stroke="#ff9d80" stroke-width="2" stroke-linecap="round"/>
-  <circle cx="32" cy="32" r="2" fill="#ffd7cc"/>
+  <circle cx="32" cy="32" r="24" fill="url(#gl)"/>
+  <circle cx="32" cy="32" r="13" fill="url(#core)"/>
+  <path d="M32 13 L38 24 L50 24 L40 31 L44 42 L32 35 L20 42 L24 31 L14 24 L26 24 Z" fill="none" stroke="#ffe4d6" stroke-width="2" opacity="0.8"/>
 </svg>
