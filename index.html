@@ -98,7 +98,7 @@
         .skill-out { animation: skillOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes skillOut { 0% { opacity: 1; transform: translateX(0) scale(1); } 100% { opacity: 0; transform: translateX(-30px) scale(0.7); } }
 
-        .tech-tree-wrap { position: relative; height: 100%; overflow: auto; scrollbar-width: thin; }
+        .tech-tree-wrap { position: relative; height: 100%; overflow: auto; scrollbar-width: thin; padding: 0; }
         .tech-tree { display: grid; grid-template-columns: repeat(4, 150px); grid-template-rows: auto repeat(7, 1fr); gap: 24px 36px; padding: 8px 4px 28px; min-width: 700px; position: relative; }
         .tech-col-head { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #9ca3af; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.08); align-self: end; }
         .tech-col-head i { font-size: 14px; }
@@ -1473,8 +1473,7 @@
             }
 
             let html = '<div class="text-xs text-gray-400 mb-3 font-orbitron font-bold tracking-widest uppercase border-b border-white/10 pb-2 flex items-center justify-between"><span>Древо Исследований</span><span class="text-[10px] normal-case tracking-normal text-gray-500 font-sans font-medium hidden md:flex items-center gap-1"><i class="fa-solid fa-lightbulb text-yellow-300/70"></i> Пульсирующие узлы доступны для изучения</span></div>';
-            html += '<div class="tech-tree-wrap"><div id="tech-tree" class="tech-tree">';
-            html += '<svg id="tech-lines" class="tech-lines"></svg>';
+            html += '<div class="tech-tree-wrap"><svg id="tech-lines" class="tech-lines"></svg><div id="tech-tree" class="tech-tree">';
 
             branches.forEach(b => {
                 html += `<div class="tech-col-head" style="grid-row:1;grid-column:${b.col + 1}"><i class="fa-solid ${b.icon} ${b.color}"></i><span>${b.label}</span></div>`;
@@ -1522,14 +1521,25 @@
                 window.addEventListener('resize', () => { if (currentTab === 'tech') drawTechLines(); });
             }
             setTimeout(drawTechLines, 150);
+            const win = document.getElementById('tab-modal-window');
+            if (win && !win.__techAnimBound) {
+                win.__techAnimBound = true;
+                win.addEventListener('animationend', (e) => {
+                    if (e.animationName === 'modalIn' && currentTab === 'tech') drawTechLines();
+                });
+            }
         }
 
         function drawTechLines() {
             const tree = document.getElementById('tech-tree');
             const svg = document.getElementById('tech-lines');
             if (!tree || !svg) return;
+            const container = tree.parentElement;
             svg.style.width = tree.scrollWidth + 'px';
             svg.style.height = tree.scrollHeight + 'px';
+            const cr = container.getBoundingClientRect();
+            const sl = container.scrollLeft;
+            const st = container.scrollTop;
             let html = '';
             for (let key in TECH_DATA) {
                 const t = TECH_DATA[key];
@@ -1537,18 +1547,20 @@
                 const parent = document.getElementById('tech-node-' + t.req);
                 const child = document.getElementById('tech-node-' + key);
                 if (!parent || !child) continue;
-                const px = parent.offsetLeft + parent.offsetWidth / 2;
-                const py = parent.offsetTop + parent.offsetHeight / 2;
-                const cx = child.offsetLeft + child.offsetWidth / 2;
-                const cy = child.offsetTop + child.offsetHeight / 2;
+                const pr = parent.getBoundingClientRect();
+                const ck = child.getBoundingClientRect();
                 let d;
-                if (parent.offsetTop === child.offsetTop) {
-                    d = `M ${px.toFixed(1)} ${py.toFixed(1)} L ${cx.toFixed(1)} ${cy.toFixed(1)}`;
+                if (Math.round(pr.top) === Math.round(ck.top)) {
+                    const y = pr.top - cr.top + st + pr.height / 2;
+                    const leftward = ck.left < pr.left;
+                    const x1 = (leftward ? pr.left : pr.right) - cr.left + sl;
+                    const x2 = (leftward ? ck.right : ck.left) - cr.left + sl;
+                    d = `M ${x1.toFixed(1)} ${y.toFixed(1)} L ${x2.toFixed(1)} ${y.toFixed(1)}`;
                 } else {
-                    const x1 = parent.offsetLeft + parent.offsetWidth / 2;
-                    const y1 = parent.offsetTop + parent.offsetHeight;
-                    const x2 = child.offsetLeft + child.offsetWidth / 2;
-                    const y2 = child.offsetTop;
+                    const x1 = pr.left - cr.left + pr.width / 2 + sl;
+                    const y1 = pr.bottom - cr.top + st;
+                    const x2 = ck.left - cr.left + ck.width / 2 + sl;
+                    const y2 = ck.top - cr.top + st;
                     const mid = (y1 + y2) / 2;
                     d = `M ${x1.toFixed(1)} ${y1.toFixed(1)} C ${x1.toFixed(1)} ${mid.toFixed(1)}, ${x2.toFixed(1)} ${mid.toFixed(1)}, ${x2.toFixed(1)} ${y2.toFixed(1)}`;
                 }
