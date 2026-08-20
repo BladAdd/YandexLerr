@@ -350,7 +350,7 @@
     <div id="ufo-container" class="hidden interactive fixed z-40" onclick="catchUFO()">
         <div class="relative w-16 h-16 flex items-center justify-center cursor-pointer group">
             <div class="absolute inset-0 bg-ufo-blur rounded-full hover-bg-ufo-blur transition-all duration-300 group-hover:scale-125"></div>
-            <i class="fa-solid fa-satellite text-4xl text-gray-200 z-10 animate-float shadow-glow-ufo drop-shadow-[0_0_15px_rgba(34,211,238,1)]"></i>
+            <i class="fa-solid fa-shuttle-space text-4xl text-gray-200 z-10 animate-float shadow-glow-ufo drop-shadow-[0_0_15px_rgba(34,211,238,1)]"></i>
         </div>
     </div>
 
@@ -1001,7 +1001,7 @@
             updateDynamicUI(); 
             updateQuestsUI(); 
             
-            if(Math.random() < 0.001) spawnUFO();
+            if(Date.now() - lastUfoSpawn >= 180000) { lastUfoSpawn = Date.now(); spawnUFO(); }
             
             if(currentTab === 'hq') {
                 const rateEl = document.getElementById('market-rate-display');
@@ -2233,6 +2233,7 @@
         }
 
         let currentShuttleOffer = null;
+        let lastUfoSpawn = Date.now();
 
         function spawnUFO() {
             const ufo = document.getElementById('ufo-container');
