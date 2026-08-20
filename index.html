@@ -592,9 +592,11 @@
                     panel_open: 'lib/sfx/panel_open.wav',
                     panel_close: 'lib/sfx/panel_close.wav'
                 };
+                const volumes = { click: 1.0, buy: 0.75, error: 0.7, skill: 0.65, epic: 0.75, panel_open: 0.6, panel_close: 0.6 };
                 for (let name in files) {
                     const a = new Audio(files[name]);
                     a.preload = 'auto';
+                    a.volume = volumes[name] || 0.7;
                     sfx[name] = a;
                 }
                 audioReady = true;

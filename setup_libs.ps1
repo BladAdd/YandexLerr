@@ -39,12 +39,12 @@ Write-Host "== SFX (Kenney UI Sounds, CC0) =="
 $sfxBase = "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/master/addons/kenney_interface_sounds"
 $sfxFiles = @{
     "click_002.wav" = "click.wav";
-    "pluck_001.wav" = "buy.wav";
-    "error_002.wav" = "error.wav";
-    "toggle_001.wav" = "skill.wav";
-    "maximize_003.wav" = "epic.wav";
-    "open_002.wav" = "panel_open.wav";
-    "close_002.wav" = "panel_close.wav"
+    "pluck_002.wav" = "buy.wav";
+    "error_005.wav" = "error.wav";
+    "select_002.wav" = "skill.wav";
+    "bong_001.wav" = "epic.wav";
+    "back_001.wav" = "panel_open.wav";
+    "drop_001.wav" = "panel_close.wav"
 }
 foreach ($k in $sfxFiles.Keys) {
     Invoke-WebRequest -UseBasicParsing "$sfxBase/$k" -OutFile "$lib\sfx\$($sfxFiles[$k])"
