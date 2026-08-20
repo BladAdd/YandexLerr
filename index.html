@@ -226,7 +226,7 @@
 
     <div id="ui-layer">
         <header class="glass-panel w-full p-2 md:p-3 flex flex-wrap justify-between items-center interactive z-30 relative border-b border-white/10">
-            <div class="flex items-center gap-3 mb-2 md:mb-0 cursor-pointer group" onclick="handleLogoClick()" title="AresCorp">
+            <div class="flex items-center gap-3 mb-2 md:mb-0 cursor-pointer group" onclick="handleLogoClick()" title="Арес Корп">
                 <div class="relative w-12 h-12 flex items-center justify-center bg-black/40 rounded-xl border border-white/10 shadow-inner group-hover:border-mars-500/50 transition-colors">
                     <div class="absolute inset-0 border-2 border-mars-500/50 rounded-xl animate-spin-slow opacity-50 group-hover:opacity-100 group-hover:border-mars-400 transition-all"></div>
                     <span class="ico ico-dm text-purple-300 text-2xl animate-pulse-fast drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]"></span>
@@ -309,7 +309,7 @@
 
                 <div class="flex-1 flex flex-col items-center justify-center pointer-events-auto gap-8 my-auto">
                     <div class="relative flex items-center justify-center group h-16">
-                        <div id="combo-display" class="font-orbitron text-3xl md:text-5xl font-black text-white z-10 text-shadow-md transition-all duration-200 group-hover:scale-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">Комбо x1.0</div>
+                        <div id="combo-display" style="opacity: 0" class="font-orbitron text-3xl md:text-5xl font-black text-white z-10 text-shadow-md transition-all duration-200 group-hover:scale-110 drop-shadow-[0_0_20px_rgba(255,255,255,0.4)]">Комбо x1.0</div>
                     </div>
                     
                     <div id="main-clicker" class="relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 cursor-crosshair group flex items-center justify-center rounded-full">
@@ -1086,6 +1086,7 @@
         function updateComboUI() {
             const el = document.getElementById('combo-display');
             el.innerText = "Комбо x" + combo.toFixed(1);
+            el.style.opacity = combo > 1.0 ? '1' : '0';
             el.classList.remove('scale-110', 'scale-125', 'text-gold-400');
             if(combo > 2.0) {
                 el.style.color = '#f59e0b';
@@ -2527,7 +2528,7 @@
             ringsMesh.rotation.x = Math.PI / 2.5;
             scene.add(ringsMesh);
 
-            phobosMesh = new THREE.Mesh(new THREE.SphereGeometry(0.8, 16, 16), new THREE.MeshStandardMaterial({ color: 0x666666, roughness: 0.9 }));
+            phobosMesh = new THREE.Mesh(new THREE.SphereGeometry(0.8, 32, 32), new THREE.MeshStandardMaterial({ color: 0x666666, roughness: 0.9 }));
             scene.add(phobosMesh);
 
             const sGeo = new THREE.BufferGeometry();
@@ -2545,7 +2546,7 @@
             sGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3));
             sGeo.setAttribute('color', new THREE.BufferAttribute(sColors, 3));
             
-            const starMat = new THREE.PointsMaterial({ size: 0.15, vertexColors: true, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending });
+            const starMat = new THREE.PointsMaterial({ size: 0.18, map: tex, vertexColors: true, transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false });
             const stars = new THREE.Points(sGeo, starMat);
             scene.add(stars);
 
@@ -2592,8 +2593,15 @@
             
             if(phobosMesh) {
                 phobosAngle += 0.0015;
-                phobosMesh.position.x = Math.cos(phobosAngle) * 14;
-                phobosMesh.position.z = Math.sin(phobosAngle) * 14;
+                const s = currentPlanetScale;
+                const orb = Math.min(1, Math.max(0.55, (window.innerWidth / window.innerHeight) / 1.5));
+                const A = 11.2 * s * orb;
+                const B = 9.6 * s * orb;
+                const tilt = 25 * Math.PI / 180;
+                phobosMesh.position.x = Math.cos(phobosAngle) * A;
+                phobosMesh.position.z = Math.sin(phobosAngle) * B * Math.cos(tilt);
+                phobosMesh.position.y = Math.sin(phobosAngle) * B * Math.sin(tilt);
+                phobosMesh.scale.setScalar(s);
                 phobosMesh.rotation.y += 0.01;
                 phobosMesh.rotation.x += 0.005;
             }
