@@ -44,42 +44,35 @@
     <script src="/sdk.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; background-color: #02040a; color: white; user-select: none; -webkit-touch-callout: none; font-family: 'Rajdhani', sans-serif; touch-action: none; }
+        body { margin: 0; overflow: hidden; background-color: #030508; color: white; user-select: none; -webkit-touch-callout: none; font-family: 'Rajdhani', sans-serif; touch-action: none; }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
         
         .text-shadow-sm { text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
         .text-shadow-md { text-shadow: 2px 2px 6px rgba(0,0,0,1), -1px -1px 3px rgba(0,0,0,0.6); }
         .text-glow { text-shadow: 0 0 15px currentColor; }
         
-        #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; pointer-events: none; }
-        #space-bg { position: fixed; inset: 0; z-index: 0; background: url('assets/img/ui/nebula.svg') center/cover no-repeat; pointer-events: none; opacity: 0.95; animation: spaceDrift 90s ease-in-out infinite alternate; }
+        #canvas-container { position: absolute; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 0; pointer-events: none; }
         #ui-particles { position: absolute; top:0; left:0; width:100vw; height:100vh; pointer-events: none; z-index: 5; }
         #vignette { position: absolute; top:0; left:0; width:100vw; height:100vh; pointer-events: none; z-index: 2; box-shadow: inset 0 0 150px rgba(0,0,0,0.8); transition: box-shadow 0.3s ease; }
         
         #ui-layer { position: relative; z-index: 10; height: 100vh; width: 100vw; display: flex; flex-direction: column; pointer-events: none; }
         .interactive { pointer-events: auto; }
         
-        .glass-panel { background: linear-gradient(135deg, rgba(10, 16, 28, 0.82) 0%, rgba(3, 6, 12, 0.94) 100%); backdrop-filter: blur(22px) saturate(170%); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 15px 35px rgba(0,0,0,0.85), inset 0 1px 0 rgba(255,255,255,0.12), inset 0 0 60px rgba(229,89,52,0.04); }
-        .glass-card { position: relative; background: linear-gradient(180deg, rgba(17, 25, 40, 0.72) 0%, rgba(10, 15, 27, 0.9) 100%); backdrop-filter: blur(14px) saturate(140%); border: 1px solid rgba(255,255,255,0.09); transition: all 0.35s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 8px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07); overflow: hidden; }
-        .glass-card::before { content: ''; position: absolute; top: 0; left: -60%; width: 45%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0) 100%); transform: skewX(-20deg); transition: left 0.7s cubic-bezier(0.4, 0, 0.2, 1); pointer-events: none; }
-        .glass-card:hover { transform: translateY(-4px) scale(1.015); border-color: rgba(255,255,255,0.28); background: linear-gradient(180deg, rgba(28, 40, 62, 0.8) 0%, rgba(16, 22, 40, 0.94) 100%); box-shadow: 0 14px 28px rgba(0,0,0,0.55), 0 0 30px rgba(229,89,52,0.08), inset 0 1px 0 rgba(255,255,255,0.16); z-index: 10; }
-        .glass-card:hover::before { left: 120%; }
+        .glass-panel { background: linear-gradient(135deg, rgba(8, 12, 20, 0.75) 0%, rgba(2, 4, 8, 0.9) 100%); backdrop-filter: blur(16px) saturate(150%); border: 1px solid rgba(255, 255, 255, 0.05); box-shadow: 0 15px 35px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.1); }
+        .glass-card { background: linear-gradient(180deg, rgba(15, 22, 35, 0.6) 0%, rgba(10, 15, 25, 0.8) 100%); backdrop-filter: blur(10px) saturate(120%); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        .glass-card:hover { transform: translateY(-3px) scale(1.01); border-color: rgba(255,255,255,0.3); background: linear-gradient(180deg, rgba(25, 35, 55, 0.7) 0%, rgba(15, 20, 35, 0.9) 100%); box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2); z-index: 10; }
         .glass-card:active { transform: translateY(0) scale(0.99); }
         
-        .tab-btn { transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0.45; position: relative; overflow: hidden; transform-origin: bottom; flex-shrink: 0; }
-        .tab-btn::after { content: ''; position: absolute; bottom: 0; left: 50%; width: 0; height: 3px; background: linear-gradient(90deg, #E55934, #FF7B59); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-50%); box-shadow: 0 -2px 12px rgba(229,89,52,0); }
-        .tab-btn .tab-icon, .tab-btn .nav-img { transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); filter: drop-shadow(0 0 0 rgba(255,255,255,0)); }
-        .tab-btn:hover { opacity: 0.9; }
-        .tab-btn:hover .tab-icon, .tab-btn:hover .nav-img { transform: translateY(-2px) scale(1.12); }
-        .tab-btn.active { opacity: 1; transform: scale(1.06); text-shadow: 0 0 12px rgba(229,89,52,0.9); }
+        .tab-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0.4; position: relative; overflow: hidden; transform-origin: bottom; flex-shrink: 0; }
+        .tab-btn::after { content: ''; position: absolute; bottom: 0; left: 50%; width: 0; height: 3px; background: #E55934; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-50%); box-shadow: 0 -2px 10px rgba(229,89,52,0); }
+        .tab-btn.active { opacity: 1; transform: scale(1.05); text-shadow: 0 0 12px rgba(229,89,52,0.9); }
         .tab-btn.active::after { width: 100%; box-shadow: 0 -3px 15px rgba(229,89,52,1); }
-        .tab-btn.active .tab-icon, .tab-btn.active .nav-img { filter: drop-shadow(0 0 10px rgba(255,123,89,0.8)); animation: iconFloat 2.5s ease-in-out infinite; }
         
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
-        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.5); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(255,123,89,0.9), rgba(199,65,30,0.9)); border-radius: 4px; box-shadow: inset 0 0 2px rgba(0,0,0,0.5), 0 0 8px rgba(229,89,52,0.4); }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.4); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: linear-gradient(180deg, rgba(229,89,52,0.8), rgba(199,65,30,0.8)); border-radius: 4px; box-shadow: inset 0 0 2px rgba(0,0,0,0.5); }
 
-        .heat-bar-bg { box-shadow: inset 0 3px 6px rgba(0,0,0,1), 0 0 15px rgba(229,89,52,0.15); border: 1px solid rgba(255,255,255,0.18); background: rgba(0,0,0,0.75); backdrop-filter: blur(4px); }
+        .heat-bar-bg { box-shadow: inset 0 3px 6px rgba(0,0,0,1), 0 0 15px rgba(229,89,52,0.1); border: 1px solid rgba(255,255,255,0.15); background: rgba(0,0,0,0.7); }
         .heat-bar-fill-texture { background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(0,0,0,0.4) 10px, rgba(0,0,0,0.4) 20px); mix-blend-mode: overlay; }
         .overheat-flash { animation: flashRed 0.5s infinite alternate ease-in-out; }
         @keyframes flashRed { 0% { box-shadow: 0 0 10px rgba(229,89,52,0.3); } 100% { box-shadow: 0 0 50px rgba(255,0,0,0.8); border-color: rgba(255,50,50,0.8); } }
@@ -87,9 +80,8 @@
         .skill-btn-wrapper { position: relative; width: 3.5rem; height: 3.5rem; margin-bottom: 0.5rem; }
         @media (min-width: 768px) { .skill-btn-wrapper { width: 100%; height: auto; margin-bottom: 0; } }
         
-        .skill-btn { transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1); background: linear-gradient(135deg, rgba(16,16,28,0.85), rgba(6,6,12,0.95)); border: 1px solid rgba(255,255,255,0.12); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 0.85rem; overflow: visible; box-shadow: 0 4px 12px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08); }
-        .skill-btn .skill-img { width: 22px; height: 22px; filter: drop-shadow(0 0 6px currentColor); }
-        .skill-btn:hover { border-color: rgba(255,255,255,0.55); box-shadow: 0 0 24px currentColor, inset 0 1px 0 rgba(255,255,255,0.15); transform: translateX(8px); z-index: 50; }
+        .skill-btn { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); background: linear-gradient(135deg, rgba(15,15,25,0.8), rgba(5,5,10,0.9)); border: 1px solid rgba(255,255,255,0.1); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 0.75rem; overflow: visible; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        .skill-btn:hover { border-color: rgba(255,255,255,0.5); box-shadow: 0 0 20px currentColor; transform: translateX(8px); z-index: 50; }
         .skill-btn:active:not(:disabled) { transform: scale(0.92) translateX(8px); }
         
         .skill-cooldown-container { position: absolute; inset: 0; border-radius: 0.75rem; overflow: hidden; pointer-events: none; z-index: 0; }
@@ -109,43 +101,8 @@
 
         .reticle-core { transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s; }
         
-        #main-clicker::before { content: ''; position: absolute; inset: -28%; background: conic-gradient(from 0deg, rgba(229,89,52,0.25), rgba(56,189,248,0.12), rgba(168,85,247,0.18), rgba(229,89,52,0.25)); border-radius: 50%; filter: blur(28px); animation: spin-slow 14s linear infinite; pointer-events: none; opacity: 0.8; }
-        #main-clicker:hover::before { opacity: 1; }
-        
         .modal-enter { animation: modalIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
         @keyframes modalIn { 0% { opacity: 0; transform: scale(0.8) translateY(30px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
-        
-        .corner-frame { position: absolute; inset: 0; }
-        .corner-frame::before, .corner-frame::after { content: ''; position: absolute; width: 120px; height: 120px; pointer-events: none; z-index: 30; opacity: 0.6; transition: opacity 0.3s; }
-        .corner-frame::before { top: 0; left: 0; background: url('assets/img/ui/corner.svg') top left/120px 120px no-repeat; }
-        .corner-frame::after { bottom: 0; right: 0; background: url('assets/img/ui/corner.svg') bottom right/120px 120px no-repeat; transform: rotate(180deg); }
-        
-        .res-chip { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
-        .res-chip:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.6); }
-        .res-chip img { width: 22px; height: 22px; }
-        .res-chip .res-img-sm { width: 18px; height: 18px; }
-        
-        @keyframes iconFloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
-        @keyframes spaceDrift { 0% { transform: scale(1) translateX(0); } 100% { transform: scale(1.08) translateX(-2%); } }
-        @keyframes glowPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-        
-        .nav-img { width: 20px; height: 20px; }
-        @media (min-width: 768px) { .nav-img { width: 24px; height: 24px; } }
-        
-        .bld-icon { width: 48px; height: 48px; }
-        .planet-icon { width: 56px; height: 56px; }
-        .crew-icon { width: 48px; height: 48px; }
-        .skill-ico { width: 20px; height: 20px; }
-        @media (min-width: 768px) { .bld-icon { width: 56px; height: 56px; } .skill-ico { width: 26px; height: 26px; } }
-        
-        .btn-premium { position: relative; overflow: hidden; background: linear-gradient(135deg, #C7411E, #E55934 50%, #FF7B59); box-shadow: 0 6px 20px rgba(229,89,52,0.4), inset 0 1px 0 rgba(255,255,255,0.25); transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        .btn-premium:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 10px 30px rgba(229,89,52,0.6), inset 0 1px 0 rgba(255,255,255,0.3); }
-        .btn-premium:active { transform: scale(0.96); }
-        
-        .glow-ring { box-shadow: 0 0 0 1px rgba(255,255,255,0.1), 0 0 25px rgba(229,89,52,0.15), inset 0 0 25px rgba(229,89,52,0.06); }
-        
-        .stat-card { transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
-        .stat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.5), 0 0 20px rgba(229,89,52,0.1); }
         
         .rarity-common { border-color: rgba(148,163,184,0.5); box-shadow: inset 0 0 15px rgba(148,163,184,0.1); }
         .rarity-rare { border-color: rgba(59,130,246,0.6); box-shadow: inset 0 0 20px rgba(59,130,246,0.2); }
@@ -209,7 +166,6 @@
 <body class="antialiased text-gray-200 ui-auto">
 
     <div id="canvas-container"></div>
-    <div id="space-bg"></div>
     <div id="vignette"></div>
     <canvas id="ui-particles"></canvas>
 
@@ -218,7 +174,7 @@
             <div class="flex items-center gap-3 mb-2 md:mb-0 cursor-pointer group" onclick="handleLogoClick()" title="AresCorp">
                 <div class="relative w-12 h-12 flex items-center justify-center bg-black/40 rounded-xl border border-white/10 shadow-inner group-hover:border-mars-500/50 transition-colors">
                     <div class="absolute inset-0 border-2 border-mars-500/50 rounded-xl animate-spin-slow opacity-50 group-hover:opacity-100 group-hover:border-mars-400 transition-all"></div>
-                    <img src="assets/img/ui/logo.svg" alt="AresCorp" class="w-9 h-9 relative z-10 drop-shadow-[0_0_10px_rgba(229,89,52,0.6)] group-hover:scale-110 transition-transform">
+                    <i class="fa-solid fa-meteor text-mars-400 text-xl animate-pulse-fast text-glow drop-shadow-[0_0_10px_rgba(229,89,52,0.8)]"></i>
                 </div>
                 <div>
                     <h1 class="font-orbitron text-2xl font-black tracking-widest uppercase flex items-center gap-1 leading-none drop-shadow-md">
@@ -240,18 +196,18 @@
                     <i class="fa-solid fa-gear"></i>
                 </button>
 
-                <div id="ui-dark-matter-container" class="hidden flex-col items-center bg-gradient-to-b from-purple-900/40 to-black/80 px-4 py-1.5 rounded-xl border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] res-chip">
+                <div id="ui-dark-matter-container" class="hidden flex-col items-center bg-gradient-to-b from-purple-900/40 to-black/80 px-4 py-1.5 rounded-xl border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
                     <div class="text-[9px] text-purple-300 font-orbitron uppercase mb-0.5 tracking-wider">Материя</div>
                     <div class="flex items-center">
-                        <img src="assets/img/res/darkmatter.svg" alt="ТМ" class="res-img-sm mr-2 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]">
+                        <i class="fa-solid fa-infinity text-purple-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"></i>
                         <span id="ui-res-dm" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
                     </div>
                 </div>
                 
-                <div class="flex flex-col items-center bg-gradient-to-b from-gray-900/60 to-black/80 px-4 py-1.5 rounded-xl border border-white/10 shadow-inner res-chip">
+                <div class="flex flex-col items-center bg-gradient-to-b from-gray-900/60 to-black/80 px-4 py-1.5 rounded-xl border border-white/10 shadow-inner">
                     <div class="text-[9px] text-gray-400 font-orbitron uppercase mb-0.5 tracking-wider">Минералы</div>
                     <div class="flex items-center">
-                        <img src="assets/img/res/mineral.svg" alt="Мин" class="res-img-sm mr-2 drop-shadow-[0_0_8px_rgba(229,89,52,0.8)]">
+                        <i class="fa-solid fa-gem text-mars-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(229,89,52,0.8)]"></i>
                         <span id="ui-res-min" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
                     </div>
                     <div class="flex justify-between w-full mt-0.5">
@@ -260,10 +216,10 @@
                     </div>
                 </div>
                 
-                <div class="flex flex-col items-center bg-gradient-to-b from-gray-900/60 to-black/80 px-4 py-1.5 rounded-xl border border-white/10 shadow-inner res-chip">
+                <div class="flex flex-col items-center bg-gradient-to-b from-gray-900/60 to-black/80 px-4 py-1.5 rounded-xl border border-white/10 shadow-inner">
                     <div class="text-[9px] text-gray-400 font-orbitron uppercase mb-0.5 tracking-wider">Наука</div>
                     <div class="flex items-center">
-                        <img src="assets/img/res/science.svg" alt="Наука" class="res-img-sm mr-2 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]">
+                        <i class="fa-solid fa-flask text-sci-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]"></i>
                         <span id="ui-res-sci" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
                     </div>
                     <div class="flex justify-between w-full mt-0.5">
@@ -272,10 +228,10 @@
                     </div>
                 </div>
                 
-                <div class="flex flex-col items-center bg-gradient-to-b from-prem-900/40 to-black/80 px-4 py-1.5 rounded-xl border border-prem-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] res-chip">
+                <div class="flex flex-col items-center bg-gradient-to-b from-prem-900/40 to-black/80 px-4 py-1.5 rounded-xl border border-prem-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
                     <div class="text-[9px] text-prem-300 font-orbitron uppercase mb-0.5 tracking-wider">Кристаллы</div>
                     <div class="flex items-center">
-                        <img src="assets/img/res/crystal.svg" alt="Кристаллы" class="res-img-sm mr-2 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]">
+                        <i class="fa-solid fa-gem text-prem-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]"></i>
                         <span id="ui-res-prm" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
                     </div>
                 </div>
@@ -309,9 +265,8 @@
                         
                         <div id="reticle-core" class="reticle-core absolute inset-[25%] bg-gradient-to-br from-black/80 to-mars-900/80 backdrop-blur-xl rounded-full border-2 border-mars-400 shadow-glow-mars shadow-glow-mars-hover group-active:scale-90 group-active:border-white transition-all duration-100 z-10 overflow-hidden flex flex-col items-center justify-center group-hover:shadow-[0_0_80px_rgba(229,89,52,0.8)]">
                              <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(229,89,52,0.4)_0%,transparent_70%)] animate-pulse-fast pointer-events-none"></div>
-                             <img id="clicker-planet" src="assets/img/planet/mars.svg" alt="Планета" class="w-16 h-16 md:w-20 md:h-20 relative z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] group-active:scale-110 transition-transform pointer-events-none">
-                             <i class="fa-solid fa-crosshairs absolute inset-0 m-auto w-8 h-8 text-4xl md:text-5xl text-white/90 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] z-20 pointer-events-none opacity-70"></i>
-                             <span class="font-orbitron text-[10px] md:text-xs font-bold text-mars-100 uppercase tracking-widest mt-1 relative z-10 drop-shadow-md">Добыча</span>
+                             <i class="fa-solid fa-crosshairs text-4xl md:text-5xl text-white group-active:text-white transition-colors relative z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] group-active:scale-110"></i>
+                             <span class="font-orbitron text-[10px] md:text-xs font-bold text-mars-100 uppercase tracking-widest mt-2 relative z-10 drop-shadow-md">Добыча</span>
                         </div>
                     </div>
 
@@ -328,25 +283,25 @@
             <div id="game-sidebar-container" class="interactive">
                 <nav id="main-nav" class="scrollbar-hide interactive">
                     <button class="tab-btn nav-tab-core flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('core')">
-                        <img src="assets/img/ui/logo.svg" alt="Ядро" class="nav-img mb-1.5 drop-shadow-[0_0_8px_rgba(255,255,255,0.5)]"> ЯДРО
+                        <i class="fa-solid fa-crosshairs mb-1.5 text-base md:text-lg text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]"></i> ЯДРО
                     </button>
                     <button class="tab-btn active flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('build')">
-                        <img src="assets/img/bld/extractor.svg" alt="База" class="nav-img mb-1.5"> БАЗА
+                        <i class="fa-solid fa-industry mb-1.5 text-base md:text-lg text-mars-400 drop-shadow-[0_0_8px_rgba(229,89,52,0.6)]"></i> БАЗА
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('tech')">
-                        <img src="assets/img/res/science.svg" alt="Наука" class="nav-img mb-1.5"> НАУКА
+                        <i class="fa-solid fa-microchip mb-1.5 text-base md:text-lg text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]"></i> НАУКА
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('crew')">
-                        <img src="assets/img/ui/crew.svg" alt="Экипаж" class="nav-img mb-1.5"> ЭКИП.
+                        <i class="fa-solid fa-users mb-1.5 text-base md:text-lg text-prem-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]"></i> ЭКИП.
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('hq')">
-                        <img src="assets/img/ui/hq.svg" alt="Штаб" class="nav-img mb-1.5"> ШТАБ
+                        <i class="fa-solid fa-satellite-dish mb-1.5 text-base md:text-lg text-gold-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]"></i> ШТАБ
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('quests')">
-                        <img src="assets/img/ui/quests.svg" alt="Задачи" class="nav-img mb-1.5"> ЗАДАЧИ
+                        <i class="fa-solid fa-list-check mb-1.5 text-base md:text-lg text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]"></i> ЗАДАЧИ
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('planets')">
-                        <img src="assets/img/planet/mars.svg" alt="Космос" class="nav-img mb-1.5"> КОСМОС
+                        <i class="fa-solid fa-earth-americas mb-1.5 text-base md:text-lg text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]"></i> КОСМОС
                     </button>
                 </nav>
 
@@ -354,16 +309,13 @@
                     <div id="tab-content" class="flex-1 overflow-y-auto relative p-4 scroll-smooth">
                         <!-- JS Injects Content Here -->
                     </div>
-                    <div class="corner-frame pointer-events-none"></div>
                 </aside>
             </div>
         </main>
     </div>
 
     <div id="generic-modal" class="fixed inset-0 bg-black/90 z-[70] flex items-center justify-center hidden interactive backdrop-blur-xl transition-opacity">
-        <div id="modal-content" class="glass-panel p-6 md:p-8 rounded-3xl max-w-xl w-full mx-4 relative border border-white/20 shadow-glow-modal modal-enter max-h-[90vh] flex flex-col bg-gradient-to-b from-gray-900/90 to-black/95">
-            <div class="corner-frame pointer-events-none"></div>
-        </div>
+        <div id="modal-content" class="glass-panel p-6 md:p-8 rounded-3xl max-w-xl w-full mx-4 relative border border-white/20 shadow-glow-modal modal-enter max-h-[90vh] flex flex-col bg-gradient-to-b from-gray-900/90 to-black/95"></div>
     </div>
     
     <div id="ufo-container" class="hidden interactive fixed z-40" onclick="catchUFO()">
@@ -1181,13 +1133,13 @@
                             <div class="skill-cooldown-container">
                                 <div id="skill-cd-${id}" class="skill-cooldown" style="height: 0%"></div>
                             </div>
-                            <img src="assets/img/skill/${id}.svg" alt="${s.name}" class="skill-ico z-10 relative ${s.color}">
+                            <i class="fa-solid ${s.icon} text-lg md:text-2xl ${s.color} z-10 relative drop-shadow-[0_0_8px_currentColor]"></i>
                             <div class="hidden md:flex flex-col items-start z-10 text-left leading-tight pointer-events-none w-full ml-1">
                                 <span class="text-xs font-bold text-white whitespace-nowrap drop-shadow-md">${s.name}</span>
                                 <span id="skill-status-${id}" class="text-[10px] text-gray-300 font-bold tracking-wide">Готово</span>
                             </div>
                             <div class="skill-tooltip">
-                                <div class="font-bold text-white text-base mb-2 border-b border-white/10 pb-2 flex items-center gap-2"><img src="assets/img/skill/${id}.svg" alt="" class="skill-ico"> ${s.name}</div>
+                                <div class="font-bold text-white text-base mb-2 border-b border-white/10 pb-2 flex items-center gap-2"><i class="fa-solid ${s.icon} ${s.color}"></i> ${s.name}</div>
                                 <div class="text-gray-300 text-sm my-3 leading-relaxed whitespace-normal text-left">${s.desc}</div>
                                 <div class="text-mars-400 text-xs font-orbitron font-bold flex items-center gap-1 bg-black/50 p-2 rounded-lg border border-white/5"><i class="fa-solid fa-clock"></i> Откат: ${s.cd} сек</div>
                             </div>
@@ -1367,7 +1319,7 @@
                     
                     <div class="flex items-center gap-4 relative z-10 overflow-hidden flex-1 pr-2">
                         <div class="w-14 h-14 shrink-0 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                            <img src="assets/img/bld/${id}.svg" alt="${d.name}" class="bld-icon">
+                            <i class="fa-solid ${d.icon} text-2xl ${d.isSci ? 'text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]' : 'text-gray-300 drop-shadow-[0_0_8px_rgba(200,200,200,0.5)]'}"></i>
                         </div>
                         
                         <div class="flex flex-col items-start min-w-0 flex-1">
@@ -1383,7 +1335,7 @@
                     <button id="btn-bld-${id}" onclick="buyBld('${id}')" class="shrink-0 px-4 py-3 rounded-xl text-xs font-bold transition-all active:scale-95 border border-white/10 ${btnClass} relative z-10 w-[90px] md:w-[100px]">
                         <div class="flex flex-col items-center">
                             <span class="tracking-widest uppercase mb-1">Апгрейд</span>
-                            <span class="text-xs flex items-center gap-1.5 font-orbitron"><img src="assets/img/res/mineral.svg" alt="Мин" class="w-3.5 h-3.5"> ${formatNum(cost)}</span>
+                            <span class="text-xs flex items-center gap-1.5 font-orbitron"><i class="fa-solid fa-gem"></i> ${formatNum(cost)}</span>
                         </div>
                     </button>
                 </div>`;
@@ -1423,7 +1375,7 @@
                 let btnHtml = isBought 
                     ? '<span class="shrink-0 text-sci-400 text-sm font-bold bg-black/40 px-3 py-1.5 rounded-lg border border-sci-500/30 flex items-center gap-2"><i class="fa-solid fa-check"></i> Изучено</span>'
                     : `<button id="btn-tech-${key}" onclick="buyTech('${key}')" class="shrink-0 px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white/5 text-gray-500 border border-white/10 hover:scale-105 active:scale-95 flex items-center gap-2">
-                        <img src="assets/img/res/science.svg" alt="Наука" class="w-4 h-4"> <span class="font-orbitron">${formatNum(t.cost)}</span>
+                        <i class="fa-solid fa-flask text-sm"></i> <span class="font-orbitron">${formatNum(t.cost)}</span>
                        </button>`; 
 
                 html += `<div class="rounded-2xl p-4 flex justify-between items-center border border-white/10 ${bgClass} transition-all duration-300 group hover:shadow-[0_5px_20px_rgba(0,0,0,0.5)]">
@@ -1478,14 +1430,14 @@
                         ${c.rarity === 'epic' ? '<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.15),transparent)] pointer-events-none"></div>' : ''}
                         
                         <div class="w-14 h-14 bg-black/60 rounded-full flex items-center justify-center mb-3 shadow-inner border border-white/10 group-hover:scale-110 transition-transform">
-                            <img src="assets/img/ui/crew.svg" alt="${c.name}" class="crew-icon group-hover:scale-110 transition-transform ${c.rarity === 'epic' ? 'shadow-[0_0_12px_rgba(168,85,247,0.7)]' : (c.rarity === 'rare' ? 'shadow-[0_0_12px_rgba(59,130,246,0.6)]' : '')}">
+                            <i class="fa-solid fa-user-astronaut text-2xl ${c.rarity === 'epic' ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : (c.rarity === 'rare' ? 'text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]' : 'text-gray-400')}"></i>
                         </div>
                         <h5 class="font-black text-sm text-white tracking-wide z-10 w-full truncate">${c.name}</h5>
                         <div class="text-[10px] text-gray-400 mb-2 z-10 bg-black/40 px-2 py-0.5 rounded-md border border-white/5 mt-1 shrink-0">Уровень ${lvl}</div>
                         <div class="text-[11px] text-prem-300 font-bold mb-4 h-8 flex items-center justify-center z-10 w-full">${c.effect} (x${lvl})</div>
                         
                         <button onclick="upgradeCrew('${c.id}', ${upgradeCost})" class="w-full bg-sci-600/30 hover:bg-sci-500/60 border border-sci-500/50 py-2.5 rounded-xl text-xs font-bold text-white transition-all z-10 flex items-center justify-center gap-1.5 hover:shadow-[0_0_15px_rgba(74,222,128,0.4)] mt-auto">
-                            Обучить <img src="assets/img/res/science.svg" alt="Наука" class="w-3 h-3 inline"> ${upgradeCost}
+                            Обучить <i class="fa-solid fa-flask text-[10px]"></i> ${upgradeCost}
                         </button>
                     </div>`;
                 }
@@ -1517,7 +1469,7 @@
                 <div class="space-y-4 mb-2 overflow-y-auto max-h-[60vh] scrollbar-hide pr-2 pb-4">
                     <div class="glass-card p-4 rounded-2xl border border-mars-500/40 flex justify-between items-center hover:shadow-[0_10px_30px_rgba(229,89,52,0.2)] transition-all">
                         <div class="flex gap-4 items-center">
-                            <div class="w-12 h-12 shrink-0 rounded-full bg-mars-900/50 flex items-center justify-center border border-mars-500/30"><img src="assets/img/res/mineral.svg" alt="Мин" class="w-7 h-7 drop-shadow-[0_0_8px_rgba(229,89,52,0.8)]"></div>
+                            <div class="w-12 h-12 shrink-0 rounded-full bg-mars-900/50 flex items-center justify-center border border-mars-500/30"><i class="fa-solid fa-gem text-2xl text-mars-400 drop-shadow-[0_0_8px_rgba(229,89,52,0.8)]"></i></div>
                             <div>
                                 <div class="text-base font-bold text-white tracking-wide">Инвестиции</div>
                                 <div class="text-[11px] text-gray-400 mt-1">Мгновенно дает минералы за 30 мин. добычи.</div>
@@ -1530,7 +1482,7 @@
 
                     <div class="glass-card p-4 rounded-2xl border border-sci-500/40 flex justify-between items-center hover:shadow-[0_10px_30px_rgba(74,222,128,0.2)] transition-all">
                         <div class="flex gap-4 items-center">
-                            <div class="w-12 h-12 shrink-0 rounded-full bg-sci-900/50 flex items-center justify-center border border-sci-500/30"><img src="assets/img/res/science.svg" alt="Наука" class="w-7 h-7 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]"></div>
+                            <div class="w-12 h-12 shrink-0 rounded-full bg-sci-900/50 flex items-center justify-center border border-sci-500/30"><i class="fa-solid fa-flask text-2xl text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]"></i></div>
                             <div>
                                 <div class="text-base font-bold text-white tracking-wide">Грант на исследования</div>
                                 <div class="text-[11px] text-gray-400 mt-1">Мгновенно дает науку за 30 мин. генерации.</div>
@@ -1543,7 +1495,7 @@
 
                     <div class="glass-card p-4 rounded-2xl border border-prem-500/40 flex justify-between items-center hover:shadow-[0_10px_30px_rgba(192,132,252,0.2)] transition-all">
                         <div class="flex gap-4 items-center">
-                            <div class="w-12 h-12 shrink-0 rounded-full bg-prem-900/50 flex items-center justify-center border border-prem-500/30"><img src="assets/img/res/crystal.svg" alt="Кристаллы" class="w-7 h-7 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]"></div>
+                            <div class="w-12 h-12 shrink-0 rounded-full bg-prem-900/50 flex items-center justify-center border border-prem-500/30"><i class="fa-regular fa-gem text-2xl text-prem-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]"></i></div>
                             <div>
                                 <div class="text-base font-bold text-white tracking-wide">Кристальный тайник</div>
                                 <div class="text-[11px] text-gray-400 mt-1">Пополняет ваш баланс на +15 кристаллов.</div>
@@ -1641,7 +1593,7 @@
                 <div class="flex justify-between items-center mb-6 shrink-0 border-b border-white/10 pb-4">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-prem-600 to-purple-900 flex items-center justify-center border border-prem-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
-                            <img src="assets/img/ui/crew.svg" alt="Отдел Кадров" class="w-11 h-11 rounded-xl">
+                            <i class="fa-solid fa-user-astronaut text-2xl text-white"></i>
                         </div>
                         <div>
                             <h3 class="font-orbitron font-black text-xl text-white leading-none tracking-wider">Отдел Кадров</h3>
@@ -1649,7 +1601,7 @@
                         </div>
                     </div>
                     <div class="text-prem-300 font-bold bg-black/60 px-5 py-2.5 rounded-xl border border-prem-500/40 flex items-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                        <img src="assets/img/res/crystal.svg" alt="Кристаллы" class="w-5 h-5 animate-pulse"> <span id="modal-prm-display" class="font-orbitron text-lg">${formatNum(state.res.prm)}</span>
+                        <i class="fa-solid fa-gem animate-pulse text-lg"></i> <span id="modal-prm-display" class="font-orbitron text-lg">${formatNum(state.res.prm)}</span>
                     </div>
                 </div>
                 
@@ -1659,7 +1611,7 @@
                         <div class="text-[11px] text-gray-400 mt-1">Смотреть видео-рекламу</div>
                     </div>
                     <button onclick="showRewardedAd()" class="bg-gradient-to-r from-prem-600 to-purple-600 hover:from-prem-500 hover:to-purple-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(168,85,247,0.5)] flex items-center gap-2 group-hover:scale-105 active:scale-95 btn-shine">
-                        <i class="fa-solid fa-video"></i> +25 <img src="assets/img/res/crystal.svg" alt="Кристаллы" class="w-4 h-4">
+                        <i class="fa-solid fa-video"></i> +25 <i class="fa-solid fa-gem"></i>
                     </button>
                 </div>
                 
@@ -1687,7 +1639,7 @@
                         ${r.id === 'epic' ? '<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.15),transparent)] animate-pulse pointer-events-none"></div>' : ''}
                         
                         <div class="w-14 h-14 rounded-full bg-black/60 border border-white/10 flex items-center justify-center mb-3 shadow-inner group-hover:border-white/30 transition-colors z-10 group-hover:scale-110 shrink-0">
-                            <img src="assets/img/ui/crew.svg" alt="Сотрудник" class="crew-icon group-hover:scale-110 transition-transform">
+                            <i class="fa-solid fa-user-tie text-2xl ${r.iconColor}"></i>
                         </div>
                         
                         <div class="text-sm font-black text-white truncate w-full z-10 tracking-wide">${c.name}</div>
@@ -1698,7 +1650,7 @@
                                 ? 'bg-gradient-to-r from-prem-600 to-purple-600 hover:from-prem-500 hover:to-purple-500 border-prem-400 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_25px_rgba(168,85,247,0.7)]' 
                                 : 'bg-black/50 text-gray-500 border-white/10 cursor-not-allowed'}">
                             ${has ? '<i class="fa-solid fa-clone"></i> Дубликат' : '<i class="fa-solid fa-file-signature"></i> Нанять'} 
-                            <span class="ml-1 px-2 py-0.5 bg-black/40 rounded-md flex items-center gap-1 shrink-0">${c.cost} <img src="assets/img/res/crystal.svg" alt="Крист" class="w-3 h-3"></span>
+                            <span class="ml-1 px-2 py-0.5 bg-black/40 rounded-md flex items-center gap-1 shrink-0">${c.cost} <i class="fa-solid fa-gem text-prem-300"></i></span>
                         </button>
                     </div>`;
                 });
@@ -1793,12 +1745,12 @@
                     <p class="text-sm text-gray-300 mb-8">Ваша колония работала без вас: <span class="font-bold text-white">${timeStr}</span></p>
                     <div class="grid grid-cols-2 gap-4 mb-8">
                         <div class="bg-black/50 border border-white/10 rounded-2xl p-4 flex flex-col items-center shadow-inner">
-                            <img src="assets/img/res/mineral.svg" alt="Мин" class="w-8 h-8 mb-2 drop-shadow-[0_0_10px_rgba(229,89,52,0.8)]">
+                            <i class="fa-solid fa-gem text-mars-400 text-2xl mb-2 drop-shadow-[0_0_10px_rgba(229,89,52,0.8)]"></i>
                             <span class="text-base font-black text-white">+${formatNum(min)}</span>
                             <span class="text-[9px] text-gray-500 uppercase font-bold mt-1">Минералы</span>
                         </div>
                         <div class="bg-black/50 border border-white/10 rounded-2xl p-4 flex flex-col items-center shadow-inner">
-                            <img src="assets/img/res/science.svg" alt="Наука" class="w-8 h-8 mb-2 drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]">
+                            <i class="fa-solid fa-flask text-sci-400 text-2xl mb-2 drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]"></i>
                             <span class="text-base font-black text-white">+${formatNum(sci)}</span>
                             <span class="text-[9px] text-gray-500 uppercase font-bold mt-1">Наука</span>
                         </div>
@@ -1820,7 +1772,7 @@
             html += `<div class="glass-card p-5 rounded-2xl mb-8 border border-purple-500/50 bg-gradient-to-br from-black/90 to-purple-900/30 relative overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-700/20 via-transparent to-transparent opacity-70 animate-pulse-fast pointer-events-none"></div>
                 <div class="relative z-10">
-                    <div class="text-lg font-black text-white mb-2 tracking-wide flex items-center gap-2"><img src="assets/img/res/darkmatter.svg" alt="ТМ" class="w-6 h-6 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"> Перерождение Колонии</div>
+                    <div class="text-lg font-black text-white mb-2 tracking-wide flex items-center gap-2"><i class="fa-solid fa-infinity text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"></i> Перерождение Колонии</div>
                     <div class="text-[11px] text-gray-300 mb-5 leading-relaxed">Сбросьте базу, чтобы получить Темную Материю. ТМ дает <span class="text-purple-400 font-bold">+10% ко всей добыче</span> за единицу и нужна для полетов к другим мирам!</div>
                     
                     <div class="flex justify-between items-center mb-2 bg-black/40 p-2 rounded-lg border border-white/5">
@@ -1913,7 +1865,7 @@
             const content = document.getElementById('modal-content');
             content.innerHTML = `
                 <div class="text-center">
-                    <img src="assets/img/res/darkmatter.svg" alt="Сингулярность" class="w-16 h-16 mb-6 drop-shadow-[0_0_20px_rgba(168,85,247,1)] animate-pulse mx-auto">
+                    <i class="fa-solid fa-infinity text-6xl text-purple-500 mb-6 drop-shadow-[0_0_20px_rgba(168,85,247,1)] animate-pulse"></i>
                     <h3 class="font-orbitron font-black text-2xl text-white mb-4 tracking-wide">Сингулярность</h3>
                     <p class="text-sm text-gray-300 mb-4 leading-relaxed bg-black/40 p-4 rounded-xl border border-white/5">Вы разрушите текущую базу и потеряете минералы, науку, здания и технологии.</p>
                     <p class="text-base text-purple-400 font-bold mb-8 drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]">Взамен вы получите +${formatNum(calcDM)} Тёмной Материи<br><span class="text-[10px] text-gray-400 font-normal uppercase tracking-widest mt-2 block">(Экипаж, Кристаллы и Планеты сохранятся)</span></p>
@@ -2016,7 +1968,7 @@
                     ${isClaimed ? 
                         `<div class="w-10 h-10 shrink-0 rounded-full bg-green-900/30 flex items-center justify-center border border-green-500/20 z-10 relative"><span class="text-green-500 text-xl font-bold"><i class="fa-solid fa-check"></i></span></div>` : 
                         `<button id="quest-btn-${q.id}" onclick="claimQuest('${q.id}')" class="shrink-0 px-4 py-2 rounded-lg text-xs font-bold bg-white/5 text-gray-500 transition-all active:scale-95 z-10 relative w-[80px]" disabled>
-                            Забрать<br><span class="flex items-center justify-center gap-1 mt-0.5">${q.reward.prm} <img src="assets/img/res/crystal.svg" alt="Крист" class="w-3 h-3"></span>
+                            Забрать<br><span class="flex items-center justify-center gap-1 mt-0.5">${q.reward.prm} <i class="fa-solid fa-gem text-[10px]"></i></span>
                         </button>`
                     }
                 </div>`;
@@ -2109,8 +2061,8 @@
                 html += `<div class="glass-card rounded-2xl p-5 border ${isCurrent ? 'border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.15)] bg-green-900/10' : 'border-white/10 hover:shadow-[0_10px_20px_rgba(0,0,0,0.5)]'} transition-all duration-300 relative overflow-hidden group">
                     ${isCurrent ? '<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(34,197,94,0.1),transparent)] pointer-events-none"></div>' : ''}
                     <div class="flex gap-4 items-center mb-5 relative z-10">
-                        <div class="w-16 h-16 shrink-0 rounded-full bg-black/60 border border-white/20 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                            <img src="assets/img/planet/${id}.svg" alt="${p.name}" class="planet-icon">
+                        <div class="w-16 h-16 shrink-0 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-3xl ${p.color} shadow-inner group-hover:scale-110 transition-transform">
+                            <i class="fa-solid ${p.icon} drop-shadow-[0_0_10px_currentColor]"></i>
                         </div>
                         <div class="min-w-0 flex-1">
                             <h3 class="text-xl font-black font-orbitron ${p.color} tracking-wide drop-shadow-md truncate w-full">${p.name}</h3>
@@ -2165,10 +2117,7 @@
         function updatePlanetVisuals() {
             if(!marsMesh) return;
             const p = PLANETS[state.planet || 'mars'];
-
-            const clickerPlanet = document.getElementById('clicker-planet');
-            if (clickerPlanet) clickerPlanet.src = `assets/img/planet/${state.planet || 'mars'}.svg`;
-
+            
             const bgHex = parseInt(p.bg);
             const atmosHex = parseInt(p.atmos);
             
@@ -2197,11 +2146,11 @@
                         if(state.res.min >= cost) {
                             btn.disabled = false;
                             btn.classList.remove('bg-white/5', 'text-gray-500');
-                            btn.classList.add(d.isSci ? 'bg-sci-600' : 'bg-mars-600', 'text-white', 'shadow-[0_0_15px_rgba(255,255,255,0.1)]', 'hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]', 'btn-premium');
+                            btn.classList.add(d.isSci ? 'bg-sci-600' : 'bg-mars-600', 'text-white', 'shadow-[0_0_15px_rgba(255,255,255,0.1)]', 'hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]');
                         } else {
                             btn.disabled = true;
                             btn.classList.add('bg-white/5', 'text-gray-500');
-                            btn.classList.remove('bg-sci-600', 'bg-mars-600', 'text-white', 'shadow-[0_0_15px_rgba(255,255,255,0.1)]', 'hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]', 'btn-premium');
+                            btn.classList.remove('bg-sci-600', 'bg-mars-600', 'text-white', 'shadow-[0_0_15px_rgba(255,255,255,0.1)]', 'hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]');
                         }
                     }
                 }
@@ -2282,22 +2231,22 @@
             const rand = Math.random();
             let type = 'min';
             let amount = 0;
-            let icon = 'assets/img/res/mineral.svg';
+            let icon = 'fa-gem text-mars-400';
             let bgGlow = 'rgba(229,89,52,0.5)';
 
             if (rand < 0.4) {
                 type = 'min';
                 amount = Math.max(1000, calc.rate.min * 1800);
-                icon = 'assets/img/res/mineral.svg';
+                icon = 'fa-gem text-mars-400';
             } else if (rand < 0.8) {
                 type = 'sci';
                 amount = Math.max(100, calc.rate.sci * 1800);
-                icon = 'assets/img/res/science.svg';
+                icon = 'fa-flask text-sci-400';
                 bgGlow = 'rgba(74,222,128,0.5)';
             } else {
                 type = 'prm';
                 amount = Math.floor(Math.min(75, 10 + (state.rebirth?.darkMatter || 0) * 0.5));
-                icon = 'assets/img/res/crystal.svg';
+                icon = 'fa-gem text-prem-400';
                 bgGlow = 'rgba(192,132,252,0.5)';
             }
 
@@ -2318,7 +2267,7 @@
                     <div class="glass-card p-5 rounded-2xl mb-8 flex flex-col items-center border border-white/10" style="box-shadow: inset 0 0 30px ${bgGlow}">
                         <div class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-3">Содержимое контейнера</div>
                         <div class="flex items-center gap-4">
-                            <img src="${icon}" alt="Награда" class="w-12 h-12 drop-shadow-md">
+                            <i class="fa-solid ${icon} text-4xl drop-shadow-md"></i>
                             <span class="text-4xl font-black font-orbitron text-white">+${formatNum(amount)}</span>
                         </div>
                     </div>
@@ -2404,22 +2353,22 @@
                 
                 <div class="space-y-4">
                     <div class="flex items-center gap-4 glass-card p-3 rounded-xl border border-white/10 hover:border-mars-500/50 transition-colors">
-                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><img src="assets/img/res/mineral.svg" alt="Мин" class="w-5 h-5"> Минералы</div>
+                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><i class="fa-solid fa-gem text-mars-400 text-lg"></i> Минералы</div>
                         <input type="number" id="admin-add-min" value="1000000000000000" class="flex-1 bg-black/80 border border-white/20 rounded-lg px-4 py-2.5 text-white font-orbitron focus:border-mars-500 outline-none transition-colors">
                         <button onclick="adminAddRes('min')" class="bg-mars-600 hover:bg-mars-500 text-white px-5 py-2.5 rounded-lg font-bold transition-transform active:scale-95 shadow-[0_0_15px_rgba(229,89,52,0.4)] border border-mars-400">Выдать</button>
                     </div>
                     <div class="flex items-center gap-4 glass-card p-3 rounded-xl border border-white/10 hover:border-sci-500/50 transition-colors">
-                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><img src="assets/img/res/science.svg" alt="Наука" class="w-5 h-5"> Наука</div>
+                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><i class="fa-solid fa-flask text-sci-400 text-lg"></i> Наука</div>
                         <input type="number" id="admin-add-sci" value="1000000000000000" class="flex-1 bg-black/80 border border-white/20 rounded-lg px-4 py-2.5 text-white font-orbitron focus:border-sci-500 outline-none transition-colors">
                         <button onclick="adminAddRes('sci')" class="bg-sci-600 hover:bg-sci-500 text-white px-5 py-2.5 rounded-lg font-bold transition-transform active:scale-95 shadow-[0_0_15px_rgba(34,197,94,0.4)] border border-sci-400">Выдать</button>
                     </div>
                     <div class="flex items-center gap-4 glass-card p-3 rounded-xl border border-white/10 hover:border-prem-500/50 transition-colors">
-                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><img src="assets/img/res/crystal.svg" alt="Кристаллы" class="w-5 h-5"> Кристаллы</div>
+                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><i class="fa-solid fa-gem text-prem-400 text-lg"></i> Кристаллы</div>
                         <input type="number" id="admin-add-prm" value="100000" class="flex-1 bg-black/80 border border-white/20 rounded-lg px-4 py-2.5 text-white font-orbitron focus:border-prem-500 outline-none transition-colors">
                         <button onclick="adminAddRes('prm')" class="bg-prem-600 hover:bg-prem-500 text-white px-5 py-2.5 rounded-lg font-bold transition-transform active:scale-95 shadow-[0_0_15px_rgba(168,85,247,0.4)] border border-prem-400">Выдать</button>
                     </div>
                     <div class="flex items-center gap-4 glass-card p-3 rounded-xl border border-white/10 hover:border-purple-500/50 transition-colors">
-                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><img src="assets/img/res/darkmatter.svg" alt="ТМ" class="w-5 h-5"> Темная Мат.</div>
+                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><i class="fa-solid fa-infinity text-purple-400 text-lg"></i> Темная Мат.</div>
                         <input type="number" id="admin-add-dm" value="100000" class="flex-1 bg-black/80 border border-white/20 rounded-lg px-4 py-2.5 text-white font-orbitron focus:border-purple-500 outline-none transition-colors">
                         <button onclick="adminAddRes('dm')" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2.5 rounded-lg font-bold transition-transform active:scale-95 shadow-[0_0_15px_rgba(147,51,234,0.4)] border border-purple-400">Выдать</button>
                     </div>
