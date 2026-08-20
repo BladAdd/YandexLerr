@@ -98,8 +98,9 @@
         .skill-out { animation: skillOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes skillOut { 0% { opacity: 1; transform: translateX(0) scale(1); } 100% { opacity: 0; transform: translateX(-30px) scale(0.7); } }
 
-        .tech-tree-wrap { position: relative; height: 100%; overflow: auto; scrollbar-width: thin; padding: 0; }
-        .tech-tree { display: grid; grid-template-columns: repeat(4, 150px); grid-template-rows: auto repeat(7, 1fr); gap: 24px 36px; padding: 8px 4px 28px; min-width: 700px; position: relative; }
+        .tech-tree-scroll { position: relative; height: 100%; overflow-y: auto; scrollbar-width: thin; }
+        .tech-tree-canvas { position: relative; padding: 20px; }
+        .tech-grid { display: grid; grid-template-columns: repeat(4, 150px); grid-template-rows: auto repeat(7, 1fr); gap: 24px 36px; min-width: 700px; }
         .tech-col-head { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #9ca3af; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.08); align-self: end; }
         .tech-col-head i { font-size: 14px; }
         .tech-node { position: relative; z-index: 2; }
@@ -126,7 +127,7 @@
         .tech-lock-label { display: inline-flex; align-items: center; gap: 5px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 11px; color: #6b7280; }
         .tech-req { font-size: 9px; color: #4b5563; display: flex; align-items: center; justify-content: center; gap: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
-        .tech-lines { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; overflow: visible; }
+        .tech-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
         .tech-line { fill: none; stroke-linecap: round; }
         .tech-line.locked { stroke: rgba(255,255,255,0.1); stroke-width: 2; stroke-dasharray: 4 4; }
         .tech-line.available { stroke: #38bdf8; stroke-width: 2; filter: drop-shadow(0 0 4px rgba(56,189,248,0.8)); }
@@ -1473,7 +1474,7 @@
             }
 
             let html = '<div class="text-xs text-gray-400 mb-3 font-orbitron font-bold tracking-widest uppercase border-b border-white/10 pb-2 flex items-center justify-between"><span>Древо Исследований</span><span class="text-[10px] normal-case tracking-normal text-gray-500 font-sans font-medium hidden md:flex items-center gap-1"><i class="fa-solid fa-lightbulb text-yellow-300/70"></i> Пульсирующие узлы доступны для изучения</span></div>';
-            html += '<div class="tech-tree-wrap"><svg id="tech-lines" class="tech-lines"></svg><div id="tech-tree" class="tech-tree">';
+            html += '<div class="tech-tree-scroll"><div class="tech-tree-canvas"><svg id="tech-lines" class="tech-lines"></svg><div id="tech-grid" class="tech-grid">';
 
             branches.forEach(b => {
                 html += `<div class="tech-col-head" style="grid-row:1;grid-column:${b.col + 1}"><i class="fa-solid ${b.icon} ${b.color}"></i><span>${b.label}</span></div>`;
@@ -1513,33 +1514,22 @@
                 </div>`;
             }
 
-            html += '</div></div>';
+            html += '</div></div></div>';
             container.innerHTML = html;
             drawTechLines();
-            if (!window.__techResizeBound) {
-                window.__techResizeBound = true;
-                window.addEventListener('resize', () => { if (currentTab === 'tech') drawTechLines(); });
-            }
             setTimeout(drawTechLines, 150);
-            const win = document.getElementById('tab-modal-window');
-            if (win && !win.__techAnimBound) {
-                win.__techAnimBound = true;
-                win.addEventListener('animationend', (e) => {
-                    if (e.animationName === 'modalIn' && currentTab === 'tech') drawTechLines();
-                });
+            const canvas = container.querySelector('.tech-tree-canvas');
+            if (canvas) {
+                if (window.__techCanvasObs) window.__techCanvasObs.disconnect();
+                const ro = new ResizeObserver(() => { if (currentTab === 'tech') drawTechLines(); });
+                ro.observe(canvas);
+                window.__techCanvasObs = ro;
             }
         }
 
         function drawTechLines() {
-            const tree = document.getElementById('tech-tree');
             const svg = document.getElementById('tech-lines');
-            if (!tree || !svg) return;
-            const container = tree.parentElement;
-            svg.style.width = tree.scrollWidth + 'px';
-            svg.style.height = tree.scrollHeight + 'px';
-            const cr = container.getBoundingClientRect();
-            const sl = container.scrollLeft;
-            const st = container.scrollTop;
+            if (!svg) return;
             let html = '';
             for (let key in TECH_DATA) {
                 const t = TECH_DATA[key];
@@ -1547,20 +1537,18 @@
                 const parent = document.getElementById('tech-node-' + t.req);
                 const child = document.getElementById('tech-node-' + key);
                 if (!parent || !child) continue;
-                const pr = parent.getBoundingClientRect();
-                const ck = child.getBoundingClientRect();
                 let d;
-                if (Math.round(pr.top) === Math.round(ck.top)) {
-                    const y = pr.top - cr.top + st + pr.height / 2;
-                    const leftward = ck.left < pr.left;
-                    const x1 = (leftward ? pr.left : pr.right) - cr.left + sl;
-                    const x2 = (leftward ? ck.right : ck.left) - cr.left + sl;
+                if (Math.round(parent.offsetTop) === Math.round(child.offsetTop)) {
+                    const y = parent.offsetTop + parent.offsetHeight / 2;
+                    const leftward = child.offsetLeft < parent.offsetLeft;
+                    const x1 = leftward ? parent.offsetLeft : parent.offsetLeft + parent.offsetWidth;
+                    const x2 = leftward ? child.offsetLeft + child.offsetWidth : child.offsetLeft;
                     d = `M ${x1.toFixed(1)} ${y.toFixed(1)} L ${x2.toFixed(1)} ${y.toFixed(1)}`;
                 } else {
-                    const x1 = pr.left - cr.left + pr.width / 2 + sl;
-                    const y1 = pr.bottom - cr.top + st;
-                    const x2 = ck.left - cr.left + ck.width / 2 + sl;
-                    const y2 = ck.top - cr.top + st;
+                    const x1 = parent.offsetLeft + parent.offsetWidth / 2;
+                    const y1 = parent.offsetTop + parent.offsetHeight;
+                    const x2 = child.offsetLeft + child.offsetWidth / 2;
+                    const y2 = child.offsetTop;
                     const mid = (y1 + y2) / 2;
                     d = `M ${x1.toFixed(1)} ${y1.toFixed(1)} C ${x1.toFixed(1)} ${mid.toFixed(1)}, ${x2.toFixed(1)} ${mid.toFixed(1)}, ${x2.toFixed(1)} ${y2.toFixed(1)}`;
                 }
