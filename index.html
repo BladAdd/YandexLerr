@@ -98,24 +98,25 @@
         .skill-out { animation: skillOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes skillOut { 0% { opacity: 1; transform: translateX(0) scale(1); } 100% { opacity: 0; transform: translateX(-30px) scale(0.7); } }
 
-        .tech-tree { display: grid; grid-template-columns: repeat(4, 150px); grid-template-rows: repeat(8, auto); gap: 24px 36px; padding: 10px 16px 24px; min-width: 700px; }
-        .tech-col-head { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #9ca3af; padding-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.08); }
+        .tech-tree-wrap { position: relative; height: 100%; overflow: auto; scrollbar-width: thin; }
+        .tech-tree { display: grid; grid-template-columns: repeat(4, 150px); grid-template-rows: auto repeat(7, 1fr); gap: 24px 36px; padding: 8px 4px 28px; min-width: 700px; position: relative; }
+        .tech-col-head { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #9ca3af; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.08); align-self: end; }
         .tech-col-head i { font-size: 14px; }
-        .tech-node { position: relative; z-index: 1; }
-        .tech-node-inner { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 5px; height: 100%; padding: 14px 8px 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); background: linear-gradient(180deg, rgba(15,22,35,0.72), rgba(10,15,25,0.92)); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.35); }
+        .tech-node { position: relative; z-index: 2; }
+        .tech-node-inner { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 5px; height: 100%; padding: 14px 8px 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); background: #0d1322; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.35); }
         .tech-node-inner:hover { transform: translateY(-2px); }
         .tech-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
         .tech-name { font-weight: 800; font-size: 12px; line-height: 1.15; color: #ffffff; }
         .tech-desc { font-size: 10px; color: #9ca3af; line-height: 1.3; min-height: 26px; }
         .tech-state { margin-top: 2px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-        .tech-node-bought .tech-node-inner { border-color: rgba(74,222,128,0.5); background: linear-gradient(180deg, rgba(18,40,32,0.75), rgba(8,20,18,0.92)); box-shadow: 0 0 18px rgba(74,222,128,0.15), inset 0 0 14px rgba(74,222,128,0.05); }
+        .tech-node-bought .tech-node-inner { border-color: rgba(74,222,128,0.5); background: #0b1a15; box-shadow: 0 0 18px rgba(74,222,128,0.15), inset 0 0 14px rgba(74,222,128,0.05); }
         .tech-node-bought .tech-name { color: #86efac; }
         .tech-node-bought .tech-icon { box-shadow: 0 0 12px rgba(74,222,128,0.3); }
-        .tech-node-ready .tech-node-inner { border-color: rgba(74,222,128,0.55); animation: techGlow 2s ease-in-out infinite; cursor: pointer; }
-        .tech-node-ready .tech-node-inner:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 0 26px rgba(74,222,128,0.45); }
-        .tech-node-avail .tech-node-inner { border-color: rgba(255,255,255,0.14); cursor: pointer; }
-        .tech-node-locked .tech-node-inner { opacity: 0.55; filter: saturate(0.3); }
-        @keyframes techGlow { 0%, 100% { box-shadow: 0 0 10px rgba(74,222,128,0.12); } 50% { box-shadow: 0 0 22px rgba(74,222,128,0.4); } }
+        .tech-node-ready .tech-node-inner { border-color: rgba(56,189,248,0.6); background: #0e1a24; animation: techGlow 2s ease-in-out infinite; cursor: pointer; }
+        .tech-node-ready .tech-node-inner:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 0 26px rgba(56,189,248,0.45); }
+        .tech-node-avail .tech-node-inner { border-color: rgba(255,255,255,0.14); background: #0e1626; cursor: pointer; }
+        .tech-node-locked .tech-node-inner { opacity: 0.6; filter: saturate(0.25); background: #0a0f1a; }
+        @keyframes techGlow { 0%, 100% { box-shadow: 0 0 10px rgba(56,189,248,0.15); } 50% { box-shadow: 0 0 24px rgba(56,189,248,0.45); } }
         .tech-check { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #4ade80; background: rgba(0,0,0,0.35); border: 1px solid rgba(74,222,128,0.3); padding: 5px 10px; border-radius: 9px; }
         .tech-buy-btn { display: inline-flex; align-items: center; gap: 6px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 11px; color: #9ca3af; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
         .tech-buy-btn:hover { transform: scale(1.06); }
@@ -124,8 +125,12 @@
         .tech-buy-btn[disabled] { cursor: not-allowed; }
         .tech-lock-label { display: inline-flex; align-items: center; gap: 5px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 11px; color: #6b7280; }
         .tech-req { font-size: 9px; color: #4b5563; display: flex; align-items: center; justify-content: center; gap: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-        .tech-node-inner-enter { animation: techIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
-        @keyframes techIn { 0% { opacity: 0; transform: translateY(14px) scale(0.85); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+
+        .tech-lines { position: absolute; top: 0; left: 0; pointer-events: none; z-index: 1; overflow: visible; }
+        .tech-line { fill: none; stroke-linecap: round; }
+        .tech-line.locked { stroke: rgba(255,255,255,0.1); stroke-width: 2; stroke-dasharray: 4 4; }
+        .tech-line.available { stroke: #38bdf8; stroke-width: 2; filter: drop-shadow(0 0 4px rgba(56,189,248,0.8)); }
+        .tech-line.purchased { stroke: #ffaa00; stroke-width: 2.5; opacity: 0.8; filter: drop-shadow(0 0 3px rgba(255,170,0,0.5)); }
 
         .reticle-core { transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s; }
         
@@ -1460,7 +1465,7 @@
             ];
             const branchByKey = {};
             branches.forEach(b => { branchByKey[b.id] = b; });
-            const pos = {}, numCols = 4, numRows = 8;
+            const pos = {};
             for (let key in TECH_DATA) {
                 const b = branchByKey[key.replace(/[0-9]/g, '')] || branches[0];
                 const idx = parseInt(key.replace(/^[a-z]+/, ''), 10) - 1;
@@ -1468,33 +1473,14 @@
             }
 
             let html = '<div class="text-xs text-gray-400 mb-3 font-orbitron font-bold tracking-widest uppercase border-b border-white/10 pb-2 flex items-center justify-between"><span>Древо Исследований</span><span class="text-[10px] normal-case tracking-normal text-gray-500 font-sans font-medium hidden md:flex items-center gap-1"><i class="fa-solid fa-lightbulb text-yellow-300/70"></i> Пульсирующие узлы доступны для изучения</span></div>';
-            html += '<div class="overflow-x-auto pb-2 -mx-2 px-2"><div class="tech-tree">';
-
-            const linePaths = [];
-            for (let key in TECH_DATA) {
-                const t = TECH_DATA[key];
-                if (!t.req || !pos[t.req]) continue;
-                const p = pos[t.req], c = pos[key];
-                const x1 = (p.col + 0.5) * 100 / numCols, y1 = (p.row + 1.5) * 100 / numRows;
-                const x2 = (c.col + 0.5) * 100 / numCols, y2 = (c.row + 1.5) * 100 / numRows;
-                const dx = x2 - x1, dy = y2 - y1;
-                let d;
-                if (Math.abs(dy) < 0.001) {
-                    d = `M ${x1} ${y1} L ${x2} ${y2}`;
-                } else {
-                    d = `M ${x1} ${y1} C ${x1} ${y1 + dy * 0.45}, ${x2} ${y2 - dy * 0.45}, ${x2} ${y2}`;
-                }
-                const bought = state.tech[key];
-                linePaths.push(`<path d="${d}" vector-effect="non-scaling-stroke" fill="none" stroke="${bought ? '#4ade80' : '#3f3f46'}" stroke-opacity="${bought ? 0.9 : 0.55}" stroke-width="${bought ? 2.5 : 1.5}" stroke-linecap="round"/>`);
-            }
-            html += `<svg class="tech-lines absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none" style="z-index:0">${linePaths.join('')}</svg>`;
+            html += '<div class="tech-tree-wrap"><div id="tech-tree" class="tech-tree">';
+            html += '<svg id="tech-lines" class="tech-lines"></svg>';
 
             branches.forEach(b => {
                 html += `<div class="tech-col-head" style="grid-row:1;grid-column:${b.col + 1}"><i class="fa-solid ${b.icon} ${b.color}"></i><span>${b.label}</span></div>`;
             });
 
-            const order = Object.keys(TECH_DATA);
-            order.forEach((key, i) => {
+            for (let key in TECH_DATA) {
                 const t = TECH_DATA[key];
                 const p = pos[key];
                 const b = branches[p.col];
@@ -1519,17 +1505,57 @@
                 }
 
                 html += `<div id="tech-node-${key}" class="tech-node ${nodeClass}" style="grid-row:${p.row + 2};grid-column:${p.col + 1}" title="${t.desc}">
-                    <div class="tech-node-inner tech-node-inner-enter" style="animation-delay:${(i * 0.03).toFixed(2)}s">
+                    <div class="tech-node-inner">
                         <div class="tech-icon ${iconClass}"><i class="fa-solid ${b.icon}"></i></div>
                         <div class="tech-name">${t.name}</div>
                         <div class="tech-desc">${t.desc}</div>
                         <div class="tech-state">${stateHtml}</div>
                     </div>
                 </div>`;
-            });
+            }
 
             html += '</div></div>';
             container.innerHTML = html;
+            drawTechLines();
+            if (!window.__techResizeBound) {
+                window.__techResizeBound = true;
+                window.addEventListener('resize', () => { if (currentTab === 'tech') drawTechLines(); });
+            }
+            setTimeout(drawTechLines, 150);
+        }
+
+        function drawTechLines() {
+            const tree = document.getElementById('tech-tree');
+            const svg = document.getElementById('tech-lines');
+            if (!tree || !svg) return;
+            svg.style.width = tree.scrollWidth + 'px';
+            svg.style.height = tree.scrollHeight + 'px';
+            let html = '';
+            for (let key in TECH_DATA) {
+                const t = TECH_DATA[key];
+                if (!t.req) continue;
+                const parent = document.getElementById('tech-node-' + t.req);
+                const child = document.getElementById('tech-node-' + key);
+                if (!parent || !child) continue;
+                const px = parent.offsetLeft + parent.offsetWidth / 2;
+                const py = parent.offsetTop + parent.offsetHeight / 2;
+                const cx = child.offsetLeft + child.offsetWidth / 2;
+                const cy = child.offsetTop + child.offsetHeight / 2;
+                let d;
+                if (parent.offsetTop === child.offsetTop) {
+                    d = `M ${px.toFixed(1)} ${py.toFixed(1)} L ${cx.toFixed(1)} ${cy.toFixed(1)}`;
+                } else {
+                    const x1 = parent.offsetLeft + parent.offsetWidth / 2;
+                    const y1 = parent.offsetTop + parent.offsetHeight;
+                    const x2 = child.offsetLeft + child.offsetWidth / 2;
+                    const y2 = child.offsetTop;
+                    const mid = (y1 + y2) / 2;
+                    d = `M ${x1.toFixed(1)} ${y1.toFixed(1)} C ${x1.toFixed(1)} ${mid.toFixed(1)}, ${x2.toFixed(1)} ${mid.toFixed(1)}, ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+                }
+                const cls = state.tech[key] ? 'purchased' : (state.tech[t.req] ? 'available' : 'locked');
+                html += `<path class="tech-line ${cls}" d="${d}"/>`;
+            }
+            svg.innerHTML = html;
         }
 
         function buyTech(id) {
