@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="pl" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#101d2e"/>
+      <stop offset="100%" stop-color="#050c14"/>
+    </linearGradient>
+    <radialGradient id="gl" cx="50%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#7dd3fc" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#7dd3fc" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="fl" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#e0f2fe"/>
+      <stop offset="100%" stop-color="#0284c7"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#pl)"/>
+  <rect width="64" height="64" rx="16" fill="url(#gl)"/>
+  <rect width="64" height="64" rx="16" fill="none" stroke="#38bdf8" stroke-opacity="0.4" stroke-width="1.5"/>
+  <path d="M32 10 L35 24 L47 20 L38 30 L50 36 L36 35 L40 48 L31 38 L22 48 L26 35 L12 36 L24 30 L15 20 L27 24 Z" fill="url(#fl)"/>
+  <path d="M32 10 L35 24 L32 38 L29 24 Z" fill="#f0f9ff" opacity="0.5"/>
+  <path d="M32 38 L40 48 L36 35 Z" fill="#075985" opacity="0.4"/>
+  <path d="M32 10 L32 14 M32 50 L32 54 M10 32 L14 32 M50 32 L54 32" stroke="#7dd3fc" stroke-opacity="0.6" stroke-width="2" stroke-linecap="round"/>
+</svg>

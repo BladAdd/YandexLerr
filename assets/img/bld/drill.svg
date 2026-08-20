@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="pl" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2a1510"/>
+      <stop offset="100%" stop-color="#120705"/>
+    </linearGradient>
+    <radialGradient id="gl" cx="50%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#fb923c" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#fb923c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bit" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#fdba74"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#pl)"/>
+  <rect width="64" height="64" rx="16" fill="url(#gl)"/>
+  <rect width="64" height="64" rx="16" fill="none" stroke="#fb923c" stroke-opacity="0.4" stroke-width="1.5"/>
+  <path d="M32 12 L38 34 L26 34 Z" fill="url(#bit)"/>
+  <path d="M32 12 L38 34 L32 34 Z" fill="#7c2d12" opacity="0.4"/>
+  <path d="M24 36 L40 36 L42 42 L22 42 Z" fill="#94a3b8"/>
+  <rect x="30" y="42" width="4" height="8" fill="#cbd5e1"/>
+  <path d="M20 50 L44 50 L42 54 L22 54 Z" fill="#475569"/>
+  <circle cx="32" cy="38" r="2" fill="#1e293b"/>
+</svg>
