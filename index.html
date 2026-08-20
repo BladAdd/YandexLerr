@@ -99,41 +99,6 @@
         .skill-out { animation: skillOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         @keyframes skillOut { 0% { opacity: 1; transform: translateX(0) scale(1); } 100% { opacity: 0; transform: translateX(-30px) scale(0.7); } }
 
-        .tech-tree-scroll { position: relative; height: 100%; overflow-y: auto; scrollbar-width: thin; }
-        .tech-tree-canvas { position: relative; padding: 20px; }
-        .tech-grid { display: grid; grid-template-columns: repeat(4, 150px); grid-template-rows: auto repeat(7, 1fr); gap: 24px 36px; min-width: 700px; }
-        .tech-col-head { display: flex; flex-direction: column; align-items: center; gap: 4px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: #9ca3af; padding-bottom: 8px; border-bottom: 1px dashed rgba(255,255,255,0.08); align-self: end; }
-        .tech-col-head i { font-size: 14px; }
-        .tech-node { position: relative; z-index: 2; }
-        .tech-node-inner { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 5px; height: 100%; padding: 14px 8px 12px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); background: #0d1322; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: 0 4px 10px rgba(0,0,0,0.35); }
-        .tech-node-inner:hover { transform: translateY(-2px); }
-        .tech-icon { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); flex-shrink: 0; }
-        .tech-name { font-weight: 800; font-size: 12px; line-height: 1.15; color: #ffffff; }
-        .tech-desc { font-size: 10px; color: #9ca3af; line-height: 1.3; min-height: 26px; }
-        .tech-state { margin-top: 2px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3px; }
-        .tech-node-bought .tech-node-inner { border-color: rgba(74,222,128,0.5); background: #0b1a15; box-shadow: 0 0 18px rgba(74,222,128,0.15), inset 0 0 14px rgba(74,222,128,0.05); }
-        .tech-node-bought .tech-name { color: #86efac; }
-        .tech-node-bought .tech-icon { box-shadow: 0 0 12px rgba(74,222,128,0.3); }
-        .tech-node-ready .tech-node-inner { border-color: rgba(56,189,248,0.6); background: #0e1a24; animation: techGlow 2s ease-in-out infinite; cursor: pointer; }
-        .tech-node-ready .tech-node-inner:hover { transform: translateY(-3px) scale(1.04); box-shadow: 0 0 26px rgba(56,189,248,0.45); }
-        .tech-node-avail .tech-node-inner { border-color: rgba(255,255,255,0.14); background: #0e1626; cursor: pointer; }
-        .tech-node-locked .tech-node-inner { opacity: 0.6; filter: saturate(0.25); background: #0a0f1a; }
-        @keyframes techGlow { 0%, 100% { box-shadow: 0 0 10px rgba(56,189,248,0.15); } 50% { box-shadow: 0 0 24px rgba(56,189,248,0.45); } }
-        .tech-check { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #4ade80; background: rgba(0,0,0,0.35); border: 1px solid rgba(74,222,128,0.3); padding: 5px 10px; border-radius: 9px; }
-        .tech-buy-btn { display: inline-flex; align-items: center; gap: 6px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 11px; color: #9ca3af; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); padding: 6px 12px; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-        .tech-buy-btn:hover { transform: scale(1.06); }
-        .tech-buy-btn.affordable { background: linear-gradient(135deg, #16a34a, #4ade80); color: #052e16; border-color: #86efac; box-shadow: 0 0 14px rgba(74,222,128,0.35); }
-        .tech-buy-btn.affordable:hover { box-shadow: 0 0 22px rgba(74,222,128,0.55); }
-        .tech-buy-btn[disabled] { cursor: not-allowed; }
-        .tech-lock-label { display: inline-flex; align-items: center; gap: 5px; font-family: 'Orbitron', sans-serif; font-weight: 700; font-size: 11px; color: #6b7280; }
-        .tech-req { font-size: 9px; color: #4b5563; display: flex; align-items: center; justify-content: center; gap: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-
-        .tech-lines { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: visible; }
-        .tech-line { fill: none; stroke-linecap: round; }
-        .tech-line.locked { stroke: rgba(255,255,255,0.1); stroke-width: 2; stroke-dasharray: 4 4; }
-        .tech-line.available { stroke: #38bdf8; stroke-width: 2; filter: drop-shadow(0 0 4px rgba(56,189,248,0.8)); }
-        .tech-line.purchased { stroke: #ffaa00; stroke-width: 2.5; opacity: 0.8; filter: drop-shadow(0 0 3px rgba(255,170,0,0.5)); }
-
         .reticle-core { transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s; }
         
         .modal-enter { animation: modalIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
@@ -1398,104 +1363,35 @@
         }
 
         function renderTech(container) {
-            const branches = [
-                { id: 'clk', col: 0, icon: 'fa-hand-pointer', color: 'text-yellow-300', label: 'Клик' },
-                { id: 'min', col: 1, icon: 'fa-mountain-sun', color: 'text-mars-400', label: 'Добыча' },
-                { id: 'sci', col: 2, icon: 'fa-brain', color: 'text-sci-400', label: 'Наука' },
-                { id: 'heat', col: 3, icon: 'fa-temperature-high', color: 'text-red-400', label: 'Тепло' }
-            ];
-            const branchByKey = {};
-            branches.forEach(b => { branchByKey[b.id] = b; });
-            const pos = {};
-            for (let key in TECH_DATA) {
-                const b = branchByKey[key.replace(/[0-9]/g, '')] || branches[0];
-                const idx = parseInt(key.replace(/^[a-z]+/, ''), 10) - 1;
-                pos[key] = { col: b.col, row: idx };
-            }
-
-            let html = '<div class="text-xs text-gray-400 mb-3 font-orbitron font-bold tracking-widest uppercase border-b border-white/10 pb-2 flex items-center justify-between"><span>Древо Исследований</span><span class="text-[10px] normal-case tracking-normal text-gray-500 font-sans font-medium hidden md:flex items-center gap-1"><i class="fa-solid fa-lightbulb text-yellow-300/70"></i> Пульсирующие узлы доступны для изучения</span></div>';
-            html += '<div class="tech-tree-scroll"><div class="tech-tree-canvas"><svg id="tech-lines" class="tech-lines"></svg><div id="tech-grid" class="tech-grid">';
-
-            branches.forEach(b => {
-                html += `<div class="tech-col-head" style="grid-row:1;grid-column:${b.col + 1}"><i class="fa-solid ${b.icon} ${b.color}"></i><span>${b.label}</span></div>`;
-            });
-
+            let html = '<div class="text-xs text-gray-400 mb-4 font-orbitron font-bold tracking-widest uppercase border-b border-white/10 pb-2">Древо Исследований</div><div class="space-y-4">';
             for (let key in TECH_DATA) {
                 const t = TECH_DATA[key];
-                const p = pos[key];
-                const b = branches[p.col];
                 const isBought = state.tech[key];
                 const reqMet = !t.req || state.tech[t.req];
-                const canAfford = state.res.sci >= t.cost;
-                const parentName = t.req ? TECH_DATA[t.req].name : '';
+                
+                if(!reqMet && !isBought) continue;
+                
+                let bgClass = isBought ? 'bg-sci-900/40 border-sci-500/50 shadow-[0_0_15px_rgba(74,222,128,0.1)]' : 'glass-card';
+                let btnHtml = isBought 
+                    ? '<span class="shrink-0 text-sci-400 text-sm font-bold bg-black/40 px-3 py-1.5 rounded-lg border border-sci-500/30 flex items-center gap-2"><i class="fa-solid fa-check"></i> Изучено</span>'
+                    : `<button id="btn-tech-${key}" onclick="buyTech('${key}')" class="shrink-0 px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white/5 text-gray-500 border border-white/10 hover:scale-105 active:scale-95 flex items-center gap-2">
+                        <i class="fa-solid fa-flask text-sm"></i> <span class="font-orbitron">${formatNum(t.cost)}</span>
+                       </button>`; 
 
-                let nodeClass, iconClass, stateHtml;
-                if (isBought) {
-                    nodeClass = 'tech-node-bought';
-                    iconClass = b.color;
-                    stateHtml = '<span class="tech-check"><i class="fa-solid fa-check"></i> Изучено</span>';
-                } else if (reqMet) {
-                    nodeClass = canAfford ? 'tech-node-ready' : 'tech-node-avail';
-                    iconClass = b.color;
-                    stateHtml = `<button id="btn-tech-${key}" onclick="buyTech('${key}')" class="tech-buy-btn ${canAfford ? 'affordable' : ''}" ${canAfford ? '' : 'disabled'}><i class="fa-solid fa-flask text-[10px]"></i> <span>${formatNum(t.cost)}</span></button>`;
-                } else {
-                    nodeClass = 'tech-node-locked';
-                    iconClass = 'text-gray-500';
-                    stateHtml = `<span class="tech-lock-label" title="Требуется: ${parentName}"><i class="fa-solid fa-lock"></i> ${formatNum(t.cost)}</span><div class="tech-req" title="Требуется: ${parentName}"><i class="fa-solid fa-link"></i> ${parentName}</div>`;
-                }
-
-                html += `<div id="tech-node-${key}" class="tech-node ${nodeClass}" style="grid-row:${p.row + 2};grid-column:${p.col + 1}" title="${t.desc}">
-                    <div class="tech-node-inner">
-                        <div class="tech-icon ${iconClass}"><i class="fa-solid ${b.icon}"></i></div>
-                        <div class="tech-name">${t.name}</div>
-                        <div class="tech-desc">${t.desc}</div>
-                        <div class="tech-state">${stateHtml}</div>
+                html += `<div class="rounded-2xl p-4 flex justify-between items-center border border-white/10 ${bgClass} transition-all duration-300 group hover:shadow-[0_5px_20px_rgba(0,0,0,0.5)]">
+                    <div class="flex items-center gap-4 flex-1 min-w-0 pr-2">
+                        <div class="w-10 h-10 shrink-0 rounded-full bg-black/50 border border-white/10 flex items-center justify-center group-hover:rotate-12 transition-transform">
+                             <i class="fa-solid ${isBought ? 'fa-microchip text-sci-400 drop-shadow-[0_0_5px_rgba(74,222,128,0.8)]' : 'fa-lock text-gray-500'} text-lg"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <h4 class="font-bold text-base truncate ${isBought ? 'text-sci-300' : 'text-white'} tracking-wide w-full">${t.name}</h4>
+                            <div class="text-xs text-gray-400 mt-1 font-medium truncate w-full" title="${t.desc}">${t.desc}</div>
+                        </div>
                     </div>
+                    ${btnHtml}
                 </div>`;
             }
-
-            html += '</div></div></div>';
-            container.innerHTML = html;
-            drawTechLines();
-            setTimeout(drawTechLines, 150);
-            const canvas = container.querySelector('.tech-tree-canvas');
-            if (canvas) {
-                if (window.__techCanvasObs) window.__techCanvasObs.disconnect();
-                const ro = new ResizeObserver(() => { if (currentTab === 'tech') drawTechLines(); });
-                ro.observe(canvas);
-                window.__techCanvasObs = ro;
-            }
-        }
-
-        function drawTechLines() {
-            const svg = document.getElementById('tech-lines');
-            if (!svg) return;
-            let html = '';
-            for (let key in TECH_DATA) {
-                const t = TECH_DATA[key];
-                if (!t.req) continue;
-                const parent = document.getElementById('tech-node-' + t.req);
-                const child = document.getElementById('tech-node-' + key);
-                if (!parent || !child) continue;
-                let d;
-                if (Math.round(parent.offsetTop) === Math.round(child.offsetTop)) {
-                    const y = parent.offsetTop + parent.offsetHeight / 2;
-                    const leftward = child.offsetLeft < parent.offsetLeft;
-                    const x1 = leftward ? parent.offsetLeft : parent.offsetLeft + parent.offsetWidth;
-                    const x2 = leftward ? child.offsetLeft + child.offsetWidth : child.offsetLeft;
-                    d = `M ${x1.toFixed(1)} ${y.toFixed(1)} L ${x2.toFixed(1)} ${y.toFixed(1)}`;
-                } else {
-                    const x1 = parent.offsetLeft + parent.offsetWidth / 2;
-                    const y1 = parent.offsetTop + parent.offsetHeight;
-                    const x2 = child.offsetLeft + child.offsetWidth / 2;
-                    const y2 = child.offsetTop;
-                    const mid = (y1 + y2) / 2;
-                    d = `M ${x1.toFixed(1)} ${y1.toFixed(1)} C ${x1.toFixed(1)} ${mid.toFixed(1)}, ${x2.toFixed(1)} ${mid.toFixed(1)}, ${x2.toFixed(1)} ${y2.toFixed(1)}`;
-                }
-                const cls = state.tech[key] ? 'purchased' : (state.tech[t.req] ? 'available' : 'locked');
-                html += `<path class="tech-line ${cls}" d="${d}"/>`;
-            }
-            svg.innerHTML = html;
+            container.innerHTML = html + '</div>';
         }
 
         function buyTech(id) {
@@ -2262,13 +2158,18 @@
                 for (let key in TECH_DATA) {
                     const btn = document.getElementById(`btn-tech-${key}`);
                     if(btn && !state.tech[key]) {
-                        const canAfford = state.res.sci >= TECH_DATA[key].cost;
-                        btn.disabled = !canAfford;
-                        btn.classList.toggle('affordable', canAfford);
-                        const node = document.getElementById(`tech-node-${key}`);
-                        if (node) {
-                            node.classList.toggle('tech-node-ready', canAfford);
-                            node.classList.toggle('tech-node-avail', !canAfford);
+                        const t = TECH_DATA[key];
+                        const reqMet = !t.req || state.tech[t.req];
+                        if (!reqMet) continue;
+
+                        if(state.res.sci >= t.cost) {
+                            btn.disabled = false;
+                            btn.classList.remove('border-white/20');
+                            btn.classList.add('border-sci-500', 'shadow-[0_0_15px_rgba(74,222,128,0.4)]');
+                        } else {
+                            btn.disabled = true;
+                            btn.classList.add('border-white/20');
+                            btn.classList.remove('border-sci-500', 'shadow-[0_0_15px_rgba(74,222,128,0.4)]');
                         }
                     }
                 }
@@ -2599,7 +2500,6 @@
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 resizeCanvas();
-                if (currentTab === 'tech') setTimeout(drawTechLines, 50);
             });
             
             // Mouse Parallax effect
