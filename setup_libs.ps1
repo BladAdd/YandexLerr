@@ -3,7 +3,7 @@
 $ErrorActionPreference = "Stop"
 $lib = "lib"
 
-New-Item -ItemType Directory -Force -Path "$lib\fa\webfonts", "$lib\fonts" | Out-Null
+New-Item -ItemType Directory -Force -Path "$lib\fa", "$lib\webfonts", "$lib\fonts" | Out-Null
 
 Write-Host "== Tailwind (Play CDN, self-hosted) =="
 Invoke-WebRequest -UseBasicParsing "https://cdn.tailwindcss.com" -OutFile "$lib\tailwind.js"
@@ -16,9 +16,14 @@ Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/tone/
 
 Write-Host "== Font Awesome 6.4.0 =="
 Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" -OutFile "$lib\fa\all.min.css"
-Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2" -OutFile "$lib\fa\webfonts\fa-solid-900.woff2"
-Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.woff2" -OutFile "$lib\fa\webfonts\fa-regular-400.woff2"
-Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-brands-400.woff2" -OutFile "$lib\fa\webfonts\fa-brands-400.woff2"
+Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2" -OutFile "$lib\webfonts\fa-solid-900.woff2"
+Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.woff2" -OutFile "$lib\webfonts\fa-regular-400.woff2"
+Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-brands-400.woff2" -OutFile "$lib\webfonts\fa-brands-400.woff2"
+Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.ttf" -OutFile "$lib\webfonts\fa-solid-900.ttf"
+Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-regular-400.ttf" -OutFile "$lib\webfonts\fa-regular-400.ttf"
+Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-brands-400.ttf" -OutFile "$lib\webfonts\fa-brands-400.ttf"
+Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-v4compatibility.woff2" -OutFile "$lib\webfonts\fa-v4compatibility.woff2"
+Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-v4compatibility.ttf" -OutFile "$lib\webfonts\fa-v4compatibility.ttf"
 
 Write-Host "== Google Fonts (Orbitron + Rajdhani) =="
 $ua = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0 Safari/537.36"
