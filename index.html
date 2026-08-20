@@ -184,6 +184,24 @@
             body.ui-auto #game-sidebar { position: relative; width: 100%; flex: 1; inset: auto; top: auto; bottom: auto; transform: none !important; border-radius: 0; border: none; background: transparent; box-shadow: none; z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
             body.ui-auto .nav-tab-core { display: none !important; }
         }
+
+        /* ========================================= */
+        /*   TAB MODAL (window-style tabs)           */
+        /* ========================================= */
+        #tab-modal-window { max-width: 980px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(165deg, rgba(10,15,25,0.98), rgba(3,5,8,0.98)); box-shadow: 0 20px 60px rgba(0,0,0,1), 0 0 100px rgba(0,0,0,0.8); }
+        #tab-modal-window.modal-close { animation: modalOut 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @media (max-width: 640px) {
+            #tab-modal { padding: 0; }
+            #tab-modal-window { height: 100vh !important; max-height: 100vh !important; max-width: 100% !important; border-radius: 0; }
+        }
+        body.ui-pc #game-sidebar-container { width: auto; background: linear-gradient(180deg, rgba(8,12,20,0.9), rgba(2,4,8,0.95)); }
+        body.ui-pc #main-nav { flex-direction: column; width: 92px; overflow-y: auto; }
+        body.ui-pc #game-sidebar { display: none; }
+        @media (min-width: 768px) {
+            body.ui-auto #game-sidebar-container { width: auto; background: linear-gradient(180deg, rgba(8,12,20,0.9), rgba(2,4,8,0.95)); }
+            body.ui-auto #main-nav { flex-direction: column; width: 92px; overflow-y: auto; }
+            body.ui-auto #game-sidebar { display: none; }
+        }
     </style>
 </head>
 <body class="antialiased text-gray-200 ui-auto">
@@ -337,7 +355,20 @@
         </main>
     </div>
 
-    <div id="generic-modal" class="fixed inset-0 bg-black/90 z-50 flex items-center justify-center hidden interactive backdrop-blur-xl transition-opacity">
+    <div id="tab-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-3 md:p-6 interactive">
+        <div id="tab-modal-backdrop" class="absolute inset-0 bg-black/80 backdrop-blur-[2px]" onclick="closeTabModal()"></div>
+        <div id="tab-modal-window" class="relative w-full h-[92vh] md:h-[88vh] flex flex-col overflow-hidden tab-modal-window modal-enter">
+            <div class="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-white/10 shrink-0 bg-black/40">
+                <div id="tab-modal-title" class="font-orbitron font-black uppercase tracking-widest text-sm md:text-lg flex items-center gap-3 text-white"></div>
+                <button onclick="closeTabModal()" class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-gray-300 hover:text-white transition-all active:scale-90 flex items-center justify-center" title="Закрыть">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <div id="tab-modal-content" class="flex-1 overflow-y-auto p-4 md:p-6 relative scroll-smooth"></div>
+        </div>
+    </div>
+
+    <div id="generic-modal" class="fixed inset-0 bg-black/90 z-[70] flex items-center justify-center hidden interactive backdrop-blur-xl transition-opacity">
         <div id="modal-content" class="glass-panel p-6 md:p-8 rounded-3xl max-w-xl w-full mx-4 relative border border-white/20 shadow-glow-modal modal-enter max-h-[90vh] flex flex-col bg-gradient-to-b from-gray-900/90 to-black/95"></div>
     </div>
     
@@ -787,9 +818,6 @@
             document.body.className = `antialiased text-gray-200 ui-${mode}`;
             saveGame();
             openSettings(); 
-            
-            const sidebar = document.getElementById('game-sidebar');
-            if (currentTab !== 'core' && sidebar) sidebar.classList.add('panel-open');
             
             setTimeout(resizeCanvas, 350); 
         }
@@ -1292,25 +1320,17 @@
 
         function switchTab(tab) {
             const prevTab = currentTab;
-            currentTab = tab;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            const activeBtns = document.querySelectorAll(`.tab-btn[onclick*="'${tab}'"]`);
-            activeBtns.forEach(b => b.classList.add('active'));
-            
-            const sidebar = document.getElementById('game-sidebar');
-            if (tab === 'core') {
-                if (sidebar) sidebar.classList.remove('panel-open');
-                return;
-            } else {
-                if (sidebar) sidebar.classList.add('panel-open');
-            }
+            activateTabOnly(tab);
+            if (tab === 'core') { closeTabModal(); return; }
 
-            const content = document.getElementById('tab-content');
+            const content = document.getElementById('tab-modal-content');
             if (!content) return;
             const prevScroll = content.scrollTop;
             content.style.opacity = '0';
             content.style.transform = 'translateY(10px)';
-            
+
+            openTabModal(tab);
+
             setTimeout(() => {
                 content.innerHTML = '';
                 if(tab === 'build') renderBuild(content);
@@ -1328,6 +1348,47 @@
             }, 100);
 
             if (prevTab !== tab) maybeShowInterstitial();
+        }
+
+        function activateTabOnly(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const activeBtns = document.querySelectorAll(`.tab-btn[onclick*="'${tab}'"]`);
+            activeBtns.forEach(b => b.classList.add('active'));
+        }
+
+        const TAB_META = {
+            build: { title: 'База', icon: 'fa-industry', color: 'text-mars-400' },
+            tech: { title: 'Наука', icon: 'fa-microchip', color: 'text-sci-400' },
+            crew: { title: 'Экипаж', icon: 'fa-users', color: 'text-prem-400' },
+            hq: { title: 'Штаб', icon: 'fa-satellite-dish', color: 'text-gold-400' },
+            quests: { title: 'Задания', icon: 'fa-list-check', color: 'text-green-400' },
+            planets: { title: 'Космос', icon: 'fa-earth-americas', color: 'text-blue-400' }
+        };
+
+        function openTabModal(tab) {
+            const meta = TAB_META[tab] || { title: tab, icon: 'fa-circle-info', color: 'text-white' };
+            const titleEl = document.getElementById('tab-modal-title');
+            if (titleEl) titleEl.innerHTML = `<i class="fa-solid ${meta.icon} ${meta.color}"></i> ${meta.title}`;
+            const win = document.getElementById('tab-modal-window');
+            const modal = document.getElementById('tab-modal');
+            if (!win || !modal) return;
+            win.classList.remove('modal-close');
+            win.classList.remove('modal-enter');
+            void win.offsetWidth;
+            win.classList.add('modal-enter');
+            modal.classList.remove('hidden');
+        }
+
+        function closeTabModal() {
+            const modal = document.getElementById('tab-modal');
+            const win = document.getElementById('tab-modal-window');
+            if (!modal || !win || modal.classList.contains('hidden')) return;
+            win.classList.add('modal-close');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                win.classList.remove('modal-close');
+            }, 250);
         }
 
         function renderBuild(container) {
@@ -2719,9 +2780,9 @@
             recalculate();
             
             if ((document.body.clientWidth < 768 && state.uiMode === 'auto') || state.uiMode === 'mobile') {
-                switchTab('core');
+                activateTabOnly('core');
             } else {
-                switchTab('build');
+                activateTabOnly('build');
             }
             
             requestAnimationFrame(gameLoop);
