@@ -3,16 +3,13 @@
 $ErrorActionPreference = "Stop"
 $lib = "lib"
 
-New-Item -ItemType Directory -Force -Path "$lib\fa", "$lib\webfonts", "$lib\fonts" | Out-Null
+New-Item -ItemType Directory -Force -Path "$lib\fa", "$lib\webfonts", "$lib\fonts", "$lib\sfx" | Out-Null
 
 Write-Host "== Tailwind (Play CDN, self-hosted) =="
 Invoke-WebRequest -UseBasicParsing "https://cdn.tailwindcss.com" -OutFile "$lib\tailwind.js"
 
 Write-Host "== three.js r128 =="
 Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js" -OutFile "$lib\three.min.js"
-
-Write-Host "== Tone.js 14.8.49 =="
-Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js" -OutFile "$lib\Tone.js"
 
 Write-Host "== Font Awesome 6.4.0 =="
 Invoke-WebRequest -UseBasicParsing "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" -OutFile "$lib\fa\all.min.css"
@@ -37,6 +34,22 @@ foreach ($u in $urls) {
     $css = $css.Replace($u, "$name")
 }
 [System.IO.File]::WriteAllText((Resolve-Path ".").Path + "\$lib\fonts\fonts.css", $css, [System.Text.Encoding]::UTF8)
+
+Write-Host "== SFX (Kenney UI Sounds, CC0) =="
+$sfxBase = "https://raw.githubusercontent.com/Calinou/kenney-interface-sounds/master/addons/kenney_interface_sounds"
+$sfxFiles = @{
+    "click_002.wav" = "click.wav";
+    "pluck_001.wav" = "buy.wav";
+    "error_002.wav" = "error.wav";
+    "toggle_001.wav" = "skill.wav";
+    "maximize_003.wav" = "epic.wav";
+    "open_002.wav" = "panel_open.wav";
+    "close_002.wav" = "panel_close.wav"
+}
+foreach ($k in $sfxFiles.Keys) {
+    Invoke-WebRequest -UseBasicParsing "$sfxBase/$k" -OutFile "$lib\sfx\$($sfxFiles[$k])"
+}
+Invoke-WebRequest -UseBasicParsing "$sfxBase/LICENSE.txt" -OutFile "$lib\sfx\LICENSE.txt"
 
 Write-Host ""
 Write-Host "Done. Sizes:"

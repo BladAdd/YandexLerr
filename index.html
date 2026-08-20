@@ -38,7 +38,6 @@
     </script>
     <script src="lib/tailwind.js"></script>
     <script src="lib/three.min.js"></script>
-    <script src="lib/Tone.js"></script>
     <link href="lib/fonts/fonts.css" rel="stylesheet">
     <link rel="stylesheet" href="lib/fa/all.min.css">
     <script src="/sdk.js"></script>
@@ -455,8 +454,8 @@
         let displayState = { res: { min: 0, sci: 0, prm: 50 }, darkMatter: 0 };
 
         let currentTab = 'build';
-        let synths = {};
-        let audioCtxStarted = false;
+        let sfx = {};
+        let audioReady = false;
 
         /* ================= YANDEX GAMES SDK ================= */
         let ysdk = null;
@@ -582,36 +581,33 @@
         }
 
         async function initAudio() {
-            if (audioCtxStarted) return;
+            if (audioReady) return;
             try {
-                await Tone.start();
-                audioCtxStarted = true;
-                
-                synths.click = new Tone.MembraneSynth({ pitchDecay: 0.01, octaves: 1, oscillator: { type: "square" }, envelope: { attack: 0.001, decay: 0.1, sustain: 0, release: 0.1 } }).toDestination();
-                synths.click.volume.value = -15;
-                
-                synths.buy = new Tone.Synth({ oscillator: { type: "sine" }, envelope: { attack: 0.05, decay: 0.2, sustain: 0.2, release: 1 } }).toDestination();
-                synths.buy.volume.value = -15;
-
-                synths.error = new Tone.Synth({ oscillator: { type: "sawtooth" }, envelope: { attack: 0.01, decay: 0.2, sustain: 0, release: 0.2 } }).toDestination();
-                synths.error.volume.value = -15;
-
-                synths.skill = new Tone.FMSynth().toDestination();
-                synths.skill.volume.value = -15;
-                
-                synths.epic = new Tone.AMSynth().toDestination();
-                synths.epic.volume.value = -10;
+                const files = {
+                    click: 'lib/sfx/click.wav',
+                    buy: 'lib/sfx/buy.wav',
+                    error: 'lib/sfx/error.wav',
+                    skill: 'lib/sfx/skill.wav',
+                    epic: 'lib/sfx/epic.wav',
+                    panel_open: 'lib/sfx/panel_open.wav',
+                    panel_close: 'lib/sfx/panel_close.wav'
+                };
+                for (let name in files) {
+                    const a = new Audio(files[name]);
+                    a.preload = 'auto';
+                    sfx[name] = a;
+                }
+                audioReady = true;
             } catch(e) { console.error("Audio init error", e); }
         }
 
         function playSFX(type) {
-            if (!state.soundEnabled || !audioCtxStarted) return;
+            if (!state.soundEnabled || !audioReady) return;
             try {
-                if (type === 'click') synths.click.triggerAttackRelease("C2", "32n");
-                if (type === 'buy') synths.buy.triggerAttackRelease("G5", "16n");
-                if (type === 'error') synths.error.triggerAttackRelease("C3", "8n");
-                if (type === 'skill') synths.skill.triggerAttackRelease("C5", "4n");
-                if (type === 'epic') synths.epic.triggerAttackRelease("C3", "1n");
+                const a = sfx[type];
+                if (!a) return;
+                a.currentTime = 0;
+                a.play().catch(() => {});
             } catch(e) {}
         }
         
@@ -621,7 +617,7 @@
             const icon = document.getElementById('sound-icon');
             if (icon) icon.className = state.soundEnabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark";
             saveGame();
-            if (state.soundEnabled && !audioCtxStarted) initAudio();
+            if (state.soundEnabled && !audioReady) initAudio();
         }
 
         function loadGame() {
@@ -1101,7 +1097,9 @@
             if (state.skillsVisible) {
                 initSkills();
                 updateSkillsUI();
+                playSFX('panel_open');
             } else {
+                playSFX('panel_close');
                 const container = document.getElementById('skills-container');
                 const items = container.querySelectorAll(':scope > .skill-btn-wrapper');
                 items.forEach((el, i) => {
