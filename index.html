@@ -45,7 +45,37 @@
 
     <style>
         body { margin: 0; overflow: hidden; background-color: #030508; color: white; user-select: none; -webkit-touch-callout: none; font-family: 'Rajdhani', sans-serif; touch-action: none; }
+        #space-bg { position: fixed; inset: 0; z-index: -1; background: url('assets/img/bg.jpg') center/cover no-repeat; pointer-events: none; opacity: 0.9; filter: brightness(0.55) saturate(1.1); }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
+
+        .ico { display: inline-block; width: 1.2em; height: 1.2em; background-color: currentColor; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-size: contain; mask-size: contain; -webkit-mask-position: center; mask-position: center; vertical-align: -0.15em; }
+        /* Icons: game-icons/icons (CC BY 3.0). Background & planet photos: NASA (Public Domain). */
+        .ico-mineral { -webkit-mask-image: url('assets/img/res/mineral.svg'); mask-image: url('assets/img/res/mineral.svg'); }
+        .ico-science { -webkit-mask-image: url('assets/img/res/science.svg'); mask-image: url('assets/img/res/science.svg'); }
+        .ico-crystal { -webkit-mask-image: url('assets/img/res/crystal.svg'); mask-image: url('assets/img/res/crystal.svg'); }
+        .ico-dm { -webkit-mask-image: url('assets/img/res/darkmatter.svg'); mask-image: url('assets/img/res/darkmatter.svg'); }
+        .ico-rover { -webkit-mask-image: url('assets/img/bld/rover.svg'); mask-image: url('assets/img/bld/rover.svg'); }
+        .ico-drill { -webkit-mask-image: url('assets/img/bld/drill.svg'); mask-image: url('assets/img/bld/drill.svg'); }
+        .ico-extractor { -webkit-mask-image: url('assets/img/bld/extractor.svg'); mask-image: url('assets/img/bld/extractor.svg'); }
+        .ico-lab { -webkit-mask-image: url('assets/img/bld/lab.svg'); mask-image: url('assets/img/bld/lab.svg'); }
+        .ico-factory { -webkit-mask-image: url('assets/img/bld/factory.svg'); mask-image: url('assets/img/bld/factory.svg'); }
+        .ico-collider { -webkit-mask-image: url('assets/img/bld/collider.svg'); mask-image: url('assets/img/bld/collider.svg'); }
+        .ico-station { -webkit-mask-image: url('assets/img/bld/station.svg'); mask-image: url('assets/img/bld/station.svg'); }
+        .ico-terraformer { -webkit-mask-image: url('assets/img/bld/terraformer.svg'); mask-image: url('assets/img/bld/terraformer.svg'); }
+        .ico-dyson { -webkit-mask-image: url('assets/img/bld/dyson.svg'); mask-image: url('assets/img/bld/dyson.svg'); }
+        .ico-nexus { -webkit-mask-image: url('assets/img/bld/nexus.svg'); mask-image: url('assets/img/bld/nexus.svg'); }
+        .ico-starforge { -webkit-mask-image: url('assets/img/bld/starforge.svg'); mask-image: url('assets/img/bld/starforge.svg'); }
+        .ico-weaver { -webkit-mask-image: url('assets/img/bld/weaver.svg'); mask-image: url('assets/img/bld/weaver.svg'); }
+        .ico-engine { -webkit-mask-image: url('assets/img/bld/engine.svg'); mask-image: url('assets/img/bld/engine.svg'); }
+        .ico-strike { -webkit-mask-image: url('assets/img/skill/strike.svg'); mask-image: url('assets/img/skill/strike.svg'); }
+        .ico-freeze { -webkit-mask-image: url('assets/img/skill/freeze.svg'); mask-image: url('assets/img/skill/freeze.svg'); }
+        .ico-swarm { -webkit-mask-image: url('assets/img/skill/swarm.svg'); mask-image: url('assets/img/skill/swarm.svg'); }
+        .ico-coolant { -webkit-mask-image: url('assets/img/skill/coolant.svg'); mask-image: url('assets/img/skill/coolant.svg'); }
+        .ico-overdrive { -webkit-mask-image: url('assets/img/skill/overdrive.svg'); mask-image: url('assets/img/skill/overdrive.svg'); }
+        .ico-timewarp { -webkit-mask-image: url('assets/img/skill/timewarp.svg'); mask-image: url('assets/img/skill/timewarp.svg'); }
+        .ico-crew { -webkit-mask-image: url('assets/img/ui/crew.svg'); mask-image: url('assets/img/ui/crew.svg'); }
+        .ico-hq { -webkit-mask-image: url('assets/img/ui/hq.svg'); mask-image: url('assets/img/ui/hq.svg'); }
+        .ico-quests { -webkit-mask-image: url('assets/img/ui/quests.svg'); mask-image: url('assets/img/ui/quests.svg'); }
         
         .text-shadow-sm { text-shadow: 1px 1px 3px rgba(0,0,0,0.9); }
         .text-shadow-md { text-shadow: 2px 2px 6px rgba(0,0,0,1), -1px -1px 3px rgba(0,0,0,0.6); }
@@ -165,6 +195,7 @@
 </head>
 <body class="antialiased text-gray-200 ui-auto">
 
+    <div id="space-bg"></div>
     <div id="canvas-container"></div>
     <div id="vignette"></div>
     <canvas id="ui-particles"></canvas>
@@ -174,7 +205,7 @@
             <div class="flex items-center gap-3 mb-2 md:mb-0 cursor-pointer group" onclick="handleLogoClick()" title="AresCorp">
                 <div class="relative w-12 h-12 flex items-center justify-center bg-black/40 rounded-xl border border-white/10 shadow-inner group-hover:border-mars-500/50 transition-colors">
                     <div class="absolute inset-0 border-2 border-mars-500/50 rounded-xl animate-spin-slow opacity-50 group-hover:opacity-100 group-hover:border-mars-400 transition-all"></div>
-                    <i class="fa-solid fa-meteor text-mars-400 text-xl animate-pulse-fast text-glow drop-shadow-[0_0_10px_rgba(229,89,52,0.8)]"></i>
+                    <span class="ico ico-dm text-purple-300 text-2xl animate-pulse-fast drop-shadow-[0_0_10px_rgba(168,85,247,0.8)]"></span>
                 </div>
                 <div>
                     <h1 class="font-orbitron text-2xl font-black tracking-widest uppercase flex items-center gap-1 leading-none drop-shadow-md">
@@ -199,7 +230,7 @@
                 <div id="ui-dark-matter-container" class="hidden flex-col items-center bg-gradient-to-b from-purple-900/40 to-black/80 px-4 py-1.5 rounded-xl border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
                     <div class="text-[9px] text-purple-300 font-orbitron uppercase mb-0.5 tracking-wider">Материя</div>
                     <div class="flex items-center">
-                        <i class="fa-solid fa-infinity text-purple-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"></i>
+                        <span class="ico ico-dm text-purple-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
                         <span id="ui-res-dm" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
                     </div>
                 </div>
@@ -207,7 +238,7 @@
                 <div class="flex flex-col items-center bg-gradient-to-b from-gray-900/60 to-black/80 px-4 py-1.5 rounded-xl border border-white/10 shadow-inner">
                     <div class="text-[9px] text-gray-400 font-orbitron uppercase mb-0.5 tracking-wider">Минералы</div>
                     <div class="flex items-center">
-                        <i class="fa-solid fa-gem text-mars-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(229,89,52,0.8)]"></i>
+                        <span class="ico ico-mineral text-mars-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(229,89,52,0.8)]"></span>
                         <span id="ui-res-min" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
                     </div>
                     <div class="flex justify-between w-full mt-0.5">
@@ -219,7 +250,7 @@
                 <div class="flex flex-col items-center bg-gradient-to-b from-gray-900/60 to-black/80 px-4 py-1.5 rounded-xl border border-white/10 shadow-inner">
                     <div class="text-[9px] text-gray-400 font-orbitron uppercase mb-0.5 tracking-wider">Наука</div>
                     <div class="flex items-center">
-                        <i class="fa-solid fa-flask text-sci-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]"></i>
+                        <span class="ico ico-science text-sci-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]"></span>
                         <span id="ui-res-sci" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
                     </div>
                     <div class="flex justify-between w-full mt-0.5">
@@ -231,7 +262,7 @@
                 <div class="flex flex-col items-center bg-gradient-to-b from-prem-900/40 to-black/80 px-4 py-1.5 rounded-xl border border-prem-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)]">
                     <div class="text-[9px] text-prem-300 font-orbitron uppercase mb-0.5 tracking-wider">Кристаллы</div>
                     <div class="flex items-center">
-                        <i class="fa-solid fa-gem text-prem-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]"></i>
+                        <span class="ico ico-crystal text-prem-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]"></span>
                         <span id="ui-res-prm" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
                     </div>
                 </div>
@@ -264,9 +295,10 @@
                         <div class="absolute inset-10 border-[2px] border-dashed border-white/20 rounded-full animate-[spin_5s_linear_infinite_reverse] pointer-events-none transition-all group-active:scale-75"></div>
                         
                         <div id="reticle-core" class="reticle-core absolute inset-[25%] bg-gradient-to-br from-black/80 to-mars-900/80 backdrop-blur-xl rounded-full border-2 border-mars-400 shadow-glow-mars shadow-glow-mars-hover group-active:scale-90 group-active:border-white transition-all duration-100 z-10 overflow-hidden flex flex-col items-center justify-center group-hover:shadow-[0_0_80px_rgba(229,89,52,0.8)]">
-                             <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(229,89,52,0.4)_0%,transparent_70%)] animate-pulse-fast pointer-events-none"></div>
-                             <i class="fa-solid fa-crosshairs text-4xl md:text-5xl text-white group-active:text-white transition-colors relative z-10 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] group-active:scale-110"></i>
-                             <span class="font-orbitron text-[10px] md:text-xs font-bold text-mars-100 uppercase tracking-widest mt-2 relative z-10 drop-shadow-md">Добыча</span>
+                             <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(229,89,52,0.25)_0%,transparent_70%)] animate-pulse-fast pointer-events-none"></div>
+                             <img id="clicker-planet" src="assets/img/planet/mars.jpg" alt="Планета" class="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover border-2 border-white/20 shadow-[0_0_20px_rgba(255,255,255,0.3)] relative z-10 group-active:scale-110 transition-transform pointer-events-none">
+                             <i class="fa-solid fa-crosshairs absolute inset-0 m-auto w-8 h-8 text-3xl md:text-4xl text-white/80 drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] z-20 pointer-events-none opacity-60"></i>
+                             <span class="font-orbitron text-[10px] md:text-xs font-bold text-mars-100 uppercase tracking-widest mt-1 relative z-10 drop-shadow-md">Добыча</span>
                         </div>
                     </div>
 
@@ -283,25 +315,25 @@
             <div id="game-sidebar-container" class="interactive">
                 <nav id="main-nav" class="scrollbar-hide interactive">
                     <button class="tab-btn nav-tab-core flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('core')">
-                        <i class="fa-solid fa-crosshairs mb-1.5 text-base md:text-lg text-white drop-shadow-[0_0_8px_rgba(255,255,255,0.6)]"></i> ЯДРО
+                        <span class="ico ico-dm mb-1.5 text-xl md:text-2xl text-white drop-shadow-[0_0_8px_rgba(168,85,247,0.7)]"></span> ЯДРО
                     </button>
                     <button class="tab-btn active flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('build')">
-                        <i class="fa-solid fa-industry mb-1.5 text-base md:text-lg text-mars-400 drop-shadow-[0_0_8px_rgba(229,89,52,0.6)]"></i> БАЗА
+                        <span class="ico ico-extractor mb-1.5 text-xl md:text-2xl text-mars-400 drop-shadow-[0_0_8px_rgba(229,89,52,0.6)]"></span> БАЗА
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('tech')">
-                        <i class="fa-solid fa-microchip mb-1.5 text-base md:text-lg text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]"></i> НАУКА
+                        <span class="ico ico-science mb-1.5 text-xl md:text-2xl text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]"></span> НАУКА
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('crew')">
-                        <i class="fa-solid fa-users mb-1.5 text-base md:text-lg text-prem-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]"></i> ЭКИП.
+                        <span class="ico ico-crew mb-1.5 text-xl md:text-2xl text-prem-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]"></span> ЭКИП.
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('hq')">
-                        <i class="fa-solid fa-satellite-dish mb-1.5 text-base md:text-lg text-gold-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]"></i> ШТАБ
+                        <span class="ico ico-hq mb-1.5 text-xl md:text-2xl text-gold-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]"></span> ШТАБ
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('quests')">
-                        <i class="fa-solid fa-list-check mb-1.5 text-base md:text-lg text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]"></i> ЗАДАЧИ
+                        <span class="ico ico-quests mb-1.5 text-xl md:text-2xl text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]"></span> ЗАДАЧИ
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('planets')">
-                        <i class="fa-solid fa-earth-americas mb-1.5 text-base md:text-lg text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]"></i> КОСМОС
+                        <img src="assets/img/planet/mars.jpg" alt="Космос" class="w-6 h-6 md:w-7 md:h-7 rounded-full object-cover mb-1.5 border border-white/20 shadow-[0_0_10px_rgba(59,130,246,0.5)]"> КОСМОС
                     </button>
                 </nav>
 
@@ -329,28 +361,28 @@
         "use strict";
         
         const SKILLS = {
-            strike: { name: 'Орбитальный удар', icon: 'fa-meteor', color: 'text-mars-400', border: 'border-mars-500/50', cd: 300, desc: 'Мгновенно дает минералы, равные 2 часам вашей добычи.', active: false, cost: 0, unlocked: true },
-            freeze: { name: 'Крио-Заморозка', icon: 'fa-snowflake', color: 'text-blue-400', border: 'border-blue-500/50', cd: 600, desc: 'Замораживает шкалу перегрева на 30 секунд.', active: false, duration: 30, cost: 2500, unlocked: false },
-            swarm: { name: 'Нано-Рой', icon: 'fa-bugs', color: 'text-sci-400', border: 'border-sci-500/50', cd: 120, desc: '15 авто-кликов в секунду на 15 секунд.', active: false, duration: 15, cost: 15000, unlocked: false },
-            coolant: { name: 'Сброс Тепла', icon: 'fa-temperature-arrow-down', color: 'text-teal-400', border: 'border-teal-500/50', cd: 60, desc: 'Мгновенно охлаждает ядро до 0%.', active: false, cost: 75000, unlocked: false },
-            overdrive: { name: 'Перегрузка', icon: 'fa-gauge-high', color: 'text-purple-400', border: 'border-purple-500/50', cd: 300, desc: 'Сила ручного клика x25 на 20 секунд.', active: false, duration: 20, cost: 500000, unlocked: false },
-            timewarp: { name: 'Искажение времени', icon: 'fa-hourglass-forward', color: 'text-yellow-400', border: 'border-yellow-500/50', cd: 3600, desc: 'Мгновенно дает весь пассивный доход за 24 часа.', active: false, cost: 25000000, unlocked: false }
+            strike: { name: 'Орбитальный удар', icon: 'ico-strike', color: 'text-mars-400', border: 'border-mars-500/50', cd: 300, desc: 'Мгновенно дает минералы, равные 2 часам вашей добычи.', active: false, cost: 0, unlocked: true },
+            freeze: { name: 'Крио-Заморозка', icon: 'ico-freeze', color: 'text-blue-400', border: 'border-blue-500/50', cd: 600, desc: 'Замораживает шкалу перегрева на 30 секунд.', active: false, duration: 30, cost: 2500, unlocked: false },
+            swarm: { name: 'Нано-Рой', icon: 'ico-swarm', color: 'text-sci-400', border: 'border-sci-500/50', cd: 120, desc: '15 авто-кликов в секунду на 15 секунд.', active: false, duration: 15, cost: 15000, unlocked: false },
+            coolant: { name: 'Сброс Тепла', icon: 'ico-coolant', color: 'text-teal-400', border: 'border-teal-500/50', cd: 60, desc: 'Мгновенно охлаждает ядро до 0%.', active: false, cost: 75000, unlocked: false },
+            overdrive: { name: 'Перегрузка', icon: 'ico-overdrive', color: 'text-purple-400', border: 'border-purple-500/50', cd: 300, desc: 'Сила ручного клика x25 на 20 секунд.', active: false, duration: 20, cost: 500000, unlocked: false },
+            timewarp: { name: 'Искажение времени', icon: 'ico-timewarp', color: 'text-yellow-400', border: 'border-yellow-500/50', cd: 3600, desc: 'Мгновенно дает весь пассивный доход за 24 часа.', active: false, cost: 25000000, unlocked: false }
         };
 
         const BLD_DATA = {
-            rover: { name: 'Авто-Ровер', desc: 'Сборник пыли на поверхности.', icon: 'fa-robot', base: {min: 15}, costMult: 1.15, prod: {min: 1} },
-            drill: { name: 'Плазменный Бур', desc: 'Бурение твердой коры Марса.', icon: 'fa-bore-hole', base: {min: 200}, costMult: 1.16, prod: {min: 10} },
-            extractor: { name: 'Экстрактор', desc: 'Промышленная добыча.', icon: 'fa-industry', base: {min: 3000}, costMult: 1.17, prod: {min: 120} },
-            lab: { name: 'Лаборатория', desc: 'Генерация очков Науки.', icon: 'fa-microscope', base: {min: 10000}, costMult: 1.25, prod: {sci: 1}, isSci: true },
-            factory: { name: 'Обогатитель', desc: 'Синтез редких сплавов.', icon: 'fa-building', base: {min: 50000}, costMult: 1.18, prod: {min: 1500} },
-            collider: { name: 'Суперколлайдер', desc: 'Изучение физики.', icon: 'fa-atom', base: {min: 500000}, costMult: 1.30, prod: {sci: 25}, isSci: true },
-            station: { name: 'Орбитальная Станция', desc: 'Добыча астероидов.', icon: 'fa-satellite', base: {min: 3000000}, costMult: 1.20, prod: {min: 65000} },
-            terraformer: { name: 'Терраформер', desc: 'Ускорение процессов.', icon: 'fa-seedling', base: {min: 25000000}, costMult: 1.35, prod: {sci: 1000}, isSci: true },
-            dyson: { name: 'Сфера Дайсона', desc: 'Сбор энергии звезды.', icon: 'fa-sun', base: {min: 250000000}, costMult: 1.22, prod: {min: 4000000} },
-            nexus: { name: 'Галактический Нексус', desc: 'Квантовое познание.', icon: 'fa-network-wired', base: {min: 5000000000}, costMult: 1.40, prod: {sci: 150000}, isSci: true },
-            starforge: { name: 'Звездная Кузница', desc: 'Ковка из плазмы звезд.', icon: 'fa-fire-flame-curved', base: {min: 100000000000}, costMult: 1.24, prod: {min: 500000000} },
-            weaver: { name: 'Ткач Реальности', desc: 'Создание материи из пустоты.', icon: 'fa-cube', base: {min: 5000000000000}, costMult: 1.26, prod: {min: 25000000000} },
-            engine: { name: 'Сингулярный Двигатель', desc: 'Сжатие пространства-времени.', icon: 'fa-compact-disc', base: {min: 1000000000000000}, costMult: 1.30, prod: {min: 5000000000000} }
+            rover: { name: 'Авто-Ровер', desc: 'Сборник пыли на поверхности.', icon: 'ico-rover', base: {min: 15}, costMult: 1.15, prod: {min: 1} },
+            drill: { name: 'Плазменный Бур', desc: 'Бурение твердой коры Марса.', icon: 'ico-drill', base: {min: 200}, costMult: 1.16, prod: {min: 10} },
+            extractor: { name: 'Экстрактор', desc: 'Промышленная добыча.', icon: 'ico-extractor', base: {min: 3000}, costMult: 1.17, prod: {min: 120} },
+            lab: { name: 'Лаборатория', desc: 'Генерация очков Науки.', icon: 'ico-lab', base: {min: 10000}, costMult: 1.25, prod: {sci: 1}, isSci: true },
+            factory: { name: 'Обогатитель', desc: 'Синтез редких сплавов.', icon: 'ico-factory', base: {min: 50000}, costMult: 1.18, prod: {min: 1500} },
+            collider: { name: 'Суперколлайдер', desc: 'Изучение физики.', icon: 'ico-collider', base: {min: 500000}, costMult: 1.30, prod: {sci: 25}, isSci: true },
+            station: { name: 'Орбитальная Станция', desc: 'Добыча астероидов.', icon: 'ico-station', base: {min: 3000000}, costMult: 1.20, prod: {min: 65000} },
+            terraformer: { name: 'Терраформер', desc: 'Ускорение процессов.', icon: 'ico-terraformer', base: {min: 25000000}, costMult: 1.35, prod: {sci: 1000}, isSci: true },
+            dyson: { name: 'Сфера Дайсона', desc: 'Сбор энергии звезды.', icon: 'ico-dyson', base: {min: 250000000}, costMult: 1.22, prod: {min: 4000000} },
+            nexus: { name: 'Галактический Нексус', desc: 'Квантовое познание.', icon: 'ico-nexus', base: {min: 5000000000}, costMult: 1.40, prod: {sci: 150000}, isSci: true },
+            starforge: { name: 'Звездная Кузница', desc: 'Ковка из плазмы звезд.', icon: 'ico-starforge', base: {min: 100000000000}, costMult: 1.24, prod: {min: 500000000} },
+            weaver: { name: 'Ткач Реальности', desc: 'Создание материи из пустоты.', icon: 'ico-weaver', base: {min: 5000000000000}, costMult: 1.26, prod: {min: 25000000000} },
+            engine: { name: 'Сингулярный Двигатель', desc: 'Сжатие пространства-времени.', icon: 'ico-engine', base: {min: 1000000000000000}, costMult: 1.30, prod: {min: 5000000000000} }
         };
 
         const TECH_DATA = {
@@ -1133,13 +1165,13 @@
                             <div class="skill-cooldown-container">
                                 <div id="skill-cd-${id}" class="skill-cooldown" style="height: 0%"></div>
                             </div>
-                            <i class="fa-solid ${s.icon} text-lg md:text-2xl ${s.color} z-10 relative drop-shadow-[0_0_8px_currentColor]"></i>
+                            <span class="ico ${s.icon} text-lg md:text-2xl ${s.color} z-10 relative drop-shadow-[0_0_8px_currentColor]"></span>
                             <div class="hidden md:flex flex-col items-start z-10 text-left leading-tight pointer-events-none w-full ml-1">
                                 <span class="text-xs font-bold text-white whitespace-nowrap drop-shadow-md">${s.name}</span>
                                 <span id="skill-status-${id}" class="text-[10px] text-gray-300 font-bold tracking-wide">Готово</span>
                             </div>
                             <div class="skill-tooltip">
-                                <div class="font-bold text-white text-base mb-2 border-b border-white/10 pb-2 flex items-center gap-2"><i class="fa-solid ${s.icon} ${s.color}"></i> ${s.name}</div>
+                                <div class="font-bold text-white text-base mb-2 border-b border-white/10 pb-2 flex items-center gap-2"><span class="ico ${s.icon} ${s.color}"></span> ${s.name}</div>
                                 <div class="text-gray-300 text-sm my-3 leading-relaxed whitespace-normal text-left">${s.desc}</div>
                                 <div class="text-mars-400 text-xs font-orbitron font-bold flex items-center gap-1 bg-black/50 p-2 rounded-lg border border-white/5"><i class="fa-solid fa-clock"></i> Откат: ${s.cd} сек</div>
                             </div>
@@ -1319,7 +1351,7 @@
                     
                     <div class="flex items-center gap-4 relative z-10 overflow-hidden flex-1 pr-2">
                         <div class="w-14 h-14 shrink-0 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                            <i class="fa-solid ${d.icon} text-2xl ${d.isSci ? 'text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]' : 'text-gray-300 drop-shadow-[0_0_8px_rgba(200,200,200,0.5)]'}"></i>
+                            <span class="ico ${d.icon} text-2xl ${d.isSci ? 'text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]' : 'text-gray-300 drop-shadow-[0_0_8px_rgba(200,200,200,0.5)]'}"></span>
                         </div>
                         
                         <div class="flex flex-col items-start min-w-0 flex-1">
@@ -1335,7 +1367,7 @@
                     <button id="btn-bld-${id}" onclick="buyBld('${id}')" class="shrink-0 px-4 py-3 rounded-xl text-xs font-bold transition-all active:scale-95 border border-white/10 ${btnClass} relative z-10 w-[90px] md:w-[100px]">
                         <div class="flex flex-col items-center">
                             <span class="tracking-widest uppercase mb-1">Апгрейд</span>
-                            <span class="text-xs flex items-center gap-1.5 font-orbitron"><i class="fa-solid fa-gem"></i> ${formatNum(cost)}</span>
+                            <span class="text-xs flex items-center gap-1.5 font-orbitron"><span class="ico ico-mineral text-[10px] text-mars-400"></span> ${formatNum(cost)}</span>
                         </div>
                     </button>
                 </div>`;
@@ -1375,7 +1407,7 @@
                 let btnHtml = isBought 
                     ? '<span class="shrink-0 text-sci-400 text-sm font-bold bg-black/40 px-3 py-1.5 rounded-lg border border-sci-500/30 flex items-center gap-2"><i class="fa-solid fa-check"></i> Изучено</span>'
                     : `<button id="btn-tech-${key}" onclick="buyTech('${key}')" class="shrink-0 px-4 py-2.5 rounded-xl text-xs font-bold transition-all bg-white/5 text-gray-500 border border-white/10 hover:scale-105 active:scale-95 flex items-center gap-2">
-                        <i class="fa-solid fa-flask text-sm"></i> <span class="font-orbitron">${formatNum(t.cost)}</span>
+                        <span class="ico ico-science text-sm"></span> <span class="font-orbitron">${formatNum(t.cost)}</span>
                        </button>`; 
 
                 html += `<div class="rounded-2xl p-4 flex justify-between items-center border border-white/10 ${bgClass} transition-all duration-300 group hover:shadow-[0_5px_20px_rgba(0,0,0,0.5)]">
@@ -1430,14 +1462,14 @@
                         ${c.rarity === 'epic' ? '<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(168,85,247,0.15),transparent)] pointer-events-none"></div>' : ''}
                         
                         <div class="w-14 h-14 bg-black/60 rounded-full flex items-center justify-center mb-3 shadow-inner border border-white/10 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-user-astronaut text-2xl ${c.rarity === 'epic' ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : (c.rarity === 'rare' ? 'text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]' : 'text-gray-400')}"></i>
+                            <span class="ico ico-crew text-2xl ${c.rarity === 'epic' ? 'text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]' : (c.rarity === 'rare' ? 'text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.8)]' : 'text-gray-400')}"></span>
                         </div>
                         <h5 class="font-black text-sm text-white tracking-wide z-10 w-full truncate">${c.name}</h5>
                         <div class="text-[10px] text-gray-400 mb-2 z-10 bg-black/40 px-2 py-0.5 rounded-md border border-white/5 mt-1 shrink-0">Уровень ${lvl}</div>
                         <div class="text-[11px] text-prem-300 font-bold mb-4 h-8 flex items-center justify-center z-10 w-full">${c.effect} (x${lvl})</div>
                         
                         <button onclick="upgradeCrew('${c.id}', ${upgradeCost})" class="w-full bg-sci-600/30 hover:bg-sci-500/60 border border-sci-500/50 py-2.5 rounded-xl text-xs font-bold text-white transition-all z-10 flex items-center justify-center gap-1.5 hover:shadow-[0_0_15px_rgba(74,222,128,0.4)] mt-auto">
-                            Обучить <i class="fa-solid fa-flask text-[10px]"></i> ${upgradeCost}
+                            Обучить <span class="ico ico-science text-[10px]"></span> ${upgradeCost}
                         </button>
                     </div>`;
                 }
@@ -1469,7 +1501,7 @@
                 <div class="space-y-4 mb-2 overflow-y-auto max-h-[60vh] scrollbar-hide pr-2 pb-4">
                     <div class="glass-card p-4 rounded-2xl border border-mars-500/40 flex justify-between items-center hover:shadow-[0_10px_30px_rgba(229,89,52,0.2)] transition-all">
                         <div class="flex gap-4 items-center">
-                            <div class="w-12 h-12 shrink-0 rounded-full bg-mars-900/50 flex items-center justify-center border border-mars-500/30"><i class="fa-solid fa-gem text-2xl text-mars-400 drop-shadow-[0_0_8px_rgba(229,89,52,0.8)]"></i></div>
+                            <div class="w-12 h-12 shrink-0 rounded-full bg-mars-900/50 flex items-center justify-center border border-mars-500/30"><span class="ico ico-mineral text-2xl text-mars-400 drop-shadow-[0_0_8px_rgba(229,89,52,0.8)]"></span></div>
                             <div>
                                 <div class="text-base font-bold text-white tracking-wide">Инвестиции</div>
                                 <div class="text-[11px] text-gray-400 mt-1">Мгновенно дает минералы за 30 мин. добычи.</div>
@@ -1482,7 +1514,7 @@
 
                     <div class="glass-card p-4 rounded-2xl border border-sci-500/40 flex justify-between items-center hover:shadow-[0_10px_30px_rgba(74,222,128,0.2)] transition-all">
                         <div class="flex gap-4 items-center">
-                            <div class="w-12 h-12 shrink-0 rounded-full bg-sci-900/50 flex items-center justify-center border border-sci-500/30"><i class="fa-solid fa-flask text-2xl text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]"></i></div>
+                            <div class="w-12 h-12 shrink-0 rounded-full bg-sci-900/50 flex items-center justify-center border border-sci-500/30"><span class="ico ico-science text-2xl text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]"></span></div>
                             <div>
                                 <div class="text-base font-bold text-white tracking-wide">Грант на исследования</div>
                                 <div class="text-[11px] text-gray-400 mt-1">Мгновенно дает науку за 30 мин. генерации.</div>
@@ -1495,7 +1527,7 @@
 
                     <div class="glass-card p-4 rounded-2xl border border-prem-500/40 flex justify-between items-center hover:shadow-[0_10px_30px_rgba(192,132,252,0.2)] transition-all">
                         <div class="flex gap-4 items-center">
-                            <div class="w-12 h-12 shrink-0 rounded-full bg-prem-900/50 flex items-center justify-center border border-prem-500/30"><i class="fa-regular fa-gem text-2xl text-prem-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]"></i></div>
+                            <div class="w-12 h-12 shrink-0 rounded-full bg-prem-900/50 flex items-center justify-center border border-prem-500/30"><span class="ico ico-crystal text-2xl text-prem-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]"></span></div>
                             <div>
                                 <div class="text-base font-bold text-white tracking-wide">Кристальный тайник</div>
                                 <div class="text-[11px] text-gray-400 mt-1">Пополняет ваш баланс на +15 кристаллов.</div>
@@ -1508,7 +1540,7 @@
 
                     <div class="glass-card p-4 rounded-2xl border border-teal-500/40 flex justify-between items-center hover:shadow-[0_10px_30px_rgba(45,212,191,0.2)] transition-all">
                         <div class="flex gap-4 items-center">
-                            <div class="w-12 h-12 shrink-0 rounded-full bg-teal-900/50 flex items-center justify-center border border-teal-500/30"><i class="fa-solid fa-rotate-right text-2xl text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.8)]"></i></div>
+                            <div class="w-12 h-12 shrink-0 rounded-full bg-teal-900/50 flex items-center justify-center border border-teal-500/30"><span class="ico ico-coolant text-2xl text-teal-400 drop-shadow-[0_0_8px_rgba(45,212,191,0.8)]"></span></div>
                             <div>
                                 <div class="text-base font-bold text-white tracking-wide">Экстренная перезагрузка</div>
                                 <div class="text-[11px] text-gray-400 mt-1">Сбрасывает таймеры всех навыков.</div>
@@ -1521,7 +1553,7 @@
 
                     <div class="glass-card p-4 rounded-2xl border border-gold-500/40 flex justify-between items-center hover:shadow-[0_10px_30px_rgba(251,191,36,0.2)] transition-all">
                         <div class="flex gap-4 items-center">
-                            <div class="w-12 h-12 shrink-0 rounded-full bg-gold-900/50 flex items-center justify-center border border-gold-500/30"><i class="fa-solid fa-bolt text-2xl text-gold-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]"></i></div>
+                            <div class="w-12 h-12 shrink-0 rounded-full bg-gold-900/50 flex items-center justify-center border border-gold-500/30"><span class="ico ico-strike text-2xl text-gold-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]"></span></div>
                             <div>
                                 <div class="text-base font-bold text-white tracking-wide">Турбо-режим <span class="text-gold-400">(Бафф x2)</span></div>
                                 <div class="text-[11px] text-gray-400 mt-1">Увеличивает весь доход в 2 раза на 5 минут.</div>
@@ -1593,7 +1625,7 @@
                 <div class="flex justify-between items-center mb-6 shrink-0 border-b border-white/10 pb-4">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-prem-600 to-purple-900 flex items-center justify-center border border-prem-400/50 shadow-[0_0_20px_rgba(168,85,247,0.4)]">
-                            <i class="fa-solid fa-user-astronaut text-2xl text-white"></i>
+                            <span class="ico ico-crew text-2xl text-white"></span>
                         </div>
                         <div>
                             <h3 class="font-orbitron font-black text-xl text-white leading-none tracking-wider">Отдел Кадров</h3>
@@ -1601,7 +1633,7 @@
                         </div>
                     </div>
                     <div class="text-prem-300 font-bold bg-black/60 px-5 py-2.5 rounded-xl border border-prem-500/40 flex items-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.3)]">
-                        <i class="fa-solid fa-gem animate-pulse text-lg"></i> <span id="modal-prm-display" class="font-orbitron text-lg">${formatNum(state.res.prm)}</span>
+                        <span class="ico ico-crystal animate-pulse text-lg"></span> <span id="modal-prm-display" class="font-orbitron text-lg">${formatNum(state.res.prm)}</span>
                     </div>
                 </div>
                 
@@ -1611,7 +1643,7 @@
                         <div class="text-[11px] text-gray-400 mt-1">Смотреть видео-рекламу</div>
                     </div>
                     <button onclick="showRewardedAd()" class="bg-gradient-to-r from-prem-600 to-purple-600 hover:from-prem-500 hover:to-purple-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_15px_rgba(168,85,247,0.5)] flex items-center gap-2 group-hover:scale-105 active:scale-95 btn-shine">
-                        <i class="fa-solid fa-video"></i> +25 <i class="fa-solid fa-gem"></i>
+                        <i class="fa-solid fa-video"></i> +25 <span class="ico ico-crystal"></span>
                     </button>
                 </div>
                 
@@ -1639,7 +1671,7 @@
                         ${r.id === 'epic' ? '<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(168,85,247,0.15),transparent)] animate-pulse pointer-events-none"></div>' : ''}
                         
                         <div class="w-14 h-14 rounded-full bg-black/60 border border-white/10 flex items-center justify-center mb-3 shadow-inner group-hover:border-white/30 transition-colors z-10 group-hover:scale-110 shrink-0">
-                            <i class="fa-solid fa-user-tie text-2xl ${r.iconColor}"></i>
+                            <span class="ico ico-crew text-2xl ${r.iconColor}"></span>
                         </div>
                         
                         <div class="text-sm font-black text-white truncate w-full z-10 tracking-wide">${c.name}</div>
@@ -1650,7 +1682,7 @@
                                 ? 'bg-gradient-to-r from-prem-600 to-purple-600 hover:from-prem-500 hover:to-purple-500 border-prem-400 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)] hover:shadow-[0_0_25px_rgba(168,85,247,0.7)]' 
                                 : 'bg-black/50 text-gray-500 border-white/10 cursor-not-allowed'}">
                             ${has ? '<i class="fa-solid fa-clone"></i> Дубликат' : '<i class="fa-solid fa-file-signature"></i> Нанять'} 
-                            <span class="ml-1 px-2 py-0.5 bg-black/40 rounded-md flex items-center gap-1 shrink-0">${c.cost} <i class="fa-solid fa-gem text-prem-300"></i></span>
+                            <span class="ml-1 px-2 py-0.5 bg-black/40 rounded-md flex items-center gap-1 shrink-0">${c.cost} <span class="ico ico-crystal text-prem-300"></span></span>
                         </button>
                     </div>`;
                 });
@@ -1745,12 +1777,12 @@
                     <p class="text-sm text-gray-300 mb-8">Ваша колония работала без вас: <span class="font-bold text-white">${timeStr}</span></p>
                     <div class="grid grid-cols-2 gap-4 mb-8">
                         <div class="bg-black/50 border border-white/10 rounded-2xl p-4 flex flex-col items-center shadow-inner">
-                            <i class="fa-solid fa-gem text-mars-400 text-2xl mb-2 drop-shadow-[0_0_10px_rgba(229,89,52,0.8)]"></i>
+                            <span class="ico ico-mineral text-mars-400 text-2xl mb-2 drop-shadow-[0_0_10px_rgba(229,89,52,0.8)]"></span>
                             <span class="text-base font-black text-white">+${formatNum(min)}</span>
                             <span class="text-[9px] text-gray-500 uppercase font-bold mt-1">Минералы</span>
                         </div>
                         <div class="bg-black/50 border border-white/10 rounded-2xl p-4 flex flex-col items-center shadow-inner">
-                            <i class="fa-solid fa-flask text-sci-400 text-2xl mb-2 drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]"></i>
+                            <span class="ico ico-science text-sci-400 text-2xl mb-2 drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]"></span>
                             <span class="text-base font-black text-white">+${formatNum(sci)}</span>
                             <span class="text-[9px] text-gray-500 uppercase font-bold mt-1">Наука</span>
                         </div>
@@ -1772,7 +1804,7 @@
             html += `<div class="glass-card p-5 rounded-2xl mb-8 border border-purple-500/50 bg-gradient-to-br from-black/90 to-purple-900/30 relative overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
                 <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-700/20 via-transparent to-transparent opacity-70 animate-pulse-fast pointer-events-none"></div>
                 <div class="relative z-10">
-                    <div class="text-lg font-black text-white mb-2 tracking-wide flex items-center gap-2"><i class="fa-solid fa-infinity text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"></i> Перерождение Колонии</div>
+                    <div class="text-lg font-black text-white mb-2 tracking-wide flex items-center gap-2"><span class="ico ico-dm text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span> Перерождение Колонии</div>
                     <div class="text-[11px] text-gray-300 mb-5 leading-relaxed">Сбросьте базу, чтобы получить Темную Материю. ТМ дает <span class="text-purple-400 font-bold">+10% ко всей добыче</span> за единицу и нужна для полетов к другим мирам!</div>
                     
                     <div class="flex justify-between items-center mb-2 bg-black/40 p-2 rounded-lg border border-white/5">
@@ -1865,7 +1897,7 @@
             const content = document.getElementById('modal-content');
             content.innerHTML = `
                 <div class="text-center">
-                    <i class="fa-solid fa-infinity text-6xl text-purple-500 mb-6 drop-shadow-[0_0_20px_rgba(168,85,247,1)] animate-pulse"></i>
+                    <span class="ico ico-dm text-6xl text-purple-500 mb-6 drop-shadow-[0_0_20px_rgba(168,85,247,1)] animate-pulse"></span>
                     <h3 class="font-orbitron font-black text-2xl text-white mb-4 tracking-wide">Сингулярность</h3>
                     <p class="text-sm text-gray-300 mb-4 leading-relaxed bg-black/40 p-4 rounded-xl border border-white/5">Вы разрушите текущую базу и потеряете минералы, науку, здания и технологии.</p>
                     <p class="text-base text-purple-400 font-bold mb-8 drop-shadow-[0_0_5px_rgba(168,85,247,0.8)]">Взамен вы получите +${formatNum(calcDM)} Тёмной Материи<br><span class="text-[10px] text-gray-400 font-normal uppercase tracking-widest mt-2 block">(Экипаж, Кристаллы и Планеты сохранятся)</span></p>
@@ -1968,7 +2000,7 @@
                     ${isClaimed ? 
                         `<div class="w-10 h-10 shrink-0 rounded-full bg-green-900/30 flex items-center justify-center border border-green-500/20 z-10 relative"><span class="text-green-500 text-xl font-bold"><i class="fa-solid fa-check"></i></span></div>` : 
                         `<button id="quest-btn-${q.id}" onclick="claimQuest('${q.id}')" class="shrink-0 px-4 py-2 rounded-lg text-xs font-bold bg-white/5 text-gray-500 transition-all active:scale-95 z-10 relative w-[80px]" disabled>
-                            Забрать<br><span class="flex items-center justify-center gap-1 mt-0.5">${q.reward.prm} <i class="fa-solid fa-gem text-[10px]"></i></span>
+                            Забрать<br><span class="flex items-center justify-center gap-1 mt-0.5">${q.reward.prm} <span class="ico ico-crystal text-[10px]"></span></span>
                         </button>`
                     }
                 </div>`;
@@ -2061,8 +2093,8 @@
                 html += `<div class="glass-card rounded-2xl p-5 border ${isCurrent ? 'border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.15)] bg-green-900/10' : 'border-white/10 hover:shadow-[0_10px_20px_rgba(0,0,0,0.5)]'} transition-all duration-300 relative overflow-hidden group">
                     ${isCurrent ? '<div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(34,197,94,0.1),transparent)] pointer-events-none"></div>' : ''}
                     <div class="flex gap-4 items-center mb-5 relative z-10">
-                        <div class="w-16 h-16 shrink-0 rounded-full bg-black/60 border border-white/20 flex items-center justify-center text-3xl ${p.color} shadow-inner group-hover:scale-110 transition-transform">
-                            <i class="fa-solid ${p.icon} drop-shadow-[0_0_10px_currentColor]"></i>
+                        <div class="w-16 h-16 shrink-0 rounded-full bg-black/60 border border-white/20 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform overflow-hidden ${isCurrent ? 'ring-2 ring-green-500/60' : ''}">
+                            <img src="assets/img/planet/${id}.jpg" alt="${p.name}" class="w-full h-full object-cover ${isCurrent ? '' : 'grayscale-[35%] group-hover:grayscale-0'} transition-all duration-300">
                         </div>
                         <div class="min-w-0 flex-1">
                             <h3 class="text-xl font-black font-orbitron ${p.color} tracking-wide drop-shadow-md truncate w-full">${p.name}</h3>
@@ -2115,6 +2147,8 @@
         }
         
         function updatePlanetVisuals() {
+            const cp = document.getElementById('clicker-planet');
+            if(cp) cp.src = `assets/img/planet/${state.planet || 'mars'}.jpg`;
             if(!marsMesh) return;
             const p = PLANETS[state.planet || 'mars'];
             
@@ -2231,22 +2265,22 @@
             const rand = Math.random();
             let type = 'min';
             let amount = 0;
-            let icon = 'fa-gem text-mars-400';
+            let icon = 'ico-mineral text-mars-400';
             let bgGlow = 'rgba(229,89,52,0.5)';
 
             if (rand < 0.4) {
                 type = 'min';
                 amount = Math.max(1000, calc.rate.min * 1800);
-                icon = 'fa-gem text-mars-400';
+                icon = 'ico-mineral text-mars-400';
             } else if (rand < 0.8) {
                 type = 'sci';
                 amount = Math.max(100, calc.rate.sci * 1800);
-                icon = 'fa-flask text-sci-400';
+                icon = 'ico-science text-sci-400';
                 bgGlow = 'rgba(74,222,128,0.5)';
             } else {
                 type = 'prm';
                 amount = Math.floor(Math.min(75, 10 + (state.rebirth?.darkMatter || 0) * 0.5));
-                icon = 'fa-gem text-prem-400';
+                icon = 'ico-crystal text-prem-400';
                 bgGlow = 'rgba(192,132,252,0.5)';
             }
 
@@ -2267,7 +2301,7 @@
                     <div class="glass-card p-5 rounded-2xl mb-8 flex flex-col items-center border border-white/10" style="box-shadow: inset 0 0 30px ${bgGlow}">
                         <div class="text-xs text-gray-400 uppercase tracking-widest font-bold mb-3">Содержимое контейнера</div>
                         <div class="flex items-center gap-4">
-                            <i class="fa-solid ${icon} text-4xl drop-shadow-md"></i>
+                            <span class="ico ${icon} text-4xl drop-shadow-md"></span>
                             <span class="text-4xl font-black font-orbitron text-white">+${formatNum(amount)}</span>
                         </div>
                     </div>
@@ -2353,22 +2387,22 @@
                 
                 <div class="space-y-4">
                     <div class="flex items-center gap-4 glass-card p-3 rounded-xl border border-white/10 hover:border-mars-500/50 transition-colors">
-                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><i class="fa-solid fa-gem text-mars-400 text-lg"></i> Минералы</div>
+                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><span class="ico ico-mineral text-mars-400 text-lg"></span> Минералы</div>
                         <input type="number" id="admin-add-min" value="1000000000000000" class="flex-1 bg-black/80 border border-white/20 rounded-lg px-4 py-2.5 text-white font-orbitron focus:border-mars-500 outline-none transition-colors">
                         <button onclick="adminAddRes('min')" class="bg-mars-600 hover:bg-mars-500 text-white px-5 py-2.5 rounded-lg font-bold transition-transform active:scale-95 shadow-[0_0_15px_rgba(229,89,52,0.4)] border border-mars-400">Выдать</button>
                     </div>
                     <div class="flex items-center gap-4 glass-card p-3 rounded-xl border border-white/10 hover:border-sci-500/50 transition-colors">
-                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><i class="fa-solid fa-flask text-sci-400 text-lg"></i> Наука</div>
+                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><span class="ico ico-science text-sci-400 text-lg"></span> Наука</div>
                         <input type="number" id="admin-add-sci" value="1000000000000000" class="flex-1 bg-black/80 border border-white/20 rounded-lg px-4 py-2.5 text-white font-orbitron focus:border-sci-500 outline-none transition-colors">
                         <button onclick="adminAddRes('sci')" class="bg-sci-600 hover:bg-sci-500 text-white px-5 py-2.5 rounded-lg font-bold transition-transform active:scale-95 shadow-[0_0_15px_rgba(34,197,94,0.4)] border border-sci-400">Выдать</button>
                     </div>
                     <div class="flex items-center gap-4 glass-card p-3 rounded-xl border border-white/10 hover:border-prem-500/50 transition-colors">
-                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><i class="fa-solid fa-gem text-prem-400 text-lg"></i> Кристаллы</div>
+                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><span class="ico ico-crystal text-prem-400 text-lg"></span> Кристаллы</div>
                         <input type="number" id="admin-add-prm" value="100000" class="flex-1 bg-black/80 border border-white/20 rounded-lg px-4 py-2.5 text-white font-orbitron focus:border-prem-500 outline-none transition-colors">
                         <button onclick="adminAddRes('prm')" class="bg-prem-600 hover:bg-prem-500 text-white px-5 py-2.5 rounded-lg font-bold transition-transform active:scale-95 shadow-[0_0_15px_rgba(168,85,247,0.4)] border border-prem-400">Выдать</button>
                     </div>
                     <div class="flex items-center gap-4 glass-card p-3 rounded-xl border border-white/10 hover:border-purple-500/50 transition-colors">
-                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><i class="fa-solid fa-infinity text-purple-400 text-lg"></i> Темная Мат.</div>
+                        <div class="w-1/3 text-sm font-bold text-gray-200 flex items-center gap-2"><span class="ico ico-dm text-purple-400 text-lg"></span> Темная Мат.</div>
                         <input type="number" id="admin-add-dm" value="100000" class="flex-1 bg-black/80 border border-white/20 rounded-lg px-4 py-2.5 text-white font-orbitron focus:border-purple-500 outline-none transition-colors">
                         <button onclick="adminAddRes('dm')" class="bg-purple-600 hover:bg-purple-500 text-white px-5 py-2.5 rounded-lg font-bold transition-transform active:scale-95 shadow-[0_0_15px_rgba(147,51,234,0.4)] border border-purple-400">Выдать</button>
                     </div>
