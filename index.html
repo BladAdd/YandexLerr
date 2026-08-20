@@ -13,9 +13,9 @@
                 theme: {
                     extend: {
                         colors: {
-                            mars: { 400: '#FF7B59', 500: '#E55934', 600: '#C7411E', 800: '#5A1F0D', 900: '#2A0D05' },
+                            mars: { 100: '#ffd7cc', 300: '#ff9d80', 400: '#FF7B59', 500: '#E55934', 600: '#C7411E', 800: '#5A1F0D', 900: '#2A0D05' },
                             sci: { 400: '#4ade80', 500: '#22c55e', 600: '#16a34a', 900: '#14532d' },
-                            prem: { 400: '#c084fc', 500: '#a855f7', 600: '#9333ea', 900: '#4c1d95' },
+                            prem: { 300: '#d8b4fe', 400: '#c084fc', 500: '#a855f7', 600: '#9333ea', 900: '#4c1d95' },
                             terra: { 400: '#38bdf8', 500: '#0ea5e9', 900: '#0c4a6e' },
                             gold: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' }
                         },
@@ -27,6 +27,7 @@
                             'shimmer': 'shimmer 2.5s infinite',
                         },
                         keyframes: {
+                            spin: { '0%': { transform: 'rotate(0deg)' }, '100%': { transform: 'rotate(360deg)' } },
                             'spin-reverse': { '0%': { transform: 'rotate(360deg)' }, '100%': { transform: 'rotate(0deg)' } },
                             float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-8px)' } },
                             shimmer: { '0%': { transform: 'translateX(-100%)' }, '100%': { transform: 'translateX(100%)' } }
@@ -148,6 +149,10 @@
         .shadow-glow-mars { box-shadow: 0 0 30px rgba(229,89,52,0.5); }
         .shadow-glow-mars-hover:hover { box-shadow: 0 0 60px rgba(229,89,52,0.9); }
         .shadow-glow-modal { box-shadow: 0 20px 60px rgba(0,0,0,1), 0 0 100px rgba(0,0,0,0.8); }
+        .shadow-glow-crystal { box-shadow: 0 0 25px rgba(168,85,247,0.5); }
+        .shadow-glow-ufo { box-shadow: 0 0 25px rgba(34,211,238,0.6); }
+        .bg-ufo-blur { background: radial-gradient(circle, rgba(34,211,238,0.35) 0%, rgba(34,211,238,0.08) 55%, transparent 75%); }
+        .hover-bg-ufo-blur:hover { background: radial-gradient(circle, rgba(34,211,238,0.6) 0%, rgba(34,211,238,0.15) 55%, transparent 75%); }
         
         .btn-shine { position: relative; overflow: hidden; }
         .btn-shine::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%); transform: skewX(-20deg); animation: shimmer 3s infinite; pointer-events: none; }
@@ -191,24 +196,7 @@
             body.ui-auto .nav-tab-core { display: none !important; }
         }
 
-        /* ========================================= */
-        /*   TAB MODAL (window-style tabs)           */
-        /* ========================================= */
-        #tab-modal-window { max-width: 980px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.12); background: linear-gradient(165deg, rgba(10,15,25,0.98), rgba(3,5,8,0.98)); box-shadow: 0 20px 60px rgba(0,0,0,1), 0 0 100px rgba(0,0,0,0.8); }
-        #tab-modal-window.modal-close { animation: modalOut 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        @media (max-width: 640px) {
-            #tab-modal { padding: 0; }
-            #tab-modal-window { height: 100vh !important; max-height: 100vh !important; max-width: 100% !important; border-radius: 0; }
-        }
-        body.ui-pc #game-sidebar-container { width: auto; background: linear-gradient(180deg, rgba(8,12,20,0.9), rgba(2,4,8,0.95)); }
-        body.ui-pc #main-nav { flex-direction: column; width: 92px; overflow-y: auto; }
-        body.ui-pc #game-sidebar { display: none; }
-        @media (min-width: 768px) {
-            body.ui-auto #game-sidebar-container { width: auto; background: linear-gradient(180deg, rgba(8,12,20,0.9), rgba(2,4,8,0.95)); }
-            body.ui-auto #main-nav { flex-direction: column; width: 92px; overflow-y: auto; }
-            body.ui-auto #game-sidebar { display: none; }
-        }
-    </style>
+        </style>
 </head>
 <body class="antialiased text-gray-200 ui-auto">
 
@@ -359,19 +347,6 @@
                 </aside>
             </div>
         </main>
-    </div>
-
-    <div id="tab-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center p-3 md:p-6 interactive">
-        <div id="tab-modal-backdrop" class="absolute inset-0 bg-black/80 backdrop-blur-[2px]" onclick="closeTabModal()"></div>
-        <div id="tab-modal-window" class="relative w-full h-[92vh] md:h-[88vh] flex flex-col overflow-hidden tab-modal-window modal-enter">
-            <div class="flex items-center justify-between px-4 md:px-6 py-3 md:py-4 border-b border-white/10 shrink-0 bg-black/40">
-                <div id="tab-modal-title" class="font-orbitron font-black uppercase tracking-widest text-sm md:text-lg flex items-center gap-3 text-white"></div>
-                <button onclick="closeTabModal()" class="w-9 h-9 md:w-10 md:h-10 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-gray-300 hover:text-white transition-all active:scale-90 flex items-center justify-center" title="Закрыть">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-            <div id="tab-modal-content" class="flex-1 overflow-y-auto p-4 md:p-6 relative scroll-smooth"></div>
-        </div>
     </div>
 
     <div id="generic-modal" class="fixed inset-0 bg-black/90 z-[70] flex items-center justify-center hidden interactive backdrop-blur-xl transition-opacity">
@@ -629,7 +604,7 @@
                             containerEl.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">Пока пусто. Станьте первым магнатом!</div>';
                             return;
                         }
-                        const meId = ysdk.player ? ysdk.player.id : null;
+                        const meId = ysdk.player && ysdk.player.id ? ysdk.player.id.uniqueID : null;
                         let html = rows.map((e, i) => {
                             const name = (e.player && e.player.publicName) || 'Игрок';
                             const score = e.score != null ? formatNum(e.score) : '0';
@@ -816,7 +791,7 @@
         function resetGame() {
             localStorage.removeItem('marsMagnateSave');
             if (ysdk && ysdk.player) { try { ysdk.player.setData({ save: '' }); } catch(e) {} }
-            location.reload();
+            setTimeout(() => location.reload(), 500);
         }
 
         function setUIMode(mode) {
@@ -1326,16 +1301,23 @@
 
         function switchTab(tab) {
             const prevTab = currentTab;
-            activateTabOnly(tab);
-            if (tab === 'core') { closeTabModal(); return; }
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const activeBtns = document.querySelectorAll(`.tab-btn[onclick*="'${tab}'"]`);
+            activeBtns.forEach(b => b.classList.add('active'));
 
-            const content = document.getElementById('tab-modal-content');
+            const sidebar = document.getElementById('game-sidebar');
+            if (tab === 'core') {
+                if (sidebar) sidebar.classList.remove('panel-open');
+                return;
+            } else {
+                if (sidebar) sidebar.classList.add('panel-open');
+            }
+
+            const content = document.getElementById('tab-content');
             if (!content) return;
-            const prevScroll = content.scrollTop;
             content.style.opacity = '0';
             content.style.transform = 'translateY(10px)';
-
-            openTabModal(tab);
 
             setTimeout(() => {
                 content.innerHTML = '';
@@ -1346,7 +1328,6 @@
                 if(tab === 'quests') renderQuests(content);
                 if(tab === 'planets') renderPlanets(content);
 
-                content.scrollTop = prevScroll;
                 updateDynamicUI(); 
                 content.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
                 content.style.opacity = '1';
@@ -1354,47 +1335,6 @@
             }, 100);
 
             if (prevTab !== tab) maybeShowInterstitial();
-        }
-
-        function activateTabOnly(tab) {
-            currentTab = tab;
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            const activeBtns = document.querySelectorAll(`.tab-btn[onclick*="'${tab}'"]`);
-            activeBtns.forEach(b => b.classList.add('active'));
-        }
-
-        const TAB_META = {
-            build: { title: 'База', icon: 'fa-industry', color: 'text-mars-400' },
-            tech: { title: 'Наука', icon: 'fa-microchip', color: 'text-sci-400' },
-            crew: { title: 'Экипаж', icon: 'fa-users', color: 'text-prem-400' },
-            hq: { title: 'Штаб', icon: 'fa-satellite-dish', color: 'text-gold-400' },
-            quests: { title: 'Задания', icon: 'fa-list-check', color: 'text-green-400' },
-            planets: { title: 'Космос', icon: 'fa-earth-americas', color: 'text-blue-400' }
-        };
-
-        function openTabModal(tab) {
-            const meta = TAB_META[tab] || { title: tab, icon: 'fa-circle-info', color: 'text-white' };
-            const titleEl = document.getElementById('tab-modal-title');
-            if (titleEl) titleEl.innerHTML = `<i class="fa-solid ${meta.icon} ${meta.color}"></i> ${meta.title}`;
-            const win = document.getElementById('tab-modal-window');
-            const modal = document.getElementById('tab-modal');
-            if (!win || !modal) return;
-            win.classList.remove('modal-close');
-            win.classList.remove('modal-enter');
-            void win.offsetWidth;
-            win.classList.add('modal-enter');
-            modal.classList.remove('hidden');
-        }
-
-        function closeTabModal() {
-            const modal = document.getElementById('tab-modal');
-            const win = document.getElementById('tab-modal-window');
-            if (!modal || !win || modal.classList.contains('hidden')) return;
-            win.classList.add('modal-close');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-                win.classList.remove('modal-close');
-            }, 250);
         }
 
         function renderBuild(container) {
@@ -2062,6 +2002,7 @@
             
             playSFX('epic');
             saveGame();
+            if (ysdk && ysdk.player) { try { ysdk.player.setData({ save: JSON.stringify(state) }); } catch(e) {} }
             submitLeaderboard();
             
             const f = document.createElement('div');
@@ -2387,31 +2328,30 @@
             playSFX('skill');
 
             const rand = Math.random();
-        let type = 'min';
-        let amount = 0;
-        let icon = 'fa-gem text-mars-400';
-        let bgGlow = 'rgba(229,89,52,0.5)';
+            let type = 'min';
+            let amount = 0;
+            let icon = 'fa-gem text-mars-400';
+            let bgGlow = 'rgba(229,89,52,0.5)';
 
-        if (rand < 0.4) {
-            type = 'min';
-            amount = Math.max(1000, calc.rate.min * 1800); // 30 минут добычи минералов
-            icon = 'fa-gem text-mars-400';
-        } else if (rand < 0.8) {
-            type = 'sci';
-            amount = Math.max(100, calc.rate.sci * 1800); // 30 минут генерации науки
-            icon = 'fa-flask text-sci-400';
-            bgGlow = 'rgba(74,222,128,0.5)';
-        } else {
-            type = 'prm';
-            // Ограниченный и сбалансированный бонус кристаллов
-            amount = Math.floor(Math.min(75, 10 + (state.rebirth?.darkMatter || 0) * 0.5));
-            icon = 'fa-gem text-prem-400';
-            bgGlow = 'rgba(192,132,252,0.5)';
-        }
+            if (rand < 0.4) {
+                type = 'min';
+                amount = Math.max(1000, calc.rate.min * 1800);
+                icon = 'fa-gem text-mars-400';
+            } else if (rand < 0.8) {
+                type = 'sci';
+                amount = Math.max(100, calc.rate.sci * 1800);
+                icon = 'fa-flask text-sci-400';
+                bgGlow = 'rgba(74,222,128,0.5)';
+            } else {
+                type = 'prm';
+                amount = Math.floor(Math.min(75, 10 + (state.rebirth?.darkMatter || 0) * 0.5));
+                icon = 'fa-gem text-prem-400';
+                bgGlow = 'rgba(192,132,252,0.5)';
+            }
 
-        currentShuttleOffer = { type, amount };
+            currentShuttleOffer = { type, amount };
 
-        const modal = document.getElementById('generic-modal');
+            const modal = document.getElementById('generic-modal');
             const content = document.getElementById('modal-content');
             
             content.innerHTML = `
@@ -2432,7 +2372,7 @@
                     </div>
                     
                     <div class="flex gap-4">
-                        <button onclick="closeModal()" class="flex-1 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white py-4 rounded-xl font-bold transition-all border border-white/10 hover:border-white/20">Отклонить</button>
+                        <button onclick="declineShuttleOffer()" class="flex-1 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white py-4 rounded-xl font-bold transition-all border border-white/10 hover:border-white/20">Отклонить</button>
                         <button onclick="acceptShuttleOffer()" class="flex-[2] bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white py-4 rounded-xl font-bold transition-all shadow-[0_0_20px_rgba(34,197,94,0.4)] hover:shadow-[0_0_30px_rgba(34,197,94,0.6)] btn-shine flex justify-center items-center gap-2">
                             <i class="fa-solid fa-video"></i> Забрать груз
                         </button>
@@ -2440,6 +2380,11 @@
                 </div>
             `;
             modal.classList.remove('hidden');
+        }
+
+        function declineShuttleOffer() {
+            currentShuttleOffer = null;
+            closeModal();
         }
 
         function acceptShuttleOffer() {
@@ -2806,9 +2751,9 @@
             recalculate();
             
             if ((document.body.clientWidth < 768 && state.uiMode === 'auto') || state.uiMode === 'mobile') {
-                activateTabOnly('core');
+                switchTab('core');
             } else {
-                activateTabOnly('build');
+                switchTab('build');
             }
             
             requestAnimationFrame(gameLoop);
