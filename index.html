@@ -271,7 +271,10 @@
                 <button onclick="toggleSound()" class="mr-1 text-gray-400 hover:text-white transition-all hover:scale-110 w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)]" title="Звук: включить/выключить игровые эффекты">
                     <i id="sound-icon" class="fa-solid fa-volume-high"></i>
                 </button>
-                <button onclick="openAdsMarket()" class="mr-1 text-white hover:text-green-300 transition-all hover:scale-110 w-9 h-9 rounded-lg bg-gradient-to-br from-green-600/50 to-green-800/50 flex items-center justify-center border border-green-400/50 shadow-[0_0_15px_rgba(34,197,94,0.4)] animate-pulse" title="Маркет бонусов: награды за просмотр рекламы">
+                <button id="income-buff-btn" onclick="activateIncomeBuffRewarded()" class="mr-1 text-white hover:text-green-300 transition-all hover:scale-105 min-w-9 h-9 px-2 rounded-lg bg-gradient-to-br from-green-600/50 to-green-800/50 flex items-center justify-center gap-1 border border-green-400/50 shadow-[0_0_15px_rgba(34,197,94,0.4)]" title="x2 доход на 15 минут за rewarded">
+                    <i class="fa-solid fa-bolt"></i><span id="income-buff-label" class="text-[9px] font-orbitron font-black">x2 15м</span>
+                </button>
+                <button onclick="openAdsMarket()" class="mr-1 text-white hover:text-green-300 transition-all hover:scale-110 w-9 h-9 rounded-lg bg-gradient-to-br from-green-600/50 to-green-800/50 flex items-center justify-center border border-green-400/50 shadow-[0_0_15px_rgba(34,197,94,0.4)]" title="Маркет бонусов: награды за просмотр рекламы">
                     <i class="fa-solid fa-tv"></i>
                 </button>
                 <!-- STAGE 5: достижения открываются из шапки; бейдж обновляется без перестройки DOM. -->
@@ -496,6 +499,15 @@
                 ]),
                 rewards: Object.freeze({ crystals: Object.freeze([5, 8, 12]), incomeSeconds: Object.freeze([300, 600, 900]), mineralFloor: Object.freeze([500, 1500, 5000]) })
             }),
+            // STAGE 7: все SDK technical IDs, лимиты, wall-time и throttles централизованы.
+            yandex: Object.freeze({
+                initTimeoutMs: 2500, cloudDebounceMs: 2000, cloudMinIntervalMs: 10000,
+                leaderboardThrottleMs: 5 * 60 * 1000, leaderboardMaxScore: 2147483647,
+                leaderboards: Object.freeze({ anomalyCores: 'anomaly_cores', totalMined: 'total_mined' }),
+                incomeBuffMs: 15 * 60 * 1000, backgroundAdAfterMs: 5 * 60 * 1000,
+                interstitialCooldownMs: 3 * 60 * 1000, devRewardDelayMs: 250,
+                wheelRewardedDailyLimit: 3, wheelRewardedCooldownMs: 30 * 60 * 1000
+            }),
             // STAGE 6: события используют только активное видимое время и не сохраняются между сессиями.
             randomEvents: Object.freeze({
                 minIntervalSeconds: 10 * 60,
@@ -663,7 +675,8 @@
         ];
 
         // STAGE 5: версия добавляет достижения и стабильные ежедневные задания.
-        const SAVE_VERSION = 5;
+        // STAGE 7: wall-time buffs/cloud metadata and ad/session policy migration.
+        const SAVE_VERSION = 6;
         const DEFAULT_SKILLS = Object.freeze({ strike: 0, freeze: 0, swarm: 0, coolant: 0, overdrive: 0, timewarp: 0 });
         const DEFAULT_SKILLS_UNLOCKED = Object.freeze({ strike: true, freeze: false, swarm: false, coolant: false, overdrive: false, timewarp: false });
 
@@ -691,6 +704,9 @@
             planet: 'mars',
             unlockedPlanets: { mars: true },
             uiMode: 'auto',
+            // STAGE 7: persistent wall-time/ad/analytics state; session-only flags stay outside the save.
+            monetization: { incomeBuffEndAt: 0, wheelRewardedDate: null, wheelRewardedCount: 0, wheelRewardedLastAt: 0 },
+            sdkMeta: { updatedAt: 0, firstPrestigeSent: false, analytics: {}, lastLeaderboardAt: 0 },
             casino: { slotsPity: 0, slotsLastWins: [], crashHistory: [], wheelLastFree: 0, wheelSpins: 0, visited: false, lastGame: 'slots', stats: { spins: 0, bestCrash: 0, biggestWin: 0, wagered: 0, won: 0 } }
         };
         
@@ -704,133 +720,192 @@
         let sfx = {};
         let audioReady = false;
 
-        /* ================= YANDEX GAMES SDK ================= */
+        /* ================= YANDEX GAMES SDK · STAGE 7 ================= */
         let ysdk = null;
+        let yPlayer = null;
         let cloudSaveTimer = null;
+        let lastCloudWriteAt = 0;
+        let sdkInitPromise = null;
+        let adInFlight = false;
+        let interstitialInFlight = false;
+        let hiddenAt = 0;
+        let firstSession = true;
+        let lastInterstitialAt = 0;
 
-        function initYandexSDK() {
-            if (typeof YaGames === 'undefined') { console.log('[YSDK] SDK не найден (локальный/тестовый режим)'); return; }
-            YaGames.init().then(sdk => {
-                ysdk = sdk;
-                try {
-                    if (ysdk.features && ysdk.features.LoadingAPI) ysdk.features.LoadingAPI.ready();
-                    if (ysdk.gameplayStart) ysdk.gameplayStart();
-                } catch(e) {}
-                loadCloudSave();
-                submitLeaderboard();
-            }).catch(e => console.warn('[YSDK] init error', e));
+        const sdkLog = (label, error) => {
+            if (error) console.debug('[YSDK]', label, error && error.message ? error.message : error);
+            else console.debug('[YSDK]', label);
+        };
+
+        function gameplayMarker(active) {
+            try {
+                const api = ysdk && ysdk.features && ysdk.features.GameplayAPI;
+                const method = active ? api?.start : api?.stop;
+                if (typeof method === 'function') method.call(api);
+            } catch (error) { sdkLog('GameplayAPI marker skipped', error); }
         }
 
-        function loadCloudSave() {
-            if (!ysdk || !ysdk.player) return;
+        function deepMergeSave(older, authoritative) {
+            if (!older || typeof older !== 'object' || Array.isArray(older)) return authoritative;
+            if (!authoritative || typeof authoritative !== 'object' || Array.isArray(authoritative)) return authoritative;
+            const result = { ...older };
+            Object.keys(authoritative).forEach(key => {
+                result[key] = deepMergeSave(older[key], authoritative[key]);
+            });
+            return result;
+        }
+
+        function parseSaveBlob(blob) {
             try {
-                ysdk.player.getData(['save']).then(data => {
-                    if (!data || !data.save) return;
-                    const cloud = JSON.parse(data.save);
-                    if (!storageOk) {
-                        try { localStorage.setItem('marsMagnateSave', data.save); location.reload(); } catch(e) {}
-                        return;
-                    }
-                    const local = localStorage.getItem('marsMagnateSave');
-                    if (!local) {
-                        localStorage.setItem('marsMagnateSave', data.save);
-                        location.reload();
-                        return;
-                    }
-                    const loc = JSON.parse(local);
-                    const cloudScore = (cloud.stats && cloud.stats.totalLifetime) || 0;
-                    const localScore = (loc.stats && loc.stats.totalLifetime) || 0;
-                    if (cloudScore > localScore) {
-                        localStorage.setItem('marsMagnateSave', data.save);
-                        location.reload();
-                    }
-                }).catch(() => {});
-            } catch(e) {}
+                const value = typeof blob === 'string' ? JSON.parse(blob) : blob;
+                return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
+            } catch (error) { sdkLog('invalid save ignored', error); return null; }
+        }
+
+        async function initYandexSDK() {
+            if (sdkInitPromise) return sdkInitPromise;
+            sdkInitPromise = (async () => {
+                if (typeof YaGames === 'undefined' || typeof YaGames.init !== 'function') {
+                    sdkLog('local fallback mode');
+                    return null;
+                }
+                try {
+                    const init = Promise.resolve(YaGames.init());
+                    const timeout = new Promise(resolve => setTimeout(() => resolve(null), BALANCE.yandex.initTimeoutMs));
+                    ysdk = await Promise.race([init, timeout]);
+                    if (!ysdk) { sdkLog('init timeout; game continues locally'); return null; }
+                    try { yPlayer = await ysdk.getPlayer(); } catch (error) { sdkLog('player unavailable', error); }
+                    try { ysdk.features?.LoadingAPI?.ready(); } catch (error) { sdkLog('LoadingAPI.ready skipped', error); }
+                    if (!document.hidden) gameplayMarker(true);
+                    return ysdk;
+                } catch (error) {
+                    sdkLog('init failed; game continues locally', error);
+                    ysdk = null;
+                    return null;
+                }
+            })();
+            return sdkInitPromise;
+        }
+
+        async function bootstrapPersistence() {
+            let local = null;
+            if (storageOk) {
+                try { local = parseSaveBlob(localStorage.getItem('marsMagnateSave')); } catch (error) { sdkLog('local read failed', error); }
+            }
+            await initYandexSDK();
+            let cloud = null;
+            if (yPlayer && typeof yPlayer.getData === 'function') {
+                try {
+                    const data = await yPlayer.getData(['save']);
+                    cloud = parseSaveBlob(data && data.save);
+                } catch (error) { sdkLog('cloud read failed; local retained', error); }
+            }
+            if (!cloud) return;
+            const localTs = Number(local?.sdkMeta?.updatedAt || local?.offline?.lastSavedAt || local?.lastTick || 0);
+            const cloudTs = Number(cloud?.sdkMeta?.updatedAt || cloud?.offline?.lastSavedAt || cloud?.lastTick || 0);
+            const authoritative = cloudTs > localTs ? cloud : local;
+            const older = cloudTs > localTs ? local : cloud;
+            const merged = deepMergeSave(older || {}, authoritative || {});
+            if (storageOk) {
+                try { localStorage.setItem('marsMagnateSave', JSON.stringify(merged)); } catch (error) { sdkLog('merged local write failed', error); }
+            }
         }
 
         function queueCloudSave() {
-            if (!ysdk || !ysdk.player) return;
+            if (!yPlayer || typeof yPlayer.setData !== 'function') return;
             clearTimeout(cloudSaveTimer);
-            cloudSaveTimer = setTimeout(() => {
-                try { ysdk.player.setData({ save: JSON.stringify(state) }); } catch(e) {}
-            }, 1500);
+            const wait = Math.max(BALANCE.yandex.cloudDebounceMs, BALANCE.yandex.cloudMinIntervalMs - (Date.now() - lastCloudWriteAt));
+            cloudSaveTimer = setTimeout(async () => {
+                try {
+                    lastCloudWriteAt = Date.now();
+                    await yPlayer.setData({ save: JSON.stringify(state) }, false);
+                } catch (error) { sdkLog('cloud write failed', error); }
+            }, wait);
         }
 
-        function showRewardedVideo(callback) {
+        function analyticsEvent(name, payload = {}) {
+            try { console.debug('[Analytics]', name, payload); } catch (error) {}
+        }
+        window.trackTutorialDone = () => analyticsEvent('tutorial_done');
+
+        function showRewardedVideo(callback, placement = 'generic') {
             let completed = false;
             const finish = success => {
                 if (completed) return;
                 completed = true;
-                callback(success);
+                adInFlight = false;
+                gameplayMarker(!document.hidden);
+                try { callback(!!success); } catch (error) { sdkLog('reward callback failed', error); }
             };
-            if (!ysdk || !ysdk.adv) { finish(true); return; }
+            if (adInFlight) { finish(false); return; }
+            adInFlight = true;
+            if (!ysdk || !ysdk.adv || typeof ysdk.adv.showRewardedVideo !== 'function') {
+                setTimeout(() => { analyticsEvent('ad_watched', { placement, fallback: true }); finish(true); }, BALANCE.yandex.devRewardDelayMs);
+                return;
+            }
             let rewarded = false;
+            gameplayMarker(false);
             try {
-                ysdk.adv.showRewardedVideo({
-                    callbacks: {
-                        onOpen: () => { if (ysdk.gameplayStop) ysdk.gameplayStop(); },
-                        onRewarded: () => { rewarded = true; },
-                        onClose: () => {
-                            if (ysdk.gameplayStart) ysdk.gameplayStart();
-                            finish(rewarded);
-                        },
-                        onError: () => { if (ysdk.gameplayStart) ysdk.gameplayStart(); finish(false); }
-                    }
-                });
-            } catch(e) { finish(true); }
+                ysdk.adv.showRewardedVideo({ callbacks: {
+                    onOpen: () => gameplayMarker(false),
+                    onRewarded: () => { rewarded = true; },
+                    onClose: () => {
+                        if (rewarded) analyticsEvent('ad_watched', { placement });
+                        finish(rewarded);
+                    },
+                    onError: error => { sdkLog('rewarded failed', error); finish(false); }
+                }});
+            } catch (error) { sdkLog('rewarded exception', error); finish(false); }
         }
 
-        let lastInterstitialAt = Date.now();
-        function maybeShowInterstitial() {
-            if (!ysdk || !ysdk.adv) return;
-            if (Date.now() - lastInterstitialAt < 180000) return;
-            lastInterstitialAt = Date.now();
-            try {
-                ysdk.adv.showFullscreenAdv({
-                    callbacks: {
-                        onOpen: () => { if (ysdk.gameplayStop) ysdk.gameplayStop(); },
-                        onClose: () => { if (ysdk.gameplayStart) ysdk.gameplayStart(); },
-                        onError: () => { if (ysdk.gameplayStart) ysdk.gameplayStart(); }
-                    }
-                });
-            } catch(e) {}
+        function modalBlocksInterstitial() {
+            const modal = document.getElementById('generic-modal');
+            return !!(modal && !modal.classList.contains('hidden')) || !!state.offline?.pending || !!state.daily?.pending;
         }
 
-        function submitLeaderboard() {
-            if (!ysdk) return;
+        function maybeShowInterstitial(backgroundMs = 0) {
+            const now = Date.now();
+            if (firstSession || backgroundMs < BALANCE.yandex.backgroundAdAfterMs || modalBlocksInterstitial()) return;
+            if (!ysdk?.adv || interstitialInFlight || adInFlight || now - lastInterstitialAt < BALANCE.yandex.interstitialCooldownMs) return;
+            interstitialInFlight = true;
+            lastInterstitialAt = now;
+            gameplayMarker(false);
+            const finish = () => { interstitialInFlight = false; gameplayMarker(!document.hidden); };
             try {
-                ysdk.getLeaderboards().then(lb => {
-                    lb.setLeaderboardScore('top_minerals', Math.floor(state.stats.totalLifetime || state.stats.totalMin || 0));
-                }).catch(() => {});
-            } catch(e) {}
+                ysdk.adv.showFullscreenAdv({ callbacks: {
+                    onOpen: () => gameplayMarker(false),
+                    onClose: finish,
+                    onError: error => { sdkLog('fullscreen failed', error); finish(); }
+                }});
+            } catch (error) { sdkLog('fullscreen exception', error); finish(); }
+        }
+
+        function leaderboardScore(value) {
+            return Math.max(0, Math.min(BALANCE.yandex.leaderboardMaxScore, Math.floor(Number(value) || 0)));
+        }
+
+        async function submitLeaderboard(force = false) {
+            const now = Date.now();
+            state.sdkMeta = state.sdkMeta || {};
+            if (!force && now - Number(state.sdkMeta.lastLeaderboardAt || 0) < BALANCE.yandex.leaderboardThrottleMs) return;
+            const api = ysdk && ysdk.leaderboards;
+            if (!api || typeof api.setScore !== 'function') return;
+            state.sdkMeta.lastLeaderboardAt = now;
+            const scores = [
+                [BALANCE.yandex.leaderboards.anomalyCores, state.prestige?.cores],
+                [BALANCE.yandex.leaderboards.totalMined, state.stats?.totalLifetime]
+            ];
+            for (const [name, value] of scores) {
+                try {
+                    if (typeof ysdk.isAvailableMethod === 'function' && !(await ysdk.isAvailableMethod('leaderboards.setScore'))) return;
+                    await api.setScore(name, leaderboardScore(value));
+                } catch (error) { sdkLog('leaderboard submit skipped: ' + name, error); }
+            }
         }
 
         function loadLeaderboard(containerEl) {
             if (!containerEl) return;
-            if (!ysdk) { containerEl.style.display = 'none'; return; }
-            try {
-                ysdk.getLeaderboards().then(lb => {
-                    lb.getLeaderboardEntries('top_minerals', { quantityTop: 10, includeUser: true }).then(entries => {
-                        const rows = (entries && entries.entries) || [];
-                        if (!rows.length) {
-                            containerEl.innerHTML = '<div class="text-center text-gray-500 text-sm py-4">Пока пусто. Станьте первым магнатом!</div>';
-                            return;
-                        }
-                        const meId = ysdk.player && ysdk.player.id ? ysdk.player.id.uniqueID : null;
-                        let html = rows.map((e, i) => {
-                            const name = (e.player && e.player.publicName) || 'Игрок';
-                            const score = e.score != null ? formatNum(e.score) : '0';
-                            const isMe = e.player && meId && e.player.uniqueID === meId;
-                            const medal = i === 0 ? 'fa-trophy text-gold-400' : (i === 1 ? 'fa-medal text-gray-300' : (i === 2 ? 'fa-medal text-amber-700' : 'fa-user text-gray-600'));
-                            return `<div class="flex items-center justify-between px-3 py-2 rounded-lg bg-black/40 border border-white/5 ${isMe ? 'border-mars-500/60 bg-mars-900/30' : ''}">
-                                <div class="flex items-center gap-3 min-w-0"><i class="fa-solid ${medal} w-5 text-center shrink-0"></i><span class="text-sm font-bold truncate max-w-[180px] ${isMe ? 'text-mars-300' : 'text-white'}">${i+1}. ${name}</span></div>
-                                <span class="text-xs font-orbitron font-bold ${isMe ? 'text-mars-300' : 'text-gray-300'}">${score}</span>
-                            </div>`;
-                        }).join('');
-                        containerEl.innerHTML = html;
-                    }).catch(() => {});
-                }).catch(() => {});
-            } catch(e) {}
+            containerEl.style.display = 'none';
         }
 
         async function initAudio() {
@@ -931,7 +1006,12 @@
                     const dc = defaults.casino;
                     state.casino = { ...dc, ...(parsed.casino || {}), stats: { ...dc.stats, ...((parsed.casino && parsed.casino.stats) || {}) } };
                     if(!Array.isArray(state.casino.crashHistory)) state.casino.crashHistory = [];
-                    if(parsed.adBuffTimer) adBuffTimer = parsed.adBuffTimer;
+                    // STAGE 7: migrate legacy remaining-seconds buff to a bounded wall-time endAt.
+                    state.monetization = { ...defaults.monetization, ...(parsed.monetization || {}) };
+                    if (!state.monetization.incomeBuffEndAt && Number(parsed.adBuffTimer) > 0) {
+                        state.monetization.incomeBuffEndAt = Date.now() + Math.min(Number(parsed.adBuffTimer) * 1000, BALANCE.yandex.incomeBuffMs);
+                    }
+                    state.sdkMeta = { ...defaults.sdkMeta, ...(parsed.sdkMeta || {}), analytics: { ...defaults.sdkMeta.analytics, ...((parsed.sdkMeta && parsed.sdkMeta.analytics) || {}) } };
                     
                     displayState.res.min = state.res.min;
                     displayState.res.sci = state.res.sci;
@@ -955,7 +1035,9 @@
         function saveGame() {
             const now = Date.now();
             state.lastTick = now;
-            state.adBuffTimer = adBuffTimer;
+            state.sdkMeta = state.sdkMeta || {};
+            state.sdkMeta.updatedAt = now;
+            delete state.adBuffTimer;
             state.offline = state.offline || { lastSavedAt: now, incomeSnapshot: { min: 0, sci: 0 }, pending: null };
             state.offline.lastSavedAt = now;
             // STAGE 6: сессионный income-бафф не попадает в offline snapshot и не становится постоянным после reload.
@@ -1059,9 +1141,11 @@
             modal.classList.remove('hidden');
         }
 
-        function resetGame() {
+        async function resetGame() {
             localStorage.removeItem('marsMagnateSave');
-            if (ysdk && ysdk.player) { try { ysdk.player.setData({ save: '' }); } catch(e) {} }
+            if (yPlayer && typeof yPlayer.setData === 'function') {
+                try { await yPlayer.setData({ save: '' }, true); } catch (error) { sdkLog('cloud reset failed', error); }
+            }
             setTimeout(() => location.reload(), 500);
         }
 
@@ -1077,7 +1161,24 @@
         let calc = { rate: {min: 0, sci: 0}, clickPower: 1, maxHeat: 100, marketRate: 0.01 };
         let heat = 0, isOverheated = false, combo = BALANCE.combo.min, comboTimer = 0, marketPhase = 0;
         let skillActive = {};
-        let adBuffTimer = 0;
+        // STAGE 7: persistent wall-time income buff.
+        function incomeBuffActive() { return Number(state.monetization?.incomeBuffEndAt || 0) > Date.now(); }
+        function updateIncomeBuffUI() {
+            const button = document.getElementById('income-buff-btn');
+            const label = document.getElementById('income-buff-label');
+            const remaining = Math.max(0, Number(state.monetization?.incomeBuffEndAt || 0) - Date.now());
+            if (button) button.disabled = remaining > 0;
+            if (label) label.textContent = remaining > 0 ? 'x2 ' + Math.ceil(remaining / 60000) + 'м' : 'x2 15м';
+        }
+        function activateIncomeBuffRewarded() {
+            if (incomeBuffActive()) return;
+            showRewardedVideo(success => {
+                if (!success || incomeBuffActive()) { if (!success) showToast('Реклама не досмотрена — бафф не начислен.'); return; }
+                state.monetization.incomeBuffEndAt = Date.now() + BALANCE.yandex.incomeBuffMs;
+                recalculate(); saveGame(); updateIncomeBuffUI();
+                showToast('x2 доход активирован на 15 минут');
+            }, 'income_buff');
+        }
 
         // STAGE 6: события намеренно сессионные; active-time не попадает в save и не идёт в offline reward.
         const randomEventState = { nextIn: 0, offer: null, offerRemaining: 0, active: null, activeRemaining: 0, uiAccumulator: 0 };
@@ -1268,7 +1369,7 @@
             mult.sci *= (1 + crewSciBonus);
             mult.cost = Math.max(0.1, 1 - crewCostDiscount);
 
-            if (adBuffTimer > 0) {
+            if (incomeBuffActive()) {
                 mult.min *= 2;
                 mult.sci *= 2;
             }
@@ -2471,10 +2572,22 @@
         }
         function casinoWheelAd() {
             if (_wheelSpin) return;
+            const today = localDateKey();
+            if (state.monetization.wheelRewardedDate !== today) {
+                state.monetization.wheelRewardedDate = today;
+                state.monetization.wheelRewardedCount = 0;
+                state.monetization.wheelRewardedLastAt = 0;
+            }
+            const remaining = BALANCE.yandex.wheelRewardedCooldownMs - (Date.now() - Number(state.monetization.wheelRewardedLastAt || 0));
+            if (state.monetization.wheelRewardedCount >= BALANCE.yandex.wheelRewardedDailyLimit) { showToast('Лимит rewarded-спинов на сегодня исчерпан'); return; }
+            if (remaining > 0) { showToast('Следующий rewarded-спин через ' + casinoFmtTime(remaining)); return; }
             showRewardedVideo(success => {
-                if (success) casinoWheelDoSpin();
-                else showToast('Реклама не досмотрена — спин не начислен.');
-            });
+                if (!success || _wheelSpin) { if (!success) showToast('Реклама не досмотрена — спин не начислен.'); return; }
+                state.monetization.wheelRewardedCount++;
+                state.monetization.wheelRewardedLastAt = Date.now();
+                saveGame();
+                casinoWheelDoSpin();
+            }, 'wheel_spin');
         }
         function casinoWheelDoSpin() {
             if (_wheelSpin) return;
@@ -2549,7 +2662,7 @@
                     break;
                 }
                 case 'buff': {
-                    adBuffTimer += seg.sec; recalculate();
+                    state.monetization.incomeBuffEndAt = Math.max(Date.now(), Number(state.monetization.incomeBuffEndAt || 0)) + seg.sec * 1000; recalculate(); updateIncomeBuffUI();
                     casinoFloat(host, 'Бафф x2 · ' + Math.round(seg.sec / 60) + ' мин', '#4ade80');
                     casinoSFX('bigwin');
                     if (res) res.textContent = 'Турбо x2 на ' + Math.round(seg.sec / 60) + ' мин';
@@ -2739,6 +2852,10 @@
             state.prestige.cores = (state.prestige.cores || 0) + formulaAward + adAward;
             state.prestige.formulaCores = (state.prestige.formulaCores || 0) + formulaAward;
             state.prestige.count = (state.prestige.count || 0) + 1;
+            if (!state.sdkMeta.firstPrestigeSent) {
+                state.sdkMeta.firstPrestigeSent = true;
+                analyticsEvent('first_prestige', { cores: formulaAward + adAward });
+            }
             state.prestige.adCoreReady = false;
             state.res.min = 0;
             state.res.sci = 0;
@@ -4457,9 +4574,11 @@
             }
         }
 
-        window.onload = () => {
+        window.onload = async () => {
             document.body.addEventListener('pointerdown', initAudio, { once: true });
 
+            // STAGE 7: cloud/local reconciliation completes before migration and offline calculation.
+            await bootstrapPersistence();
             loadGame(); 
             init3D();
             updatePlanetVisuals();
@@ -4493,24 +4612,31 @@
             requestAnimationFrame(animateCanvas);
             lastFrame = performance.now();
 
-            initYandexSDK();
+            submitLeaderboard();
+            updateIncomeBuffUI();
+            // First page lifetime is never eligible for interstitial; later background returns are.
+            setTimeout(() => { firstSession = false; }, BALANCE.yandex.backgroundAdAfterMs);
         };
 
         document.addEventListener('visibilitychange', () => {
             if (document.hidden) {
+                hiddenAt = Date.now();
                 saveGame();
-                if (ysdk && ysdk.gameplayStop) { try { ysdk.gameplayStop(); } catch(e) {} }
+                gameplayMarker(false);
             } else {
+                const backgroundMs = hiddenAt ? Date.now() - hiddenAt : 0;
                 prepareOfflineReward(Date.now());
                 prepareDailyReward(Date.now());
-                // STAGE 5: resume проверяет локальный rollover.
                 prepareDailyTasks(Date.now());
                 updateStage5UI();
                 scheduleStartupModal();
                 lastFrame = performance.now();
-                if (ysdk && ysdk.gameplayStart) { try { ysdk.gameplayStart(); } catch(e) {} }
+                gameplayMarker(true);
+                setTimeout(() => maybeShowInterstitial(backgroundMs), BALANCE.yandex.devRewardDelayMs);
             }
         });
+        window.addEventListener('blur', () => gameplayMarker(false));
+        window.addEventListener('focus', () => { if (!document.hidden && !adInFlight && !interstitialInFlight) gameplayMarker(true); });
         window.addEventListener('pagehide', () => saveGame());
         window.addEventListener('beforeunload', () => saveGame());
     </script>
