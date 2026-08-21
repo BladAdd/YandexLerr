@@ -183,6 +183,19 @@
         .skill-ready-pulse { animation: skillReadyPulse 2s ease-in-out infinite; }
         .skill-hint-hover { display: none; }
         .skill-btn-wrapper:hover .skill-hint-hover { display: inline-block; }
+
+        /* ================= CASINO «ФОБОС» ================= */
+        @keyframes casinoShakeKf { 0%,100% { transform: translate(0,0); } 15% { transform: translate(-6px,3px); } 30% { transform: translate(5px,-4px); } 45% { transform: translate(-4px,-3px); } 60% { transform: translate(4px,3px); } 75% { transform: translate(-2px,2px); } }
+        .casino-shake { animation: casinoShakeKf 0.5s linear; }
+        .casino-float-txt { position: absolute; left: 50%; top: 30%; transform: translateX(-50%); font-family: 'Orbitron'; font-weight: 900; pointer-events: none; z-index: 30; animation: casinoFloatUp 1.4s ease-out forwards; text-shadow: 0 0 12px currentColor; }
+        @keyframes casinoFloatUp { 0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.6); } 15% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.15); } 100% { opacity: 0; transform: translateX(-50%) translateY(-70px) scale(1); } }
+        .casino-ptc { position: absolute; width: 8px; height: 8px; border-radius: 9999px; pointer-events: none; z-index: 25; }
+        .reel-window { height: 96px; overflow: hidden; position: relative; border-radius: 12px; background: rgba(0,0,0,0.55); box-shadow: inset 0 6px 14px rgba(0,0,0,0.7), inset 0 -6px 14px rgba(0,0,0,0.7); }
+        .reel-strip { will-change: transform; }
+        .reel-cell { height: 96px; display: flex; align-items: center; justify-content: center; }
+        .reel-line { position: absolute; left: 0; right: 0; top: 50%; height: 96px; margin-top: -48px; border-top: 1px solid rgba(251,191,36,0.35); border-bottom: 1px solid rgba(251,191,36,0.35); pointer-events: none; z-index: 10; box-shadow: 0 0 18px rgba(251,191,36,0.15) inset; }
+        .chip-btn { transition: all 0.15s ease; }
+        .crash-flash-green, .crash-flash-red { position: absolute; inset: 0; pointer-events: none; z-index: 20; opacity: 0.55; transition: opacity 0.6s ease; }
         
         .btn-shine { position: relative; overflow: hidden; }
         .btn-shine::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%); transform: skewX(-20deg); animation: shimmer 3s infinite; pointer-events: none; }
@@ -374,6 +387,9 @@
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('planets')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-18 12 12)"/></svg><span id="tab-badge-planets" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> КОСМОС
                     </button>
+                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('casino')">
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.75" cy="8.75" r="1.4" fill="currentColor" stroke="none"/><circle cx="15.25" cy="15.25" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg><span id="tab-badge-casino" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> КАЗИНО
+                    </button>
                 </nav>
 
                 <aside id="game-sidebar" class="interactive">
@@ -531,7 +547,8 @@
             soundEnabled: true,
             planet: 'mars',
             unlockedPlanets: { mars: true },
-            uiMode: 'auto'
+            uiMode: 'auto',
+            casino: { slotsPity: 0, crashHistory: [], wheelLastFree: 0, wheelSpins: 0, visited: false, lastGame: 'slots', stats: { spins: 0, bestCrash: 0, biggestWin: 0, wagered: 0, won: 0 } }
         };
         
         let displayState = { res: { min: 0, sci: 0, prm: 50 }, darkMatter: 0 };
@@ -726,6 +743,7 @@
                     if(parsed.unlockedPlanets) state.unlockedPlanets = {...state.unlockedPlanets, ...parsed.unlockedPlanets};
                     if(parsed.uiMode) state.uiMode = parsed.uiMode;
                     if(parsed.adBuffTimer) adBuffTimer = parsed.adBuffTimer;
+                    if(parsed.casino) { const dc = state.casino; state.casino = { ...dc, ...parsed.casino, stats: { ...dc.stats, ...(parsed.casino.stats || {}) } }; if(!Array.isArray(state.casino.crashHistory)) state.casino.crashHistory = []; }
                     
                     displayState.res.min = state.res.min;
                     displayState.res.sci = state.res.sci;
@@ -1048,6 +1066,7 @@
             updateSkillsUI();
             updateComboUI();
             updateTabBadges();
+            casinoTick(delta);
             updateDynamicUI(); 
             updateQuestsUI();
             
@@ -1373,6 +1392,815 @@
             saveGame();
         }
 
+        /* ================================================== */
+        /* ================= КАЗИНО «ФОБОС» ================== */
+        /* ================================================== */
+        // CASINO STAGE 1: конфиг, точка входа, слоты
+        const CASINO_CONFIG = {
+            unlockLifetimeMin: 100000,
+            slots: {
+                symbols: [
+                    { id: 'min',   name: 'Минерал',  weight: 30, mult3: 2,   mult2: 1   },
+                    { id: 'rover', name: 'Ровер',    weight: 25, mult3: 3,   mult2: 1.4 },
+                    { id: 'drill', name: 'Бур',      weight: 18, mult3: 5,   mult2: 1.8 },
+                    { id: 'ship',  name: 'Шаттл',    weight: 12, mult3: 10,  mult2: 2.5 },
+                    { id: 'cryst', name: 'Кристалл', weight: 10, mult3: 25,  mult2: 1   },
+                    { id: 'ares',  name: 'АРЕС',     weight: 5,  mult3: 100, mult2: 8   }
+                ],
+                chips: [1000, 10000, 100000, 1000000],
+                reelTimes: [1400, 1700, 2000],
+                nearMissExtraMs: 1400,
+                cellPx: 96,
+                pityLimit: 5
+            },
+            // CASINO STAGE 2: краш
+            crash: { growth: 0.15, edge: 0.93, maxMult: 100, historyMax: 12 },
+            // CASINO STAGE 3: колесо
+            wheel: {
+                freeCdMs: 4 * 3600 * 1000,
+                adCostPrm: 50,
+                spinMs: 3600,
+                segments: [
+                    { id: 'min30m', label: 'Мин 30м',   weight: 20, type: 'min',     sec: 1800,  color: '#E55934' },
+                    { id: 'dust1',  label: 'Пыль',      weight: 8,  type: 'none',                 color: '#374151' },
+                    { id: 'prm10',  label: '+10 Крист', weight: 6,  type: 'prm', amount: 10,    color: '#a855f7' },
+                    { id: 'min2h',  label: 'Мин 2ч',    weight: 8,  type: 'min',     sec: 7200,  color: '#C7411E' },
+                    { id: 'buff5',  label: 'Бафф x2',   weight: 6,  type: 'buff',    sec: 300,   color: '#22c55e' },
+                    { id: 'dust2',  label: 'Пыль',      weight: 8,  type: 'none',                 color: '#4b5563' },
+                    { id: 'sci30m', label: 'Наука 30м', weight: 8,  type: 'sci',     sec: 1800,  color: '#16a34a' },
+                    { id: 'min10m', label: 'Мин 10м',   weight: 10, type: 'min',     sec: 600,   color: '#FF7B59' },
+                    { id: 'prm50',  label: '+50 Крист', weight: 3,  type: 'prm', amount: 50,    color: '#c084fc' },
+                    { id: 'dust3',  label: 'Пыль',      weight: 9,  type: 'none',                 color: '#374151' },
+                    { id: 'buff15', label: 'Бафф x2',   weight: 4,  type: 'buff',    sec: 900,   color: '#4ade80' },
+                    { id: 'jack',   label: 'ДЖЕКПОТ',   weight: 1,  type: 'jackpot', sec: 86400, color: '#fbbf24' }
+                ]
+            }
+        };
+
+        function casinoUnlocked() {
+            if (window.CASINO_DEBUG === true) return true;
+            return (state.stats.totalLifetime || 0) >= CASINO_CONFIG.unlockLifetimeMin;
+        }
+
+        // Аналитический RTP слотов: тройки (w^3*mult3) + пары (3*w^2*(1-w)*mult2)
+        function casinoSlotsRTP() {
+            let triples = 0, pairs = 0;
+            CASINO_CONFIG.slots.symbols.forEach(s => {
+                const w = s.weight / 100;
+                triples += Math.pow(w, 3) * s.mult3;
+                pairs += 3 * w * w * (1 - w) * s.mult2;
+            });
+            return { rtp: triples + pairs, triples, pairs };
+        }
+
+        const CASINO_SYM_SVG = {
+            min:   '<svg class="{CLS}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h10l4 6-9 12L3 9z"/><path d="M3 9h18"/><path d="M12 21 8.5 9 12 3l3.5 6"/></svg>',
+            rover: '<svg class="{CLS}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="10" width="13" height="6" rx="1.5"/><circle cx="7" cy="19" r="1.8"/><circle cx="13" cy="19" r="1.8"/><path d="M16.5 12.5h4"/><path d="M19 12V7.5"/><circle cx="19" cy="5.5" r="1.6"/></svg>',
+            drill: '<svg class="{CLS}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2.5" width="8" height="5" rx="1"/><path d="M9 7.5v4l3 10 3-10v-4"/><path d="M9 11.5h6"/></svg>',
+            ship:  '<svg class="{CLS}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2c3 2.5 4 6 4 9l2.5 3.5-3.2-.6c-.6 1.6-1.6 3.1-3.3 4.6-1.7-1.5-2.7-3-3.3-4.6l-3.2.6L8 11c0-3 1-6.5 4-9z"/><circle cx="12" cy="9" r="1.8"/><path d="M10 21.5l2-3 2 3"/></svg>',
+            cryst: '<svg class="{CLS}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l5.5 7L12 22 6.5 9z"/><path d="M6.5 9h11"/><path d="M12 22 9.5 9 12 2l2.5 7"/></svg>',
+            ares:  '<svg class="{CLS}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 17 12 6l4 11"/><path d="M9.7 13.5h4.6"/></svg>'
+        };
+        function casinoSymIcon(id, cls) { return CASINO_SYM_SVG[id].replace('{CLS}', cls || 'w-11 h-11 md:w-12 md:h-12'); }
+
+        let _casinoCtx = null;
+        function casinoAudio() {
+            if (!state.soundEnabled) return null;
+            try {
+                if (!_casinoCtx) _casinoCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (_casinoCtx.state === 'suspended') _casinoCtx.resume();
+                return _casinoCtx;
+            } catch (e) { return null; }
+        }
+        function casinoTone(freq, dur, type, vol, delay, freqEnd) {
+            const c = casinoAudio(); if (!c) return;
+            try {
+                const t0 = c.currentTime + (delay || 0);
+                const o = c.createOscillator(), g = c.createGain();
+                o.type = type || 'square';
+                o.frequency.setValueAtTime(freq, t0);
+                if (freqEnd) o.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd), t0 + dur);
+                g.gain.setValueAtTime(vol || 0.06, t0);
+                g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+                o.connect(g); g.connect(c.destination);
+                o.start(t0); o.stop(t0 + dur + 0.02);
+            } catch (e) {}
+        }
+        function casinoNoise(dur, vol, delay) {
+            const c = casinoAudio(); if (!c) return;
+            try {
+                const len = Math.floor(c.sampleRate * dur);
+                const buf = c.createBuffer(1, len, c.sampleRate);
+                const d = buf.getChannelData(0);
+                for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+                const src = c.createBufferSource(); src.buffer = buf;
+                const f = c.createBiquadFilter(); f.type = 'lowpass';
+                const t0 = c.currentTime + (delay || 0);
+                f.frequency.setValueAtTime(1200, t0);
+                f.frequency.exponentialRampToValueAtTime(80, t0 + dur);
+                const g = c.createGain();
+                g.gain.setValueAtTime(vol || 0.25, t0);
+                g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+                src.connect(f); f.connect(g); g.connect(c.destination);
+                src.start(t0);
+            } catch (e) {}
+        }
+        function casinoSFX(kind) {
+            switch (kind) {
+                case 'tick': casinoTone(880, 0.04, 'square', 0.04); break;
+                case 'stop': casinoTone(520, 0.07, 'square', 0.07); break;
+                case 'near': casinoTone(700, 0.05, 'square', 0.05); break;
+                case 'win': [523, 659, 784].forEach((f, i) => casinoTone(f, 0.16, 'triangle', 0.09, i * 0.09)); break;
+                case 'bigwin': [523, 659, 784, 1046, 784, 1046].forEach((f, i) => casinoTone(f, 0.18, 'triangle', 0.1, i * 0.1)); break;
+                case 'jackpot': [392, 523, 659, 784, 1046, 1318].forEach((f, i) => { casinoTone(f, 0.25, 'triangle', 0.11, i * 0.12); casinoTone(f / 2, 0.25, 'sawtooth', 0.05, i * 0.12); }); casinoNoise(0.7, 0.12, 0.72); break;
+                case 'boom': casinoNoise(0.8, 0.35); casinoTone(160, 0.5, 'sawtooth', 0.15, 0, 40); break;
+                case 'launch': casinoTone(120, 0.6, 'sawtooth', 0.08, 0, 480); break;
+                case 'cash': [784, 1175].forEach((f, i) => casinoTone(f, 0.12, 'triangle', 0.09, i * 0.07)); break;
+                case 'lose': casinoTone(220, 0.2, 'sawtooth', 0.05, 0, 110); break;
+            }
+        }
+
+        function casinoGainMin(n) { state.res.min += n; addLifetimeMin(n); updateHeaderUI(); }
+        function casinoSpendMin(n) { if (state.res.min < n) return false; state.res.min -= n; updateHeaderUI(); return true; }
+        function casinoFloat(host, text, color) {
+            if (!host) return;
+            const el = document.createElement('div');
+            el.className = 'casino-float-txt text-xl md:text-2xl';
+            el.style.color = color || '#fbbf24';
+            el.textContent = text;
+            host.appendChild(el);
+            setTimeout(() => el.remove(), 1500);
+        }
+        function casinoBurst(host, colors, count) {
+            if (!host) return;
+            for (let i = 0; i < (count || 16); i++) {
+                const p = document.createElement('div');
+                p.className = 'casino-ptc';
+                const col = colors[i % colors.length];
+                p.style.background = col;
+                p.style.boxShadow = '0 0 8px ' + col;
+                p.style.left = '50%'; p.style.top = '42%';
+                host.appendChild(p);
+                const ang = Math.random() * Math.PI * 2, dist = 60 + Math.random() * 130;
+                const dx = Math.cos(ang) * dist, dy = Math.sin(ang) * dist;
+                p.animate([
+                    { transform: 'translate(-50%,-50%) scale(1)', opacity: 1 },
+                    { transform: 'translate(calc(-50% + ' + dx + 'px), calc(-50% + ' + dy + 'px)) scale(0.2)', opacity: 0 }
+                ], { duration: 700 + Math.random() * 500, easing: 'cubic-bezier(.1,.7,.3,1)' }).onfinish = () => p.remove();
+            }
+        }
+        function casinoShake() {
+            const el = document.getElementById('game-sidebar') || document.body;
+            el.classList.remove('casino-shake'); void el.offsetWidth; el.classList.add('casino-shake');
+        }
+        function casinoWeightedPick(arr) {
+            let total = 0; arr.forEach(x => total += x.weight);
+            let r = Math.random() * total;
+            for (const x of arr) { r -= x.weight; if (r < 0) return x; }
+            return arr[arr.length - 1];
+        }
+        function casinoFmtTime(ms) {
+            const s = Math.ceil(ms / 1000);
+            const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60;
+            return (h > 0 ? h + 'ч ' : '') + (m > 0 || h > 0 ? m + 'м ' : '') + ss + 'с';
+        }
+
+        let _casinoSub = 'slots';
+        let _slotsBetIdx = 1, _slotsBetCustom = 0, _crashBetIdx = 1, _crashBetCustom = 0;
+        let _slotSpinning = false, _nmTimer = null;
+
+        function renderCasino(content) {
+            if (!casinoUnlocked()) {
+                const need = CASINO_CONFIG.unlockLifetimeMin, have = state.stats.totalLifetime || 0;
+                const pct = Math.min(100, (have / need) * 100);
+                content.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-center py-16 px-4">
+                        <div class="w-20 h-20 rounded-2xl bg-black/60 border border-gold-500/30 flex items-center justify-center mb-6 shadow-[0_0_30px_rgba(251,191,36,0.15)]">
+                            <svg class="w-10 h-10 text-gold-400/80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                        </div>
+                        <h3 class="font-orbitron font-black text-xl text-white tracking-wider">КАЗИНО «ФОБОС»</h3>
+                        <p class="text-xs text-gray-400 mt-2 max-w-xs leading-relaxed">Развлекательный модуль на спутнике Марса закрыт. Нужна суммарная добыча: ${formatNum(need)} минералов.</p>
+                        <div class="w-full max-w-xs mt-6">
+                            <div class="flex justify-between text-[10px] text-gray-500 font-orbitron tracking-widest mb-1.5"><span>ДОБЫТО</span><span>${Math.floor(pct)}%</span></div>
+                            <div class="h-[7px] rounded-full bg-white/15 overflow-hidden border border-white/10"><div class="h-full bg-mars-500 rounded-full transition-all duration-300" style="width:${pct}%"></div></div>
+                        </div>
+                    </div>`;
+                return;
+            }
+            if (!state.casino.visited) { state.casino.visited = true; saveGame(); updateTabBadges(); }
+            _casinoSub = state.casino.lastGame || 'slots';
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div class="glass-card p-4 rounded-2xl border border-gold-500/30 flex items-center gap-4">
+                        <div class="w-12 h-12 shrink-0 rounded-xl bg-gradient-to-br from-gold-600 to-yellow-900 flex items-center justify-center border border-gold-400/50 shadow-[0_0_20px_rgba(251,191,36,0.4)]">
+                            <svg class="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.75" cy="8.75" r="1.4" fill="currentColor" stroke="none"/><circle cx="15.25" cy="15.25" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg>
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="font-orbitron font-black text-lg text-white leading-none tracking-wider">КАЗИНО «ФОБОС»</h3>
+                            <div class="text-[10px] text-gold-400 uppercase tracking-widest mt-1 font-bold">Развлекательный модуль · только игровая валюта</div>
+                        </div>
+                    </div>
+                    <div id="casino-stats"></div>
+                    <div class="flex gap-2">
+                        <button id="cas-tab-slots" onclick="casinoSetSub('slots')" class="${casinoSubBtnCls(_casinoSub === 'slots')}">СЛОТЫ</button>
+                        <button id="cas-tab-crash" onclick="casinoSetSub('crash')" class="${casinoSubBtnCls(_casinoSub === 'crash')}">КРАШ</button>
+                        <button id="cas-tab-wheel" onclick="casinoSetSub('wheel')" class="${casinoSubBtnCls(_casinoSub === 'wheel')}">КОЛЕСО</button>
+                    </div>
+                    <div id="casino-game"></div>
+                </div>`;
+            renderCasinoStats();
+            casinoSetSub(_casinoSub);
+        }
+
+        function casinoSubBtnCls(active) {
+            return 'flex-1 py-2.5 rounded-xl text-[11px] font-orbitron font-bold tracking-widest uppercase transition-all border ' +
+                (active ? 'bg-gold-500/15 border-gold-400/60 text-gold-300 shadow-[0_0_14px_rgba(251,191,36,0.2)]' : 'bg-white/[0.03] border-white/10 text-gray-500 hover:text-gray-300');
+        }
+
+        function casinoSetSub(name) {
+            if (_slotSpinning || (_crash && !_crash.done)) return;
+            _casinoSub = name; state.casino.lastGame = name;
+            ['slots', 'crash', 'wheel'].forEach(n => {
+                const b = document.getElementById('cas-tab-' + n);
+                if (b) b.className = casinoSubBtnCls(n === name);
+            });
+            const game = document.getElementById('casino-game'); if (!game) return;
+            if (name === 'slots') renderCasinoSlots(game);
+            if (name === 'crash') renderCasinoCrash(game);
+            if (name === 'wheel') renderCasinoWheel(game);
+        }
+
+        // CASINO STAGE 3: статистика игрока
+        function casinoStatCell(label, val, cls) {
+            return '<div class="bg-black/40 border border-white/[0.08] rounded-xl px-2 py-2.5 text-center min-w-0">' +
+                '<div class="text-[8px] text-gray-500 font-orbitron tracking-widest uppercase truncate">' + label + '</div>' +
+                '<div class="text-sm font-bold font-orbitron ' + (cls || 'text-white') + ' mt-1 leading-none truncate">' + val + '</div></div>';
+        }
+        function renderCasinoStats() {
+            const el = document.getElementById('casino-stats'); if (!el) return;
+            const st = state.casino.stats;
+            const profit = (st.won || 0) - (st.wagered || 0);
+            el.innerHTML = '<div class="grid grid-cols-4 gap-2">' +
+                casinoStatCell('Спинов', formatNum(st.spins || 0)) +
+                casinoStatCell('Лучший краш', st.bestCrash ? st.bestCrash.toFixed(2) + 'x' : '—') +
+                casinoStatCell('Макс выигрыш', formatNum(st.biggestWin || 0)) +
+                casinoStatCell('Профит', (profit >= 0 ? '+' : '') + formatNum(profit), profit >= 0 ? 'text-green-400' : 'text-red-400') +
+                '</div>';
+        }
+
+        function casinoBetChips(prefix) {
+            return '<div class="flex flex-wrap gap-2">' +
+                CASINO_CONFIG.slots.chips.map((v, i) => '<button id="' + prefix + '-chip-' + i + '" onclick="casinoPickBet(\'' + prefix + '\',' + i + ')" class="chip-btn flex-1 min-w-[64px] py-2.5 rounded-xl border text-xs font-orbitron font-bold">' + formatNum(v) + '</button>').join('') +
+                '<button id="' + prefix + '-chip-max" onclick="casinoPickBet(\'' + prefix + '\',\'max\')" class="chip-btn flex-1 min-w-[64px] py-2.5 rounded-xl border text-xs font-orbitron font-bold text-gold-300 border-gold-500/40 bg-gold-500/5">MAX</button>' +
+                '</div>' +
+                '<div class="text-center text-[11px] text-gray-400 mt-2">Ставка: <span id="' + prefix + '-bet-val" class="text-gold-300 font-bold font-orbitron"></span></div>';
+        }
+        function casinoBetValue(prefix) {
+            const idx = prefix === 'slots' ? _slotsBetIdx : _crashBetIdx;
+            if (idx === 'max') return prefix === 'slots' ? _slotsBetCustom : _crashBetCustom;
+            return CASINO_CONFIG.slots.chips[idx];
+        }
+        function casinoPickBet(prefix, i) {
+            if (prefix === 'slots' && _slotSpinning) return;
+            if (prefix === 'crash' && _crash && !_crash.done) return;
+            if (i === 'max') {
+                const val = Math.max(1000, Math.floor(state.res.min * 0.1));
+                if (prefix === 'slots') { _slotsBetIdx = 'max'; _slotsBetCustom = val; } else { _crashBetIdx = 'max'; _crashBetCustom = val; }
+            } else {
+                if (prefix === 'slots') _slotsBetIdx = i; else _crashBetIdx = i;
+            }
+            casinoSFX('tick');
+            casinoUpdateBetUI(prefix);
+        }
+        function casinoUpdateBetUI(prefix) {
+            const idx = prefix === 'slots' ? _slotsBetIdx : _crashBetIdx;
+            CASINO_CONFIG.slots.chips.forEach((v, i) => {
+                const b = document.getElementById(prefix + '-chip-' + i); if (!b) return;
+                const sel = idx === i, afford = state.res.min >= v;
+                b.className = 'chip-btn flex-1 min-w-[64px] py-2.5 rounded-xl border text-xs font-orbitron font-bold ' +
+                    (sel ? 'border-gold-400 bg-gold-500/20 text-gold-200 shadow-[0_0_12px_rgba(251,191,36,0.25)]'
+                        : afford ? 'border-white/15 bg-white/5 text-gray-300 hover:bg-white/10'
+                            : 'border-white/5 bg-transparent text-gray-600 cursor-not-allowed');
+            });
+            const mx = document.getElementById(prefix + '-chip-max');
+            if (mx) mx.className = 'chip-btn flex-1 min-w-[64px] py-2.5 rounded-xl border text-xs font-orbitron font-bold ' +
+                (idx === 'max' ? 'border-gold-400 bg-gold-500/20 text-gold-200' : 'text-gold-300 border-gold-500/40 bg-gold-500/5 hover:bg-gold-500/15');
+            const bv = document.getElementById(prefix + '-bet-val');
+            if (bv) bv.textContent = formatNum(casinoBetValue(prefix));
+            const act = document.getElementById(prefix === 'slots' ? 'slots-spin' : 'crash-start');
+            if (act) act.disabled = state.res.min < casinoBetValue(prefix) || (prefix === 'slots' && _slotSpinning) || (prefix === 'crash' && _crash && !_crash.done);
+        }
+
+        /* ---------- СЛОТЫ «РУДНЫЙ АВТОМАТ» ---------- */
+        function casinoReelCell(sym) {
+            const col = sym.id === 'ares' ? 'text-gold-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.7)]'
+                : sym.id === 'cryst' ? 'text-prem-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]'
+                    : 'text-gray-200';
+            return '<div class="reel-cell"><span class="' + col + '">' + casinoSymIcon(sym.id) + '</span></div>';
+        }
+        function casinoReelFiller() {
+            let h = '';
+            for (let i = 0; i < 22; i++) h += casinoReelCell(CASINO_CONFIG.slots.symbols[Math.floor(Math.random() * CASINO_CONFIG.slots.symbols.length)]);
+            return h;
+        }
+        function casinoEvalSlots(syms) {
+            const [a, b, c] = syms;
+            if (a.id === b.id && b.id === c.id) return { mult: a.mult3, sym: a };
+            if (a.id === b.id) return { mult: a.mult2, sym: a };
+            if (a.id === c.id) return { mult: a.mult2, sym: a };
+            if (b.id === c.id) return { mult: b.mult2, sym: b };
+            return null;
+        }
+        function renderCasinoSlots(host) {
+            host.innerHTML = `
+                <div class="glass-card p-4 md:p-5 rounded-2xl border border-gold-500/20 relative overflow-hidden" id="slots-host">
+                    <div class="flex justify-between items-center mb-4">
+                        <div class="font-orbitron font-black text-sm text-gold-300 tracking-widest uppercase">Рудный автомат</div>
+                        <div class="text-[10px] text-gray-500">Pity: <span id="slots-pity" class="text-gray-300 font-bold">${state.casino.slotsPity}/${CASINO_CONFIG.slots.pityLimit}</span></div>
+                    </div>
+                    <div class="relative grid grid-cols-3 gap-2 md:gap-3 px-1">
+                        <div class="reel-line"></div>
+                        <div class="reel-window"><div class="reel-strip" id="reel-0"></div></div>
+                        <div class="reel-window"><div class="reel-strip" id="reel-1"></div></div>
+                        <div class="reel-window"><div class="reel-strip" id="reel-2"></div></div>
+                    </div>
+                    <div id="slots-msg" class="text-center text-xs font-orbitron tracking-widest text-gray-500 h-5 mt-3 uppercase"></div>
+                    <div class="mt-3">${casinoBetChips('slots')}</div>
+                    <button id="slots-spin" onclick="casinoSpin()" class="w-full mt-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white py-4 rounded-xl font-orbitron font-black tracking-widest uppercase text-sm transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(34,197,94,0.35)] disabled:opacity-40 disabled:cursor-not-allowed disabled:saturate-50">Крутить</button>
+                    <details class="mt-4">
+                        <summary class="cursor-pointer text-[10px] font-orbitron tracking-widest text-gray-500 uppercase hover:text-gray-300 list-none">Таблица выплат ▾</summary>
+                        <div class="mt-2 grid grid-cols-2 gap-x-4 gap-y-0 text-[11px] text-gray-400">
+                            ${CASINO_CONFIG.slots.symbols.map(s => '<div class="flex justify-between border-b border-white/5 py-1"><span class="flex items-center gap-1.5"><span class="inline-flex w-4 h-4 text-gray-300">' + casinoSymIcon(s.id, 'w-3.5 h-3.5') + '</span>' + s.name + ' ×3</span><span class="font-bold text-gold-300">x' + s.mult3 + '</span></div>').join('')}
+                            ${CASINO_CONFIG.slots.symbols.map(s => '<div class="flex justify-between border-b border-white/5 py-1"><span class="truncate">Пара: ' + s.name + '</span><span class="font-bold text-gold-300">x' + s.mult2 + '</span></div>').join('')}
+                        </div>
+                    </details>
+                </div>`;
+            [0, 1, 2].forEach(i => {
+                const strip = document.getElementById('reel-' + i);
+                if (strip) { strip.style.transition = 'none'; strip.style.transform = 'translateY(0)'; strip.innerHTML = casinoReelFiller() + casinoReelCell(CASINO_CONFIG.slots.symbols[i]); }
+            });
+            casinoUpdateBetUI('slots');
+        }
+        function casinoAnimateReel(idx, finalSym, dur, onStop) {
+            const strip = document.getElementById('reel-' + idx);
+            if (!strip) { onStop(); return; }
+            strip.style.transition = 'none';
+            strip.style.transform = 'translateY(0)';
+            strip.innerHTML = casinoReelFiller() + casinoReelCell(finalSym);
+            void strip.offsetWidth;
+            strip.style.transition = 'transform ' + dur + 'ms cubic-bezier(0.12, 0.6, 0.15, 1)';
+            strip.style.transform = 'translateY(-' + (22 * CASINO_CONFIG.slots.cellPx) + 'px)';
+            setTimeout(onStop, dur);
+        }
+        function casinoSpin() {
+            if (_slotSpinning) return;
+            const bet = casinoBetValue('slots');
+            if (!casinoSpendMin(bet)) { showToast('Недостаточно минералов для ставки'); return; }
+            _slotSpinning = true;
+            const C = CASINO_CONFIG.slots, st = state.casino;
+            st.stats.spins++; st.stats.wagered += bet;
+            let syms = [casinoWeightedPick(C.symbols), casinoWeightedPick(C.symbols), casinoWeightedPick(C.symbols)];
+            let ev = casinoEvalSlots(syms);
+            if (window.CASINO_DEBUG === true && !ev) { do { syms = [casinoWeightedPick(C.symbols), casinoWeightedPick(C.symbols), casinoWeightedPick(C.symbols)]; } while (!casinoEvalSlots(syms)); ev = casinoEvalSlots(syms); }
+            else if (st.slotsPity >= C.pityLimit && !ev) { syms = [C.symbols[0], C.symbols[0], C.symbols[0]]; ev = casinoEvalSlots(syms); }
+            const nearMiss = !ev && syms[0].id === 'ares' && syms[1].id === 'ares';
+            const msg = document.getElementById('slots-msg');
+            if (msg) msg.textContent = '';
+            casinoUpdateBetUI('slots');
+            let stopped = 0;
+            const done = () => {
+                stopped++;
+                casinoSFX('stop');
+                if (stopped < 3) return;
+                if (_nmTimer) { clearTimeout(_nmTimer); _nmTimer = null; }
+                casinoSpinResult(bet, syms, ev);
+            };
+            syms.forEach((sym, i) => {
+                let dur = C.reelTimes[i];
+                if (nearMiss && i === 2) {
+                    dur += C.nearMissExtraMs;
+                    let gap = 220;
+                    const chain = () => { _nmTimer = setTimeout(() => { casinoSFX('near'); gap = Math.max(70, gap * 0.85); chain(); }, gap); };
+                    chain();
+                }
+                casinoAnimateReel(i, sym, dur, done);
+            });
+        }
+        function casinoSpinResult(bet, syms, ev) {
+            const st = state.casino;
+            const host = document.getElementById('slots-host');
+            const msg = document.getElementById('slots-msg');
+            if (ev) {
+                const payout = Math.floor(bet * ev.mult);
+                casinoGainMin(payout);
+                st.stats.won += payout;
+                if (payout > (st.stats.biggestWin || 0)) st.stats.biggestWin = payout;
+                st.slotsPity = 0;
+                const jackpot = ev.sym.id === 'ares';
+                casinoFloat(host, '+' + formatNum(payout), jackpot ? '#fde047' : '#fbbf24');
+                casinoBurst(host, jackpot ? ['#fbbf24', '#f59e0b', '#fde047', '#ffffff'] : ['#fbbf24', '#E55934', '#ffffff'], jackpot ? 28 : 14);
+                if (jackpot) {
+                    casinoShake(); casinoSFX('jackpot');
+                    showToast('ДЖЕКПОТ! Три АРЕС: +' + formatNum(payout) + ' минералов!');
+                    if (msg) { msg.textContent = 'ДЖЕКПОТ!!!'; msg.className = 'text-center text-xs font-orbitron tracking-widest text-gold-300 h-5 mt-3 uppercase animate-pulse'; }
+                } else {
+                    casinoSFX(ev.mult >= 10 ? 'bigwin' : 'win');
+                    if (msg) msg.textContent = 'ВЫИГРЫШ X' + ev.mult;
+                }
+            } else {
+                st.slotsPity++;
+                casinoSFX('lose');
+                if (msg) msg.textContent = st.slotsPity >= CASINO_CONFIG.slots.pityLimit ? 'Следующий спин — гарантированный выигрыш!' : 'Пусто...';
+            }
+            const pe = document.getElementById('slots-pity');
+            if (pe) pe.textContent = st.slotsPity + '/' + CASINO_CONFIG.slots.pityLimit;
+            _slotSpinning = false;
+            saveGame();
+            renderCasinoStats();
+            casinoUpdateBetUI('slots');
+        }
+
+        // CASINO STAGE 2: КРАШ «ЗАПУСК ШАТТЛА»
+        let _crash = null;
+        function renderCasinoCrash(host) {
+            host.innerHTML = `
+                <div class="glass-card p-4 md:p-5 rounded-2xl border border-cyan-500/20 relative overflow-hidden" id="crash-host">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="font-orbitron font-black text-sm text-cyan-300 tracking-widest uppercase">Запуск шаттла</div>
+                        <div class="text-[10px] text-gray-500">Забери ставку до взрыва</div>
+                    </div>
+                    <div class="relative rounded-xl overflow-hidden border border-white/10 bg-gradient-to-b from-[#0b1020] to-black">
+                        <canvas id="crash-canvas" width="800" height="340" class="w-full block"></canvas>
+                        <div id="crash-mult" class="absolute inset-0 flex items-center justify-center pointer-events-none font-orbitron font-black text-5xl text-white drop-shadow-[0_0_18px_rgba(255,255,255,0.45)]">1.00x</div>
+                        <div id="crash-status" class="absolute top-3 left-0 right-0 text-center font-orbitron tracking-[0.3em] text-sm uppercase opacity-0 transition-opacity duration-300 pointer-events-none"></div>
+                        <div id="crash-flash" class="crash-flash-green hidden"></div>
+                    </div>
+                    <div id="crash-history" class="flex gap-1.5 mt-3 overflow-hidden"></div>
+                    <div class="mt-3">${casinoBetChips('crash')}</div>
+                    <button id="crash-start" onclick="casinoCrashAction()" class="w-full mt-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white py-4 rounded-xl font-orbitron font-black tracking-widest uppercase text-sm transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(34,197,94,0.35)] disabled:opacity-40 disabled:cursor-not-allowed">Запуск</button>
+                </div>`;
+            casinoRenderCrashHistory();
+            casinoUpdateBetUI('crash');
+            casinoCrashDrawIdle();
+        }
+        function casinoCrashChipClass(v) {
+            return v >= 10 ? 'bg-gold-500/20 border-gold-400/60 text-gold-300'
+                : v >= 2 ? 'bg-mars-500/15 border-mars-400/50 text-mars-300'
+                    : 'bg-white/5 border-white/10 text-gray-500';
+        }
+        function casinoRenderCrashHistory() {
+            const el = document.getElementById('crash-history'); if (!el) return;
+            const h = state.casino.crashHistory || [];
+            el.innerHTML = h.length ? h.slice().reverse().map(v => '<span class="shrink-0 px-2.5 py-1 rounded-lg border text-[11px] font-orbitron font-bold ' + casinoCrashChipClass(v) + '">' + v.toFixed(2) + 'x</span>').join('') : '<span class="text-[11px] text-gray-600">История пуста</span>';
+        }
+        function casinoCrashPushHistory(v) {
+            const h = state.casino.crashHistory;
+            h.push(Math.round(v * 100) / 100);
+            while (h.length > CASINO_CONFIG.crash.historyMax) h.shift();
+            casinoRenderCrashHistory();
+        }
+        function casinoCrashDrawIdle() {
+            const cv = document.getElementById('crash-canvas'); if (!cv) return;
+            const ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+            ctx.clearRect(0, 0, W, H);
+            ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
+            for (let gx = 46; gx < W - 20; gx += 60) { ctx.beginPath(); ctx.moveTo(gx, 10); ctx.lineTo(gx, H - 40); ctx.stroke(); }
+            for (let gy = H - 40; gy > 20; gy -= 56) { ctx.beginPath(); ctx.moveTo(46, gy); ctx.lineTo(W - 30, gy); ctx.stroke(); }
+            ctx.font = '700 14px Orbitron, sans-serif'; ctx.textAlign = 'center';
+            ctx.fillStyle = 'rgba(156,163,175,0.5)';
+            ctx.fillText('ГОТОВ К ЗАПУСКУ', W / 2, H / 2);
+        }
+        function casinoCrashAction() {
+            if (_crash && !_crash.done) { casinoCrashCashout(); return; }
+            const bet = casinoBetValue('crash');
+            if (!casinoSpendMin(bet)) { showToast('Недостаточно минералов для ставки'); return; }
+            const U = Math.random();
+            let cp = Math.min(CASINO_CONFIG.crash.maxMult, Math.max(1.00, CASINO_CONFIG.crash.edge / U));
+            if (window.CASINO_DEBUG === true) cp = Math.max(cp, 10);
+            _crash = { bet, cp, t0: performance.now(), pts: [], trail: [], done: false, success: false, cashed: false, bustAnim: 0, t: 0, m: 1 };
+            state.casino.stats.spins++; state.casino.stats.wagered += bet;
+            const status = document.getElementById('crash-status');
+            if (status) status.style.opacity = '0';
+            casinoSFX('launch');
+            requestAnimationFrame(casinoCrashFrame);
+        }
+        function casinoCrashBust() {
+            const cr = _crash; if (!cr || cr.done) return;
+            cr.done = true; cr.success = false;
+            casinoCrashPushHistory(cr.cp);
+            if (!cr.cashed) {
+                casinoSFX('boom');
+                const flash = document.getElementById('crash-flash');
+                if (flash) { flash.style.background = 'radial-gradient(circle at 50% 60%, rgba(239,68,68,0.55), rgba(127,29,29,0.7))'; flash.classList.remove('hidden'); setTimeout(() => flash.classList.add('hidden'), 650); }
+                const status = document.getElementById('crash-status');
+                if (status) { status.textContent = 'УЛЕТЕЛ БЕЗ ТЕБЯ'; status.style.color = '#f87171'; status.style.opacity = '1'; }
+            }
+            casinoCrashFinishRound();
+        }
+        function casinoCrashCashout() {
+            const cr = _crash; if (!cr || cr.done) return;
+            const t = (performance.now() - cr.t0) / 1000;
+            const eff = Math.min(Math.pow(Math.E, CASINO_CONFIG.crash.growth * t), cr.cp);
+            const payout = Math.floor(cr.bet * eff);
+            cr.done = true; cr.success = true; cr.cashed = true;
+            cr.t = Math.log(eff) / CASINO_CONFIG.crash.growth;
+            casinoGainMin(payout);
+            const st = state.casino.stats;
+            st.won += payout;
+            if (payout > (st.biggestWin || 0)) st.biggestWin = payout;
+            if (eff > (st.bestCrash || 0)) st.bestCrash = eff;
+            casinoCrashPushHistory(cr.cp);
+            casinoSFX('cash');
+            const flash = document.getElementById('crash-flash');
+            if (flash) { flash.style.background = 'radial-gradient(circle at 50% 60%, rgba(74,222,128,0.45), rgba(20,83,45,0.6))'; flash.classList.remove('hidden'); setTimeout(() => flash.classList.add('hidden'), 650); }
+            const status = document.getElementById('crash-status');
+            if (status) { status.textContent = 'ЗАБРАЛ НА ' + eff.toFixed(2) + 'X'; status.style.color = '#4ade80'; status.style.opacity = '1'; }
+            casinoFloat(document.getElementById('crash-host'), '+' + formatNum(payout), '#4ade80');
+            casinoCrashFinishRound();
+        }
+        function casinoCrashFinishRound() {
+            saveGame();
+            renderCasinoStats();
+            const btn = document.getElementById('crash-start');
+            if (btn) btn.textContent = 'Запуск';
+            casinoUpdateBetUI('crash');
+        }
+        function casinoDrawShuttle(ctx, x, y, ang, thrust) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(ang + Math.PI / 2);
+            if (thrust) {
+                const fl = 14 + Math.random() * 10;
+                const g = ctx.createLinearGradient(0, 14, 0, 14 + fl);
+                g.addColorStop(0, 'rgba(253,224,71,0.95)');
+                g.addColorStop(0.5, 'rgba(249,115,22,0.7)');
+                g.addColorStop(1, 'rgba(239,68,68,0)');
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.moveTo(-5, 14); ctx.lineTo(5, 14); ctx.lineTo(0, 14 + fl); ctx.closePath(); ctx.fill();
+            }
+            ctx.fillStyle = '#E55934';
+            ctx.beginPath(); ctx.moveTo(-8, 6); ctx.lineTo(-13, 15); ctx.lineTo(-6, 12); ctx.closePath(); ctx.fill();
+            ctx.beginPath(); ctx.moveTo(8, 6); ctx.lineTo(13, 15); ctx.lineTo(6, 12); ctx.closePath(); ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(0, -16);
+            ctx.quadraticCurveTo(9, -4, 8, 10);
+            ctx.lineTo(-8, 10);
+            ctx.quadraticCurveTo(-9, -4, 0, -16);
+            ctx.closePath();
+            ctx.fillStyle = '#e5e7eb'; ctx.fill();
+            ctx.lineWidth = 1.5; ctx.strokeStyle = '#9ca3af'; ctx.stroke();
+            ctx.beginPath(); ctx.arc(0, -3, 3.2, 0, Math.PI * 2);
+            ctx.fillStyle = '#22d3ee'; ctx.fill();
+            ctx.strokeStyle = '#0e7490'; ctx.stroke();
+            ctx.restore();
+        }
+        function casinoCrashFrame(now) {
+            const cr = _crash;
+            if (!cr) return;
+            const cv = document.getElementById('crash-canvas');
+            if (!cv) { _crash = null; return; }
+            const ctx = cv.getContext('2d');
+            const W = cv.width, H = cv.height, padL = 46, padB = 40, padT = 26, padR = 30;
+            if (!cr.done) {
+                cr.t = (now - cr.t0) / 1000;
+                cr.m = Math.pow(Math.E, CASINO_CONFIG.crash.growth * cr.t);
+                if (cr.m >= cr.cp) { cr.t = Math.log(cr.cp) / CASINO_CONFIG.crash.growth; cr.m = cr.cp; casinoCrashBust(); }
+            }
+            const m = Math.pow(Math.E, CASINO_CONFIG.crash.growth * (cr.t || 0));
+            const xf = Math.min(1, (cr.t || 0) / 16), yf = Math.max(0, Math.min(1, Math.log(m) / Math.log(30)));
+            const hx = padL + xf * (W - padL - padR), hy = H - padB - yf * (H - padB - padT);
+            if (!cr.done) {
+                cr.pts.push({ x: hx, y: hy });
+                if (cr.pts.length > 600) cr.pts.shift();
+                cr.trail.push({ x: hx, y: hy, life: 1 });
+            }
+            for (let i = cr.trail.length - 1; i >= 0; i--) { const p = cr.trail[i]; p.life -= 0.03; p.y -= 0.6; if (p.life <= 0) cr.trail.splice(i, 1); }
+            ctx.clearRect(0, 0, W, H);
+            ctx.strokeStyle = 'rgba(255,255,255,0.05)'; ctx.lineWidth = 1;
+            for (let gx = padL; gx < W - 20; gx += 60) { ctx.beginPath(); ctx.moveTo(gx, 10); ctx.lineTo(gx, H - padB); ctx.stroke(); }
+            for (let gy = H - padB; gy > 20; gy -= 56) { ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(W - padR, gy); ctx.stroke(); }
+            if (cr.pts.length > 1) {
+                ctx.beginPath();
+                ctx.moveTo(cr.pts[0].x, cr.pts[0].y);
+                for (const p of cr.pts) ctx.lineTo(p.x, p.y);
+                ctx.strokeStyle = cr.done && !cr.success ? 'rgba(239,68,68,0.9)' : 'rgba(34,211,238,0.9)';
+                ctx.lineWidth = 3;
+                ctx.shadowColor = cr.done && !cr.success ? 'rgba(239,68,68,0.6)' : 'rgba(34,211,238,0.6)';
+                ctx.shadowBlur = 12;
+                ctx.stroke();
+                ctx.shadowBlur = 0;
+            }
+            for (const p of cr.trail) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 2 + p.life * 4, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(251,' + Math.floor(140 + p.life * 80) + ',40,' + (p.life * 0.5).toFixed(3) + ')';
+                ctx.fill();
+            }
+            const n = cr.pts.length;
+            let ang = -Math.PI / 2;
+            if (n > 2) ang = Math.atan2(cr.pts[n - 1].y - cr.pts[n - 2].y, cr.pts[n - 1].x - cr.pts[n - 2].x);
+            let sx = hx, sy = hy;
+            if (cr.done) {
+                const k = (cr.bustAnim || 0) / 1000;
+                sx += k * 260; sy -= k * 320;
+            }
+            casinoDrawShuttle(ctx, sx, sy, ang, !cr.done || cr.success);
+            const mv = document.getElementById('crash-mult');
+            if (mv) {
+                mv.textContent = m.toFixed(2) + 'x';
+                mv.style.color = cr.done ? (!cr.success ? '#f87171' : '#4ade80') : '#ffffff';
+            }
+            const btn = document.getElementById('crash-start');
+            if (btn && !cr.done) btn.textContent = 'Забрать на ' + formatNum(Math.floor(cr.bet * m)) + ' (' + m.toFixed(2) + 'x)';
+            if (cr.done) {
+                cr.bustAnim += 16;
+                if (cr.bustAnim < 1000) requestAnimationFrame(casinoCrashFrame);
+            } else requestAnimationFrame(casinoCrashFrame);
+        }
+
+        // CASINO STAGE 3: КОЛЕСО ФОРТУНЫ «КРАСНОЕ КОЛЕСО»
+        let _wheelRot = 0, _wheelSpin = null;
+        function renderCasinoWheel(host) {
+            host.innerHTML = `
+                <div class="glass-card p-4 md:p-5 rounded-2xl border border-gold-500/20 relative overflow-hidden" id="wheel-host">
+                    <div class="flex justify-between items-center mb-3">
+                        <div class="font-orbitron font-black text-sm text-gold-300 tracking-widest uppercase">Красное колесо</div>
+                        <div id="wheel-free-timer" class="text-[10px] text-gray-400 font-orbitron"></div>
+                    </div>
+                    <div class="relative mx-auto" style="max-width:420px">
+                        <canvas id="wheel-canvas" width="420" height="420" class="w-full block"></canvas>
+                        <div class="absolute left-1/2 -translate-x-1/2 -top-1 w-0 h-0 z-10" style="border-left:10px solid transparent;border-right:10px solid transparent;border-top:16px solid #fbbf24;filter:drop-shadow(0 0 6px rgba(251,191,36,0.8))"></div>
+                    </div>
+                    <div id="wheel-result" class="text-center text-xs font-orbitron tracking-widest text-gray-400 h-5 mt-2 uppercase"></div>
+                    <button id="wheel-free" onclick="casinoWheelSpinFree()" class="w-full mt-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white py-4 rounded-xl font-orbitron font-black tracking-widest uppercase text-sm transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(34,197,94,0.35)] disabled:opacity-40 disabled:cursor-not-allowed disabled:saturate-50">Бесплатный спин</button>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <button id="wheel-buy" onclick="casinoWheelBuy()" class="py-3 rounded-xl border border-prem-500/40 bg-prem-500/10 hover:bg-prem-500/20 text-prem-300 text-[11px] font-orbitron font-bold tracking-wider uppercase transition-all disabled:opacity-40 disabled:cursor-not-allowed">Спин за ${CASINO_CONFIG.wheel.adCostPrm} крист.</button>
+                        <button id="wheel-ad" onclick="casinoWheelAd()" class="py-3 rounded-xl border border-green-500/40 bg-green-500/10 hover:bg-green-500/20 text-green-300 text-[11px] font-orbitron font-bold tracking-wider uppercase transition-all disabled:opacity-40 disabled:cursor-not-allowed">Спин за рекламу</button>
+                    </div>
+                </div>`;
+            casinoWheelDraw(_wheelRot);
+            casinoWheelUpdateUI();
+        }
+        function casinoWheelFreeReady() {
+            if (window.CASINO_DEBUG === true) return true;
+            return Date.now() - (state.casino.wheelLastFree || 0) >= CASINO_CONFIG.wheel.freeCdMs;
+        }
+        function casinoWheelUpdateUI() {
+            const fb = document.getElementById('wheel-free');
+            if (fb) {
+                const ready = casinoWheelFreeReady();
+                fb.disabled = !ready || !!_wheelSpin;
+                if (ready) fb.textContent = 'Бесплатный спин';
+                else fb.textContent = 'Следующий через ' + casinoFmtTime(CASINO_CONFIG.wheel.freeCdMs - (Date.now() - (state.casino.wheelLastFree || 0)));
+            }
+            const bb = document.getElementById('wheel-buy');
+            if (bb) bb.disabled = state.res.prm < CASINO_CONFIG.wheel.adCostPrm || !!_wheelSpin;
+            const ab = document.getElementById('wheel-ad');
+            if (ab) ab.disabled = !!_wheelSpin;
+        }
+        function casinoWheelDraw(rot) {
+            const cv = document.getElementById('wheel-canvas'); if (!cv) return;
+            const ctx = cv.getContext('2d'), W = cv.width, cx = W / 2, cy = W / 2, R = W / 2 - 8;
+            const segs = CASINO_CONFIG.wheel.segments, n = segs.length, arc = Math.PI * 2 / n;
+            ctx.clearRect(0, 0, W, W);
+            for (let i = 0; i < n; i++) {
+                const a0 = rot + i * arc - Math.PI / 2 - arc / 2;
+                ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, a0, a0 + arc); ctx.closePath();
+                ctx.fillStyle = segs[i].color; ctx.fill();
+                ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.save();
+                ctx.translate(cx, cy); ctx.rotate(a0 + arc / 2);
+                ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+                ctx.fillStyle = 'rgba(255,255,255,0.92)';
+                ctx.font = 'bold 13px Orbitron, sans-serif';
+                ctx.fillText(segs[i].label, R - 14, 0);
+                ctx.restore();
+            }
+            ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
+            ctx.lineWidth = 6; ctx.strokeStyle = '#fbbf24'; ctx.stroke();
+            ctx.beginPath(); ctx.arc(cx, cy, 26, 0, Math.PI * 2);
+            ctx.fillStyle = '#111827'; ctx.fill();
+            ctx.lineWidth = 3; ctx.strokeStyle = '#fbbf24'; ctx.stroke();
+        }
+        function casinoWheelSpinFree() {
+            if (_wheelSpin || !casinoWheelFreeReady()) return;
+            state.casino.wheelLastFree = Date.now();
+            casinoWheelUpdateUI(); updateTabBadges();
+            casinoWheelDoSpin();
+        }
+        function casinoWheelBuy() {
+            if (_wheelSpin) return;
+            if (state.res.prm < CASINO_CONFIG.wheel.adCostPrm) { showToast('Недостаточно кристаллов'); return; }
+            state.res.prm -= CASINO_CONFIG.wheel.adCostPrm;
+            updateHeaderUI();
+            casinoWheelDoSpin();
+        }
+        function casinoWheelAd() {
+            if (_wheelSpin) return;
+            showRewardedVideo(success => {
+                if (success) casinoWheelDoSpin();
+                else showToast('Реклама не досмотрена — спин не начислен.');
+            });
+        }
+        function casinoWheelDoSpin() {
+            if (_wheelSpin) return;
+            const segs = CASINO_CONFIG.wheel.segments;
+            const seg = casinoWeightedPick(segs);
+            const arc = Math.PI * 2 / segs.length;
+            const k = segs.indexOf(seg);
+            const targetMod = ((-k * arc) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2);
+            const curMod = ((_wheelRot % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+            let delta = targetMod - curMod;
+            if (delta <= 0.0001) delta += Math.PI * 2;
+            const jitter = (Math.random() - 0.5) * arc * 0.6;
+            _wheelSpin = { t0: performance.now(), dur: CASINO_CONFIG.wheel.spinMs, from: _wheelRot, to: _wheelRot + Math.PI * 2 * 4 + delta + jitter, seg, lastIdx: -1 };
+            const res = document.getElementById('wheel-result');
+            if (res) res.textContent = '';
+            casinoWheelUpdateUI();
+            casinoSFX('launch');
+            requestAnimationFrame(casinoWheelFrame);
+        }
+        function casinoWheelFrame(now) {
+            const sp = _wheelSpin; if (!sp) return;
+            const cv = document.getElementById('wheel-canvas');
+            if (!cv) { _wheelSpin = null; return; }
+            let t = (now - sp.t0) / sp.dur;
+            if (t > 1) t = 1;
+            const ease = 1 - Math.pow(1 - t, 3);
+            _wheelRot = sp.from + (sp.to - sp.from) * ease;
+            casinoWheelDraw(_wheelRot);
+            const segs = CASINO_CONFIG.wheel.segments, arc = Math.PI * 2 / segs.length;
+            const under = Math.round((((-_wheelRot % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2)) / arc) % segs.length;
+            if (under !== sp.lastIdx) { sp.lastIdx = under; casinoSFX('tick'); }
+            if (t < 1) requestAnimationFrame(casinoWheelFrame);
+            else { const seg = sp.seg; _wheelSpin = null; casinoWheelReward(seg); }
+        }
+        function casinoWheelReward(seg) {
+            const host = document.getElementById('wheel-host');
+            const res = document.getElementById('wheel-result');
+            switch (seg.type) {
+                case 'none':
+                    casinoSFX('lose');
+                    if (res) res.textContent = 'Пыль Фобоса... пусто';
+                    break;
+                case 'min': {
+                    const amt = Math.max(500, Math.floor(calc.rate.min * seg.sec));
+                    casinoGainMin(amt);
+                    casinoFloat(host, '+' + formatNum(amt), '#fbbf24');
+                    casinoBurst(host, ['#fbbf24', '#E55934'], 14);
+                    casinoSFX('win');
+                    if (res) res.textContent = '+' + formatNum(amt) + ' минералов';
+                    break;
+                }
+                case 'sci': {
+                    const amt = Math.max(100, Math.floor(calc.rate.sci * seg.sec));
+                    state.res.sci += amt; updateHeaderUI();
+                    casinoFloat(host, '+' + formatNum(amt) + ' науки', '#4ade80');
+                    casinoSFX('win');
+                    if (res) res.textContent = '+' + formatNum(amt) + ' науки';
+                    break;
+                }
+                case 'prm': {
+                    state.res.prm += seg.amount; updateHeaderUI();
+                    casinoFloat(host, '+' + seg.amount + ' кристаллов', '#c084fc');
+                    casinoBurst(host, ['#c084fc', '#a855f7'], 18);
+                    casinoSFX('bigwin');
+                    if (res) res.textContent = '+' + seg.amount + ' кристаллов';
+                    break;
+                }
+                case 'buff': {
+                    adBuffTimer += seg.sec; recalculate();
+                    casinoFloat(host, 'Бафф x2 · ' + Math.round(seg.sec / 60) + ' мин', '#4ade80');
+                    casinoSFX('bigwin');
+                    if (res) res.textContent = 'Турбо x2 на ' + Math.round(seg.sec / 60) + ' мин';
+                    break;
+                }
+                case 'jackpot': {
+                    const amt = Math.max(5000, Math.floor(calc.rate.min * seg.sec));
+                    casinoGainMin(amt);
+                    casinoFloat(host, '+' + formatNum(amt), '#fde047');
+                    casinoBurst(host, ['#fbbf24', '#fde047', '#ffffff'], 30);
+                    casinoShake(); casinoSFX('jackpot');
+                    showToast('ДЖЕКПОТ КОЛЕСА: +' + formatNum(amt) + ' минералов!');
+                    if (res) res.textContent = 'Джекпот! +' + formatNum(amt);
+                    break;
+                }
+            }
+            saveGame();
+            renderCasinoStats();
+            casinoWheelUpdateUI();
+            updateTabBadges();
+        }
+
+        function casinoTick(delta) {
+            if (currentTab !== 'casino') return;
+            _casinoTickAcc += delta;
+            if (_casinoTickAcc < 0.5) return;
+            _casinoTickAcc = 0;
+            if (_casinoSub === 'wheel') casinoWheelUpdateUI();
+        }
+        let _casinoTickAcc = 0;
+
         function switchTab(tab) {
             const prevTab = currentTab;
             currentTab = tab;
@@ -1401,6 +2229,7 @@
                 if(tab === 'hq') renderHQ(content);
                 if(tab === 'quests') renderQuests(content);
                 if(tab === 'planets') renderPlanets(content);
+                if(tab === 'casino') renderCasino(content);
 
                 updateDynamicUI(); 
                 content.style.transition = 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)';
@@ -2258,10 +3087,15 @@
             });
             let p = false;
             for(const id in PLANETS) { if(!state.unlockedPlanets[id] && (state.rebirth?.darkMatter || 0) >= PLANETS[id].cost) { p = true; break; } }
-            const sig = `${b}|${t}|${c}|${p}`;
+            let cs = false;
+            if (typeof casinoUnlocked === 'function' && casinoUnlocked()) {
+                const freeWheel = (Date.now() - (state.casino.wheelLastFree || 0)) >= CASINO_CONFIG.wheel.freeCdMs;
+                cs = freeWheel || !state.casino.visited;
+            }
+            const sig = `${b}|${t}|${c}|${p}|${cs}`;
             if(sig === _badgeCache) return;
             _badgeCache = sig;
-            [['build', b], ['tech', t], ['crew', c], ['planets', p]].forEach(([n, v]) => {
+            [['build', b], ['tech', t], ['crew', c], ['planets', p], ['casino', cs]].forEach(([n, v]) => {
                 const el = document.getElementById(`tab-badge-${n}`);
                 if(el) el.classList.toggle('hidden', !v);
             });
