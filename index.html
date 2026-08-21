@@ -436,6 +436,19 @@
             }),
             // STAGE 3: честный оффлайн-доход по сохранённому snapshot.
             offline: Object.freeze({ thresholdSeconds: 60, maxSeconds: 8 * 60 * 60, rewardedMultiplier: 2 }),
+            // STAGE 4: 7-дневный календарь. Минералы равны доходу за указанный период; x2 удваивает только минералы и кристаллы.
+            daily: Object.freeze({
+                rewardedMultiplier: 2,
+                rewards: Object.freeze([
+                    Object.freeze({ incomeSeconds: 15 * 60, minFloor: 100, crystals: 5, cores: 0 }),
+                    Object.freeze({ incomeSeconds: 30 * 60, minFloor: 250, crystals: 8, cores: 0 }),
+                    Object.freeze({ incomeSeconds: 45 * 60, minFloor: 500, crystals: 12, cores: 0 }),
+                    Object.freeze({ incomeSeconds: 60 * 60, minFloor: 1000, crystals: 16, cores: 0 }),
+                    Object.freeze({ incomeSeconds: 90 * 60, minFloor: 2500, crystals: 22, cores: 0 }),
+                    Object.freeze({ incomeSeconds: 120 * 60, minFloor: 5000, crystals: 30, cores: 0 }),
+                    Object.freeze({ incomeSeconds: 180 * 60, minFloor: 10000, crystals: 50, cores: 1 })
+                ])
+            }),
             casino: Object.freeze({
                 unlockLifetimeMin: 100000,
                 slots: Object.freeze({
@@ -590,8 +603,8 @@
             { id: 'q14', name: 'Повелитель Времени', desc: 'Собрать 1 Квинтиллион мин.', type: 'min', target: 1e18, reward: {prm: 2500} }
         ];
 
-        // STAGE 3: версия добавляет timestamp, snapshot дохода и отложенную оффлайн-награду.
-        const SAVE_VERSION = 3;
+        // STAGE 4: версия добавляет календарь ежедневных наград и его отложенный claim.
+        const SAVE_VERSION = 4;
         const DEFAULT_SKILLS = Object.freeze({ strike: 0, freeze: 0, swarm: 0, coolant: 0, overdrive: 0, timewarp: 0 });
         const DEFAULT_SKILLS_UNLOCKED = Object.freeze({ strike: true, freeze: false, swarm: false, coolant: false, overdrive: false, timewarp: false });
 
@@ -605,6 +618,8 @@
             prestige: { cores: 0, count: 0, adCoreReady: false },
             // STAGE 3: snapshot относится именно к моменту lastSavedAt; pending переживает перезагрузку до выбора.
             offline: { lastSavedAt: Date.now(), incomeSnapshot: { min: 0, sci: 0 }, pending: null },
+            // STAGE 4: pending фиксирует конкретную сумму до claim; lastClaimDate блокирует повтор в тот же локальный день.
+            daily: { streak: 0, lastClaimDate: null, lastClaimDay: null, currentDay: 1, pending: null },
             skillsUnlocked: { ...DEFAULT_SKILLS_UNLOCKED },
             skillsVisible: true,
             questsCompleted: {},
@@ -619,6 +634,8 @@
         let displayState = { res: { min: 0, sci: 0, prm: 50 }, darkMatter: 0 };
         let legacyOfflineMigration = false;
         let offlineClaimLocked = false;
+        let dailyClaimLocked = false;
+        let startupModalTimer = null;
 
         let currentTab = 'build';
         let sfx = {};
@@ -812,6 +829,22 @@
                     state.stats = { ...defaults.stats, ...(parsed.stats || {}) };
                     state.rebirth = { ...defaults.rebirth, ...(parsed.rebirth || {}) };
                     state.prestige = { ...defaults.prestige, ...(parsed.prestige || {}) };
+                    // STAGE 4: принимаем прежние daily-поля как объект или legacy root-поля без потери прогресса.
+                    const parsedDaily = parsed.daily || parsed.dailyReward || {};
+                    const legacyDayValue = parsedDaily.lastClaimDay;
+                    const legacyLastClaimDate = parsedDaily.lastClaimDate
+                        || (typeof legacyDayValue === 'string' && (/^\d{4}-\d{2}-\d{2}$/.test(legacyDayValue) || legacyDayValue.includes('T')) ? legacyDayValue : null)
+                        || parsed.lastDailyClaimDate || parsed.dailyLastClaim || null;
+                    const legacyStreak = parsedDaily.streak ?? parsedDaily.day ?? parsed.dailyStreak ?? parsed.dailyDay ?? 0;
+                    state.daily = {
+                        ...defaults.daily,
+                        ...parsedDaily,
+                        streak: Math.max(0, Math.min(7, Number(legacyStreak) || 0)),
+                        lastClaimDate: normalizeDailyDateKey(legacyLastClaimDate),
+                        lastClaimDay: Number(parsedDaily.lastClaimDayNumber ?? parsedDaily.lastClaimDay ?? parsed.dailyLastClaimDay ?? legacyStreak) || null,
+                        currentDay: Math.max(1, Math.min(7, Number(parsedDaily.currentDay || legacyStreak || 1))),
+                        pending: parsedDaily.pending || null
+                    };
                     const parsedOffline = parsed.offline || {};
                     legacyOfflineMigration = !parsed.offline;
                     state.offline = {
@@ -2932,6 +2965,157 @@
         style.innerHTML = `@keyframes modalOut { 0% { opacity: 1; transform: scale(1) translateY(0); } 100% { opacity: 0; transform: scale(0.9) translateY(20px); } }`;
         document.head.appendChild(style);
 
+        // STAGE 4: локальные календарные ключи сравниваются через UTC-порядковый номер даты,
+        // поэтому переходы месяца/года не зависят от длины суток и смены часового пояса/DST.
+        function localDateKey(value = Date.now()) {
+            const date = value instanceof Date ? value : new Date(value);
+            if (!Number.isFinite(date.getTime())) return null;
+            const pad = number => String(number).padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+        }
+
+        function normalizeDailyDateKey(value) {
+            if (!value) return null;
+            if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+            const numeric = Number(value);
+            const date = Number.isFinite(numeric) && numeric > 0 ? new Date(numeric) : new Date(value);
+            return Number.isFinite(date.getTime()) ? localDateKey(date) : null;
+        }
+
+        function dailyOrdinal(dateKey) {
+            const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateKey || '');
+            return match ? Math.floor(Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])) / 86400000) : null;
+        }
+
+        function dailyDateDistance(fromKey, toKey) {
+            const from = dailyOrdinal(fromKey);
+            const to = dailyOrdinal(toKey);
+            return from === null || to === null ? null : to - from;
+        }
+
+        function prepareDailyReward(now = Date.now()) {
+            state.daily = state.daily || { streak: 0, lastClaimDate: null, lastClaimDay: null, currentDay: 1, pending: null };
+            const daily = state.daily;
+            const today = localDateKey(now);
+            daily.lastClaimDate = normalizeDailyDateKey(daily.lastClaimDate);
+            if (!today || daily.lastClaimDate === today) {
+                daily.pending = null;
+                return;
+            }
+            if (daily.pending && daily.pending.date === today) return;
+
+            const distance = dailyDateDistance(daily.lastClaimDate, today);
+            const day = distance === 1 ? ((Math.max(0, Number(daily.streak) || 0) % 7) + 1) : 1;
+            const config = BALANCE.daily.rewards[day - 1];
+            const mineralRate = Math.max(0, Number(calc.rate.min) || 0);
+            daily.currentDay = day;
+            daily.pending = {
+                date: today,
+                day,
+                reward: {
+                    min: Math.max(config.minFloor, mineralRate * config.incomeSeconds),
+                    prm: config.crystals,
+                    cores: config.cores
+                }
+            };
+            saveGame();
+        }
+
+        function scheduleStartupModal(delay = 0) {
+            clearTimeout(startupModalTimer);
+            startupModalTimer = setTimeout(() => {
+                const modal = document.getElementById('generic-modal');
+                if (state.offline && state.offline.pending) {
+                    if (modal.classList.contains('hidden')) showOfflineModal();
+                    return;
+                }
+                if (state.daily && state.daily.pending && modal.classList.contains('hidden')) showDailyRewardModal();
+            }, delay);
+        }
+
+        function showDailyRewardModal() {
+            const pending = state.daily && state.daily.pending;
+            if (!pending || pending.date !== localDateKey()) return;
+            const reward = pending.reward || { min: 0, prm: 0, cores: 0 };
+            const cards = BALANCE.daily.rewards.map((item, index) => {
+                const day = index + 1;
+                const received = day < pending.day;
+                const current = day === pending.day;
+                const status = received ? 'получено' : (current ? 'сегодня' : 'будущее');
+                const classes = received
+                    ? 'border-green-500/40 bg-green-950/30 text-green-300'
+                    : (current ? 'border-mars-400 bg-mars-900/40 text-mars-300 shadow-[0_0_18px_rgba(229,89,52,0.35)]' : 'border-white/10 bg-black/40 text-gray-500');
+                const coreLine = item.cores ? '<div class="text-[9px] text-gold-400 font-bold mt-1">+1 ядро</div>' : '';
+                return `<div class="rounded-xl border p-2 min-h-[82px] flex flex-col items-center justify-center ${classes}">
+                    <div class="font-orbitron text-[10px] font-black">ДЕНЬ ${day}</div>
+                    <div class="text-[9px] mt-1"><span class="ico ico-mineral"></span> ${Math.round(item.incomeSeconds / 60)}м</div>
+                    <div class="text-[9px]"><span class="ico ico-crystal"></span> +${item.crystals}</div>${coreLine}
+                    <div class="text-[8px] uppercase mt-1 opacity-70">${status}</div>
+                </div>`;
+            }).join('');
+            const coreReward = reward.cores ? `<div class="bg-black/60 border border-gold-500/40 rounded-xl p-3 text-gold-400"><i class="fa-solid fa-atom mr-1"></i> +${reward.cores} Аномальное ядро</div>` : '';
+            const modal = document.getElementById('generic-modal');
+            const content = document.getElementById('modal-content');
+            content.innerHTML = `
+                <div class="text-center">
+                    <div class="text-mars-400 text-xs font-orbitron font-black tracking-[0.25em] uppercase">Ежедневная награда</div>
+                    <h3 class="font-orbitron font-black text-2xl text-white mt-2">Серия: день ${pending.day} из 7</h3>
+                    <p class="text-xs text-gray-400 mt-2">Пропуск дня сбрасывает серию. Награда уже зафиксирована.</p>
+                    <div class="grid grid-cols-4 sm:grid-cols-7 gap-2 my-5">${cards}</div>
+                    <div class="grid ${reward.cores ? 'grid-cols-3' : 'grid-cols-2'} gap-2 mb-4 text-sm font-orbitron font-bold">
+                        <div class="bg-black/60 border border-mars-500/40 rounded-xl p-3 text-mars-300"><span class="ico ico-mineral"></span> +${formatNum(reward.min)}</div>
+                        <div class="bg-black/60 border border-prem-500/40 rounded-xl p-3 text-prem-300"><span class="ico ico-crystal"></span> +${formatNum(reward.prm)}</div>
+                        ${coreReward}
+                    </div>
+                    ${reward.cores ? '<div class="text-[10px] text-gold-400 mb-3">Правило дня 7: x2 удваивает минералы и кристаллы, но ядро остаётся одно.</div>' : ''}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button id="daily-claim-btn" onclick="claimDailyReward(false)" class="bg-gradient-to-r from-green-700 to-green-500 text-white py-4 rounded-xl font-bold font-orbitron uppercase tracking-wider btn-shine">Получить</button>
+                        <button id="daily-ad-btn" onclick="claimDailyReward(true)" class="bg-gradient-to-r from-green-600 to-emerald-400 text-white py-4 rounded-xl font-bold font-orbitron uppercase tracking-wider btn-shine"><i class="fa-solid fa-video mr-2"></i>x${BALANCE.daily.rewardedMultiplier} минералы и кристаллы</button>
+                    </div>
+                </div>`;
+            modal.classList.remove('hidden');
+        }
+
+        function claimDailyReward(withRewarded) {
+            const today = localDateKey();
+            const pending = state.daily && state.daily.pending;
+            if (dailyClaimLocked || !pending || pending.date !== today || state.daily.lastClaimDate === today) return;
+            dailyClaimLocked = true;
+            document.querySelectorAll('#daily-claim-btn, #daily-ad-btn').forEach(button => button.disabled = true);
+            let settled = false;
+            const finish = multiplier => {
+                if (settled) return;
+                settled = true;
+                const current = state.daily && state.daily.pending;
+                if (!current || current.date !== today || state.daily.lastClaimDate === today) return;
+                const reward = current.reward || { min: 0, prm: 0, cores: 0 };
+                state.daily.pending = null;
+                state.daily.streak = current.day;
+                state.daily.currentDay = current.day;
+                state.daily.lastClaimDay = current.day;
+                state.daily.lastClaimDate = today;
+                state.res.min += reward.min * multiplier;
+                state.res.prm += reward.prm * multiplier;
+                state.prestige.cores = (state.prestige.cores || 0) + reward.cores;
+                addLifetimeMin(reward.min * multiplier);
+                saveGame();
+                updateHeaderUI();
+                closeModal();
+                dailyClaimLocked = false;
+                showToast(`День ${current.day}: ежедневная награда x${multiplier} получена`);
+                playSFX('epic');
+            };
+            if (!withRewarded) { finish(1); return; }
+            showRewardedVideo(success => {
+                if (success) finish(BALANCE.daily.rewardedMultiplier);
+                else {
+                    dailyClaimLocked = false;
+                    document.querySelectorAll('#daily-claim-btn, #daily-ad-btn').forEach(button => button.disabled = false);
+                    showToast('Реклама не досмотрена. Награда не начислена.');
+                }
+            });
+        }
+
         // STAGE 3: одноразовая модалка; награда находится в save до атомарного claim.
         function formatOfflineDuration(seconds) {
             const total = Math.max(0, Math.floor(seconds));
@@ -2985,6 +3169,7 @@
                 saveGame();
                 updateHeaderUI();
                 closeModal();
+                scheduleStartupModal(350);
                 showToast(`Оффлайн-награда x${multiplier} получена`);
                 playSFX('epic');
             };
@@ -3956,6 +4141,9 @@
             
             initSkills(); 
             recalculate();
+            // STAGE 4: offline имеет приоритет; daily создаётся заранее и показывается после него.
+            prepareDailyReward(Date.now());
+            scheduleStartupModal();
             
             if ((document.body.clientWidth < 768 && state.uiMode === 'auto') || state.uiMode === 'mobile') {
                 switchTab('core');
@@ -3976,6 +4164,8 @@
                 if (ysdk && ysdk.gameplayStop) { try { ysdk.gameplayStop(); } catch(e) {} }
             } else {
                 prepareOfflineReward(Date.now());
+                prepareDailyReward(Date.now());
+                scheduleStartupModal();
                 lastFrame = performance.now();
                 if (ysdk && ysdk.gameplayStart) { try { ysdk.gameplayStart(); } catch(e) {} }
             }
