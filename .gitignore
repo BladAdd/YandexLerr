@@ -1,0 +1,6 @@
+# Local tooling / scratch — not part of the game deploy
+postman/
+.postman/
+
+# Redundant mirror of the inline <script> in index.html (kept locally for `node --check`)
+stage8_syntax.js
