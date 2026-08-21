@@ -807,6 +807,8 @@
         let sdkInitPromise = null;
         let adInFlight = false;
         let interstitialInFlight = false;
+        const pauseReasons = new Set();
+        let loadingReadySent = false;
         let hiddenAt = 0;
         let firstSession = true;
         let lastInterstitialAt = 0;
@@ -822,6 +824,30 @@
                 const method = active ? api?.start : api?.stop;
                 if (typeof method === 'function') method.call(api);
             } catch (error) { sdkLog('GameplayAPI marker skipped', error); }
+        }
+
+        function setPlatformPause(reason, paused) {
+            if (paused) pauseReasons.add(reason);
+            else pauseReasons.delete(reason);
+            const shouldPause = pauseReasons.size > 0 || document.hidden;
+            Object.values(sfx).forEach(audio => {
+                try { if (shouldPause) audio.pause(); } catch (error) {}
+            });
+            try {
+                if (_casinoCtx) {
+                    if (shouldPause && _casinoCtx.state === 'running') _casinoCtx.suspend();
+                    else if (!shouldPause && state.soundEnabled && _casinoCtx.state === 'suspended') _casinoCtx.resume();
+                }
+            } catch (error) { sdkLog('audio pause skipped', error); }
+            gameplayMarker(!shouldPause);
+        }
+
+        function signalGameReady() {
+            if (loadingReadySent || !ysdk) return;
+            try {
+                ysdk.features?.LoadingAPI?.ready();
+                loadingReadySent = true;
+            } catch (error) { sdkLog('LoadingAPI.ready skipped', error); }
         }
 
         function deepMergeSave(older, authoritative) {
@@ -854,8 +880,6 @@
                     ysdk = await Promise.race([init, timeout]);
                     if (!ysdk) { sdkLog('init timeout; game continues locally'); return null; }
                     try { yPlayer = await ysdk.getPlayer(); } catch (error) { sdkLog('player unavailable', error); }
-                    try { ysdk.features?.LoadingAPI?.ready(); } catch (error) { sdkLog('LoadingAPI.ready skipped', error); }
-                    if (!document.hidden) gameplayMarker(true);
                     return ysdk;
                 } catch (error) {
                     sdkLog('init failed; game continues locally', error);
@@ -913,20 +937,25 @@
                 if (completed) return;
                 completed = true;
                 adInFlight = false;
-                gameplayMarker(!document.hidden);
+                setPlatformPause('rewarded-ad', false);
                 try { callback(!!success); } catch (error) { sdkLog('reward callback failed', error); }
             };
             if (adInFlight) { finish(false); return; }
             adInFlight = true;
             if (!ysdk || !ysdk.adv || typeof ysdk.adv.showRewardedVideo !== 'function') {
-                setTimeout(() => { analyticsEvent('ad_watched', { placement, fallback: true }); finish(true); }, BALANCE.yandex.devRewardDelayMs);
+                // Never grant production rewards when the platform cannot confirm an ad view.
+                const devReward = new URLSearchParams(location.search).has('dev');
+                setTimeout(() => {
+                    if (devReward) analyticsEvent('ad_watched', { placement, fallback: true });
+                    finish(devReward);
+                }, BALANCE.yandex.devRewardDelayMs);
                 return;
             }
             let rewarded = false;
-            gameplayMarker(false);
+            setPlatformPause('rewarded-ad', true);
             try {
                 ysdk.adv.showRewardedVideo({ callbacks: {
-                    onOpen: () => gameplayMarker(false),
+                    onOpen: () => setPlatformPause('rewarded-ad', true),
                     onRewarded: () => { rewarded = true; },
                     onClose: () => {
                         if (rewarded) analyticsEvent('ad_watched', { placement });
@@ -948,11 +977,11 @@
             if (!ysdk?.adv || interstitialInFlight || adInFlight || now - lastInterstitialAt < BALANCE.yandex.interstitialCooldownMs) return;
             interstitialInFlight = true;
             lastInterstitialAt = now;
-            gameplayMarker(false);
-            const finish = () => { interstitialInFlight = false; gameplayMarker(!document.hidden); };
+            setPlatformPause('fullscreen-ad', true);
+            const finish = () => { interstitialInFlight = false; setPlatformPause('fullscreen-ad', false); };
             try {
                 ysdk.adv.showFullscreenAdv({ callbacks: {
-                    onOpen: () => gameplayMarker(false),
+                    onOpen: () => setPlatformPause('fullscreen-ad', true),
                     onClose: finish,
                     onError: error => { sdkLog('fullscreen failed', error); finish(); }
                 }});
@@ -1497,6 +1526,7 @@
             gameRaf = 0;
             if (document.hidden) return;
             gameRaf = requestAnimationFrame(gameLoop);
+            if (pauseReasons.size > 0) { lastFrame = time; return; }
             const rawDelta = (time - lastFrame) / 1000;
             lastFrame = time;
             if (rawDelta <= 0) return;
@@ -4830,6 +4860,7 @@
         }
 
         window.onload = async () => {
+            setPlatformPause('startup', true);
             document.body.addEventListener('pointerdown', initAudio, { once: true });
 
             // STAGE 7: cloud/local reconciliation completes before migration and offline calculation.
@@ -4877,6 +4908,9 @@
 
             submitLeaderboard();
             updateIncomeBuffUI();
+            // The game is now rendered, interactive and no longer covered by loading UI.
+            signalGameReady();
+            setPlatformPause('startup', false);
             // First page lifetime is never eligible for interstitial; later background returns are.
             setTimeout(() => { firstSession = false; }, BALANCE.yandex.backgroundAdAfterMs);
         };
@@ -4885,7 +4919,7 @@
             if (document.hidden) {
                 hiddenAt = Date.now();
                 saveGame();
-                gameplayMarker(false);
+                setPlatformPause('visibility', true);
             } else {
                 const backgroundMs = hiddenAt ? Date.now() - hiddenAt : 0;
                 prepareOfflineReward(Date.now());
@@ -4895,12 +4929,12 @@
                 scheduleStartupModal();
                 lastFrame = performance.now();
                 startStage8Loops(); // STAGE 8: fresh timing, guarded against duplicate RAF.
-                gameplayMarker(true);
+                setPlatformPause('visibility', false);
                 setTimeout(() => maybeShowInterstitial(backgroundMs), BALANCE.yandex.devRewardDelayMs);
             }
         });
-        window.addEventListener('blur', () => gameplayMarker(false));
-        window.addEventListener('focus', () => { if (!document.hidden && !adInFlight && !interstitialInFlight) gameplayMarker(true); });
+        window.addEventListener('blur', () => setPlatformPause('window-blur', true));
+        window.addEventListener('focus', () => { if (!document.hidden) setPlatformPause('window-blur', false); });
         window.addEventListener('pagehide', () => saveGame());
         window.addEventListener('beforeunload', () => saveGame());
     </script>
