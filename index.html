@@ -118,9 +118,13 @@
         .glass-card:hover { transform: translateY(-3px) scale(1.01); border-color: rgba(255,255,255,0.3); background: linear-gradient(180deg, rgba(25, 35, 55, 0.7) 0%, rgba(15, 20, 35, 0.9) 100%); box-shadow: 0 10px 20px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.2); z-index: 10; }
         .glass-card:active { transform: translateY(0) scale(0.99); }
         
-        .tab-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0.4; position: relative; overflow: hidden; transform-origin: bottom; flex-shrink: 0; }
+        .tab-btn { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); color: rgba(255,255,255,0.55); position: relative; overflow: hidden; transform-origin: bottom; flex-shrink: 0; }
+        .tab-btn:hover { color: rgba(255,255,255,0.8); }
+        .tab-btn .tab-ico { color: rgba(255,255,255,0.55); transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .tab-btn:hover .tab-ico { color: rgba(255,255,255,0.8); }
+        .tab-btn.active .tab-ico { color: #E55934; }
         .tab-btn::after { content: ''; position: absolute; bottom: 0; left: 50%; width: 0; height: 3px; background: #E55934; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: translateX(-50%); box-shadow: 0 -2px 10px rgba(229,89,52,0); }
-        .tab-btn.active { opacity: 1; transform: scale(1.05); text-shadow: 0 0 12px rgba(229,89,52,0.9); }
+        .tab-btn.active { transform: scale(1.05); text-shadow: 0 0 12px rgba(229,89,52,0.9); color: #fff; }
         .tab-btn.active::after { width: 100%; box-shadow: 0 -3px 15px rgba(229,89,52,1); }
         
         ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -251,19 +255,19 @@
                     <i class="fa-solid fa-gear"></i>
                 </button>
 
-                <div id="ui-dark-matter-container" class="hidden flex-col items-center bg-gradient-to-b from-purple-900/40 to-black/80 px-3 py-1.5 rounded-xl border border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.3)] min-w-[130px] h-[72px] justify-center shrink-0">
-                    <div class="text-[9px] text-purple-300 font-orbitron uppercase mb-0.5 tracking-wider">Материя</div>
+                <div id="ui-dark-matter-container" class="hidden flex-col items-center px-3 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[54px] justify-center shrink-0">
+                    <div class="text-[9px] text-white/55 font-orbitron uppercase mb-0.5 tracking-[0.08em]">Материя</div>
                     <div class="flex items-center">
                         <span class="ico ico-dm text-purple-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
-                        <span id="ui-res-dm" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
+                        <span id="ui-res-dm" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
                     </div>
                 </div>
                 
-                <div class="flex flex-col items-center bg-gradient-to-b from-gray-900/60 to-black/80 px-3 py-1.5 rounded-xl border border-white/10 shadow-inner min-w-[130px] h-[72px] justify-center shrink-0">
-                    <div class="text-[9px] text-gray-400 font-orbitron uppercase mb-0.5 tracking-wider">Минералы</div>
+                <div class="flex flex-col items-center px-3 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[54px] justify-center shrink-0">
+                    <div class="text-[9px] text-white/55 font-orbitron uppercase mb-0.5 tracking-[0.08em]">Минералы</div>
                     <div class="flex items-center">
                         <span class="ico ico-mineral text-mars-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(229,89,52,0.8)]"></span>
-                        <span id="ui-res-min" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
+                        <span id="ui-res-min" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
                     </div>
                     <div class="flex justify-between w-full mt-0.5">
                         <span id="ui-rate-min" class="text-[10px] text-mars-400 font-bold drop-shadow-sm">+0/с</span>
@@ -271,11 +275,11 @@
                     </div>
                 </div>
                 
-                <div class="flex flex-col items-center bg-gradient-to-b from-gray-900/60 to-black/80 px-3 py-1.5 rounded-xl border border-white/10 shadow-inner min-w-[130px] h-[72px] justify-center shrink-0">
-                    <div class="text-[9px] text-gray-400 font-orbitron uppercase mb-0.5 tracking-wider">Наука</div>
+                <div class="flex flex-col items-center px-3 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[54px] justify-center shrink-0">
+                    <div class="text-[9px] text-white/55 font-orbitron uppercase mb-0.5 tracking-[0.08em]">Наука</div>
                     <div class="flex items-center">
                         <span class="ico ico-science text-sci-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]"></span>
-                        <span id="ui-res-sci" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
+                        <span id="ui-res-sci" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
                     </div>
                     <div class="flex justify-between w-full mt-0.5">
                         <span id="ui-rate-sci" class="text-[10px] text-sci-400 font-bold drop-shadow-sm">+0/с</span>
@@ -283,11 +287,11 @@
                     </div>
                 </div>
                 
-                <div class="flex flex-col items-center bg-gradient-to-b from-gray-900/60 to-black/80 px-3 py-1.5 rounded-xl border border-white/10 shadow-inner min-w-[130px] h-[72px] justify-center shrink-0">
-                    <div class="text-[9px] text-gray-400 font-orbitron uppercase mb-0.5 tracking-wider">Кристаллы</div>
+                <div class="flex flex-col items-center px-3 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[54px] justify-center shrink-0">
+                    <div class="text-[9px] text-white/55 font-orbitron uppercase mb-0.5 tracking-[0.08em]">Кристаллы</div>
                     <div class="flex items-center">
                         <span class="ico ico-crystal text-prem-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]"></span>
-                        <span id="ui-res-prm" class="font-orbitron font-bold text-sm md:text-lg text-white">0</span>
+                        <span id="ui-res-prm" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
                     </div>
                 </div>
             </div>
@@ -338,25 +342,25 @@
             <div id="game-sidebar-container" class="interactive">
                 <nav id="main-nav" class="scrollbar-hide interactive">
                     <button class="tab-btn nav-tab-core flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('core')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><span class="ico ico-dm text-xl md:text-2xl text-white drop-shadow-[0_0_8px_rgba(168,85,247,0.7)]"></span></span> ЯДРО
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span> ЯДРО
                     </button>
                     <button class="tab-btn active flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('build')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><span class="ico ico-extractor text-xl md:text-2xl text-mars-400 drop-shadow-[0_0_8px_rgba(229,89,52,0.6)]"></span></span> БАЗА
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V11l7-6 7 6v10"/><path d="M9.5 21v-5h5v5"/></svg></span> БАЗА
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('tech')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><span class="ico ico-science text-xl md:text-2xl text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]"></span></span> НАУКА
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.5L4.5 19a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 9.5V2"/><path d="M8.5 2h7"/><path d="M7 15h10"/></svg></span> НАУКА
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('crew')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><span class="ico ico-crew text-xl md:text-2xl text-prem-400 drop-shadow-[0_0_8px_rgba(192,132,252,0.6)]"></span></span> ЭКИП.
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> ЭКИП.
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('hq')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><span class="ico ico-hq text-xl md:text-2xl text-gold-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.6)]"></span></span> ШТАБ
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21v-5a8 8 0 0 1 16 0v5"/><path d="M12 9V6"/><circle cx="12" cy="4.5" r="1.5"/></svg></span> ШТАБ
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('quests')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><span class="ico ico-quests text-xl md:text-2xl text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.6)]"></span></span> ЗАДАЧИ
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg></span> ЗАДАЧИ
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('planets')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><i class="fa-solid fa-earth-americas text-base md:text-lg text-blue-400 drop-shadow-[0_0_8px_rgba(59,130,246,0.6)]"></i></span> КОСМОС
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-18 12 12)"/></svg></span> КОСМОС
                     </button>
                 </nav>
 
