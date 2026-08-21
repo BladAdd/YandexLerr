@@ -51,7 +51,20 @@
         body.perf-low .text-glow, body.perf-low [class*="shadow-["], body.perf-low [class*="drop-shadow-["] { text-shadow: none !important; filter: none !important; }
         body.perf-low .animate-pulse-fast, body.perf-low .animate-spin-slow, body.perf-low .casino-shake, body.perf-low .btn-shine::after { animation: none !important; }
         body.perf-low .glass-panel, body.perf-low .glass-card { backdrop-filter: none !important; }
-        #fps-hud { position:fixed; right:max(8px,env(safe-area-inset-right)); top:max(8px,env(safe-area-inset-top)); z-index:65; pointer-events:none; padding:4px 7px; border-radius:8px; background:rgba(0,0,0,.72); border:1px solid rgba(255,255,255,.15); font:700 10px Orbitron,sans-serif; color:#a7f3d0; }
+        #fps-hud { position:fixed; right:max(8px,env(safe-area-inset-right)); top:max(8px,env(safe-area-inset-top)); z-index:65; pointer-events:auto; cursor:grab; user-select:none; -webkit-user-select:none; touch-action:none; padding:4px 8px; border-radius:8px; background:rgba(0,0,0,.82); border:1px solid rgba(255,255,255,.2); font:700 10px Orbitron,sans-serif; color:#a7f3d0; box-shadow:0 4px 14px rgba(0,0,0,.45); display:inline-flex; align-items:center; gap:5px; transition:box-shadow .15s ease, border-color .15s ease, background-color .15s ease; }
+        #fps-hud:hover { border-color:rgba(167,243,208,.45); background:rgba(8,14,20,.92); }
+        #fps-hud.dragging { cursor:grabbing !important; opacity:0.95; border-color:rgba(251,191,36,.8); box-shadow:0 8px 24px rgba(0,0,0,.7), 0 0 12px rgba(251,191,36,.35); transform:scale(1.04); }
+        
+        :root { --sidebar-width: 520px; }
+        #sidebar-resizer { position: absolute; top: 0; bottom: 0; left: 0; width: 16px; margin-left: -8px; cursor: col-resize; z-index: 45; user-select: none; -webkit-user-select: none; touch-action: none; display: none; align-items: center; justify-content: center; }
+        @media (min-width: 768px) { body.ui-auto #sidebar-resizer, body.ui-pc #sidebar-resizer { display: flex; } }
+        .sidebar-resizer-line { position: absolute; top: 0; bottom: 0; left: 50%; transform: translateX(-50%); width: 2px; background: transparent; transition: background-color .15s ease, box-shadow .15s ease; }
+        .sidebar-resizer-thumb { position: relative; z-index: 2; width: 14px; height: 38px; border-radius: 6px; background: rgba(12, 18, 30, 0.9); border: 1px solid rgba(255, 255, 255, 0.2); color: rgba(255, 255, 255, 0.45); font-size: 10px; display: flex; align-items: center; justify-content: center; transition: all .15s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.6); pointer-events: none; }
+        #sidebar-resizer:hover .sidebar-resizer-line, body.resizing-sidebar #sidebar-resizer .sidebar-resizer-line { background: rgba(229, 89, 52, 0.9); box-shadow: 0 0 10px rgba(229, 89, 52, 0.7); }
+        #sidebar-resizer:hover .sidebar-resizer-thumb, body.resizing-sidebar #sidebar-resizer .sidebar-resizer-thumb { background: rgba(229, 89, 52, 1); border-color: rgba(255, 255, 255, 0.8); color: #fff; box-shadow: 0 0 14px rgba(229, 89, 52, 0.85); transform: scale(1.15); }
+        body.resizing-sidebar { cursor: col-resize !important; user-select: none !important; -webkit-user-select: none !important; }
+        body.resizing-sidebar * { user-select: none !important; -webkit-user-select: none !important; cursor: col-resize !important; }
+
         .tutorial-target { position:relative !important; z-index:84 !important; outline:3px solid #fbbf24 !important; outline-offset:4px; filter:drop-shadow(0 0 16px rgba(251,191,36,.8)); }
         #tutorial-card { position:fixed; left:50%; bottom:calc(82px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:85; width:min(92vw,420px); pointer-events:auto; }
         #drawer-overlay { display:none; }
@@ -149,27 +162,28 @@
         .overheat-flash { animation: flashRed 0.5s infinite alternate ease-in-out; }
         @keyframes flashRed { 0% { box-shadow: 0 0 10px rgba(229,89,52,0.3); } 100% { box-shadow: 0 0 50px rgba(255,0,0,0.8); border-color: rgba(255,50,50,0.8); } }
         
-        .skill-btn-wrapper { position: relative; width: 3.5rem; height: 3.5rem; margin-bottom: 0.5rem; }
-        @media (min-width: 768px) { .skill-btn-wrapper { width: 100%; height: auto; margin-bottom: 0; } }
+        .skill-btn-wrapper { position: relative; width: 3.25rem; height: 3.25rem; }
+        @media (min-width: 768px) { .skill-btn-wrapper { width: 3.5rem; height: 3.5rem; } }
         
-        .skill-btn { transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); background: linear-gradient(135deg, rgba(15,15,25,0.8), rgba(5,5,10,0.9)); border: 1px solid rgba(255,255,255,0.1); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 0.75rem; overflow: visible; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
-        .skill-btn:hover { border-color: rgba(255,255,255,0.5); box-shadow: 0 0 20px currentColor; transform: translateX(8px); z-index: 50; }
-        .skill-btn:active:not(:disabled) { transform: scale(0.92) translateX(8px); }
+        .skill-btn { transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); background: linear-gradient(135deg, rgba(15,15,25,0.9), rgba(5,5,12,0.98)); border: 1.5px solid rgba(255,255,255,0.12); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 0.85rem; overflow: visible; box-shadow: 0 4px 12px rgba(0,0,0,0.6); position: relative; }
+        .skill-btn:hover { border-color: rgba(255,255,255,0.6); box-shadow: 0 0 20px currentColor; transform: scale(1.08); z-index: 50; }
+        .skill-btn:active:not(:disabled) { transform: scale(0.95); }
         
-        .skill-cooldown-container { position: absolute; inset: 0; border-radius: 0.75rem; overflow: hidden; pointer-events: none; z-index: 0; }
-        .skill-cooldown { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); transition: height 0.1s linear; border-top: 2px solid currentColor; backdrop-filter: blur(3px); opacity: 0.9; }
+        .skill-cooldown-container { position: absolute; inset: 0; border-radius: 0.85rem; overflow: hidden; pointer-events: none; z-index: 5; }
+        .skill-cooldown { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(5,8,18,0.85); transition: height 0.1s linear; border-top: 2px solid rgba(255,255,255,0.5); backdrop-filter: blur(2px); opacity: 0.95; }
+        .skill-timer-overlay { text-shadow: 0 0 6px rgba(0,0,0,1), 0 2px 4px rgba(0,0,0,1); }
         
-        .skill-tooltip { visibility: hidden; opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); position: absolute; left: calc(100% + 20px); top: 50%; transform: translateY(-50%) translateX(-20px) scale(0.9); background: linear-gradient(135deg, rgba(20,25,40,0.95), rgba(5,10,15,0.98)); border: 1px solid rgba(255,255,255,0.15); padding: 16px; border-radius: 12px; width: 240px; z-index: 1000; pointer-events: none; box-shadow: 0 20px 40px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.2); backdrop-filter: blur(12px); }
-        .skill-tooltip::before { content: ''; position: absolute; top: 50%; left: -6px; transform: translateY(-50%) rotate(45deg); width: 12px; height: 12px; background: rgba(20,25,40,0.98); border-left: 1px solid rgba(255,255,255,0.15); border-bottom: 1px solid rgba(255,255,255,0.15); }
-        .skill-btn:hover .skill-tooltip, .locked-skill-btn:hover .skill-tooltip { visibility: visible; opacity: 1; transform: translateY(-50%) translateX(0) scale(1); }
+        .skill-tooltip { visibility: hidden; opacity: 0; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%) translateX(-8px) scale(0.95); background: linear-gradient(135deg, rgba(12,18,32,0.98), rgba(4,8,16,0.99)); border: 1px solid rgba(255,255,255,0.18); padding: 12px 14px; border-radius: 12px; width: 240px; max-width: 80vw; z-index: 9999; pointer-events: none; box-shadow: 0 16px 36px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.15); backdrop-filter: blur(16px); }
+        .skill-tooltip::before { content: ''; position: absolute; top: 50%; left: -6px; transform: translateY(-50%) rotate(45deg); width: 10px; height: 10px; background: rgba(12,18,32,0.98); border-left: 1px solid rgba(255,255,255,0.18); border-bottom: 1px solid rgba(255,255,255,0.18); }
+        .skill-btn:hover .skill-tooltip, .locked-skill-btn:hover .skill-tooltip, .skill-btn:focus-within .skill-tooltip, .locked-skill-btn:focus-within .skill-tooltip { visibility: visible; opacity: 1; transform: translateY(-50%) translateX(0) scale(1); }
         
-        .locked-skill-btn { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 0.75rem; background: rgba(0,0,0,0.8); border: 1px solid rgba(255,255,255,0.05); transition: all 0.3s; overflow: visible; }
-        .locked-skill-btn:hover { background: rgba(30,30,40,0.9); border-color: rgba(255,255,255,0.2); z-index: 50; transform: translateX(5px); }
+        .locked-skill-btn { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 0.85rem; background: rgba(10,12,18,0.85); border: 1.5px solid rgba(255,255,255,0.08); transition: all 0.2s; overflow: visible; }
+        .locked-skill-btn:hover { background: rgba(25,30,42,0.95); border-color: rgba(255,255,255,0.3); z-index: 50; transform: scale(1.06); }
 
-        .skill-in { animation: skillIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
-        @keyframes skillIn { 0% { opacity: 0; transform: translateX(-40px) scale(0.7); } 100% { opacity: 1; transform: translateX(0) scale(1); } }
-        .skill-out { animation: skillOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
-        @keyframes skillOut { 0% { opacity: 1; transform: translateX(0) scale(1); } 100% { opacity: 0; transform: translateX(-30px) scale(0.7); } }
+        .skill-in { animation: skillIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
+        @keyframes skillIn { 0% { opacity: 0; transform: scale(0.6) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        .skill-out { animation: skillOut 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes skillOut { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(0.6); } }
 
         .reticle-core { transition: transform 0.1s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s; }
         
@@ -201,8 +215,6 @@
         .hover-bg-ufo-blur:hover { background: radial-gradient(circle, rgba(34,211,238,0.6) 0%, rgba(34,211,238,0.15) 55%, transparent 75%); }
         @keyframes skillReadyPulse { 0%, 100% { box-shadow: 0 0 5px rgba(229,89,52,0.2); border-color: rgba(229,89,52,0.45); } 50% { box-shadow: 0 0 16px rgba(229,89,52,0.55); border-color: rgba(229,89,52,0.95); } }
         .skill-ready-pulse { animation: skillReadyPulse 2s ease-in-out infinite; }
-        .skill-hint-hover { display: none; }
-        .skill-btn-wrapper:hover .skill-hint-hover { display: inline-block; }
 
         /* ================= CASINO «ФОБОС» ================= */
         @keyframes casinoShakeKf { 0%,100% { transform: translate(0,0); } 15% { transform: translate(-6px,3px); } 30% { transform: translate(5px,-4px); } 45% { transform: translate(-4px,-3px); } 60% { transform: translate(4px,3px); } 75% { transform: translate(-2px,2px); } }
@@ -249,15 +261,38 @@
         /* ------ PC LAYOUT ------ */
         body.ui-pc #game-main { display: flex; flex-direction: row; height: 100%; position: relative; }
         body.ui-pc #game-clicker-section { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; bottom: auto; padding-bottom: 2.5rem; }
-        body.ui-pc #game-sidebar-container { position: relative; width: 520px; height: 100%; flex: none; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(8, 12, 20, 0.75) 0%, rgba(2, 4, 8, 0.9) 100%); backdrop-filter: blur(16px) saturate(150%); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 20; overflow: hidden; }
+        body.ui-pc #game-sidebar-container { position: relative; width: var(--sidebar-width, 520px); min-width: 340px; max-width: min(85vw, calc(100vw - 340px)); height: 100%; flex: none; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(8, 12, 20, 0.75) 0%, rgba(2, 4, 8, 0.9) 100%); backdrop-filter: blur(16px) saturate(150%); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 20; overflow: visible; }
         body.ui-pc #main-nav { position: relative; width: 100%; height: auto; bottom: auto; background: rgba(0,0,0,0.4); border-top: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0; display: flex; gap: 4px; overflow-x: auto; flex-shrink: 0; }
         body.ui-pc #game-sidebar { position: relative; width: 100%; flex: 1; inset: auto; top: auto; bottom: auto; transform: none !important; border-radius: 0; border: none; background: transparent; box-shadow: none; z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
         body.ui-pc .nav-tab-core { display: none !important; }
 
+        /* Core center fixed mode */
+        body.core-static-center.ui-pc #game-clicker-section,
+        body.core-static-center.ui-auto #game-clicker-section {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            bottom: auto;
+            padding-bottom: 2.5rem;
+        }
+        body.core-static-center.ui-pc #game-sidebar-container,
+        body.core-static-center.ui-auto #game-sidebar-container {
+            margin-left: auto;
+            position: relative;
+            z-index: 20;
+        }
+
         @media (min-width: 768px) {
             body.ui-auto #game-main { display: flex; flex-direction: row; height: 100%; position: relative; }
             body.ui-auto #game-clicker-section { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; bottom: auto; padding-bottom: 2.5rem; }
-            body.ui-auto #game-sidebar-container { position: relative; width: 520px; height: 100%; flex: none; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(8, 12, 20, 0.75) 0%, rgba(2, 4, 8, 0.9) 100%); backdrop-filter: blur(16px) saturate(150%); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 20; overflow: hidden; }
+            body.ui-auto #game-sidebar-container { position: relative; width: var(--sidebar-width, 520px); min-width: 340px; max-width: min(85vw, calc(100vw - 340px)); height: 100%; flex: none; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(8, 12, 20, 0.75) 0%, rgba(2, 4, 8, 0.9) 100%); backdrop-filter: blur(16px) saturate(150%); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 20; overflow: visible; }
             body.ui-auto #main-nav { position: relative; width: 100%; height: auto; bottom: auto; background: rgba(0,0,0,0.4); border-top: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0; display: flex; gap: 4px; overflow-x: auto; flex-shrink: 0; }
             body.ui-auto #game-sidebar { position: relative; width: 100%; flex: 1; inset: auto; top: auto; bottom: auto; transform: none !important; border-radius: 0; border: none; background: transparent; box-shadow: none; z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
             body.ui-auto .nav-tab-core { display: none !important; }
@@ -265,34 +300,31 @@
 
         /* STAGE 8: responsive mobile shell; desktop remains the Stage 7 layout. */
         @media (max-width: 1023px) {
-            body.ui-auto header, body.ui-mobile header { padding: max(6px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) 6px max(8px,env(safe-area-inset-left)); flex-wrap:wrap; min-height:64px; }
-            body.ui-auto header h1, body.ui-mobile header h1 { font-size:15px; }
+            body.ui-auto header, body.ui-mobile header { padding: max(6px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) 6px max(8px,env(safe-area-inset-left)); flex-wrap:wrap; min-height:60px; gap:6px; }
+            body.ui-auto header h1, body.ui-mobile header h1 { font-size:14px; }
             body.ui-auto header p, body.ui-mobile header p { display:none; }
-            body.ui-auto header > div:first-child > div:first-child, body.ui-mobile header > div:first-child > div:first-child { width:38px;height:38px; }
-            body.ui-auto header > div:last-child, body.ui-mobile header > div:last-child { flex-wrap:nowrap; overflow-x:auto; justify-content:flex-start; width: 100%; margin-top: 6px; padding-bottom: 4px; }
-            body.ui-auto header > div:last-child > button:not(#mobile-left-drawer-btn):not(#mobile-right-drawer-btn):not([onclick="openSettings()"]):not([onclick="activateIncomeBuffRewarded()"]):not([onclick="openAchievementsModal()"]), body.ui-mobile header > div:last-child > button:not(#mobile-left-drawer-btn):not(#mobile-right-drawer-btn):not([onclick="openSettings()"]):not([onclick="activateIncomeBuffRewarded()"]):not([onclick="openAchievementsModal()"]) { display:none; }
-            body.ui-auto header [class*="min-w-[130px]"], body.ui-mobile header [class*="min-w-[130px]"] { min-width:92px;height:44px;padding-left:6px;padding-right:6px; }
+            body.ui-auto header > div:first-child > div:first-child, body.ui-mobile header > div:first-child > div:first-child { width:34px;height:34px; }
+            body.ui-auto header > div:last-child, body.ui-mobile header > div:last-child { flex-wrap:nowrap; overflow-x:auto; justify-content:flex-start; width: 100%; margin-top: 2px; padding-bottom: 2px; scrollbar-width: none; }
+            body.ui-auto header > div:last-child::-webkit-scrollbar, body.ui-mobile header > div:last-child::-webkit-scrollbar { display:none; }
+            body.ui-auto header [class*="min-w-[130px]"], body.ui-mobile header [class*="min-w-[130px]"] { min-width:88px;height:42px;padding-left:6px;padding-right:6px; }
             body.ui-auto #mobile-drawer-buttons, body.ui-mobile #mobile-drawer-buttons { display:flex; gap:6px; }
             body.ui-auto #game-main, body.ui-mobile #game-main { display:block; height:100%; position:relative; }
             body.ui-auto #game-sidebar-container, body.ui-mobile #game-sidebar-container { display:block; }
-            body.ui-auto #game-clicker-section, body.ui-mobile #game-clicker-section { position:absolute; inset:0; bottom:calc(74px + env(safe-area-inset-bottom)); height:auto; padding:0; }
-            body.ui-auto #game-clicker-section > .absolute, body.ui-mobile #game-clicker-section > .absolute { position:fixed; top:max(64px,env(safe-area-inset-top)); left:0; bottom:calc(74px + env(safe-area-inset-bottom)); z-index:61; width:min(86vw,320px); padding:12px; overflow-y:auto; background:rgba(5,8,14,.98); transform:translateX(-110%); transition:transform .25s ease; }
-            body.ui-auto #game-clicker-section > .absolute.drawer-open, body.ui-mobile #game-clicker-section > .absolute.drawer-open { transform:translateX(0); }
-            body.ui-auto #game-clicker-section > .absolute > div:first-child, body.ui-mobile #game-clicker-section > .absolute > div:first-child { width:100%;min-height:44px; }
-            body.ui-auto #skills-container, body.ui-mobile #skills-container { width:100%; }
-            body.ui-auto .skill-btn-wrapper, body.ui-mobile .skill-btn-wrapper { width:100%;height:64px; }
-            body.ui-auto .skill-btn, body.ui-auto .locked-skill-btn, body.ui-mobile .skill-btn, body.ui-mobile .locked-skill-btn { justify-content:flex-start;padding:12px;gap:12px; overflow: hidden; }
-            body.ui-auto .skill-btn .hidden.md\:flex, body.ui-auto .locked-skill-btn .hidden.md\:flex, body.ui-mobile .skill-btn .hidden.md\:flex, body.ui-mobile .locked-skill-btn .hidden.md\:flex { display:flex; min-width: 0; }
-            body.ui-auto .locked-skill-btn .line-clamp-2, body.ui-mobile .locked-skill-btn .line-clamp-2 { font-size: 11px; -webkit-line-clamp: 3; }
-            body.ui-auto #game-sidebar, body.ui-mobile #game-sidebar { top:max(64px,env(safe-area-inset-top)); right:0; left:auto; bottom:calc(74px + env(safe-area-inset-bottom)); width:min(94vw,520px); border-radius:18px 0 0 18px; transform:translateX(110%); transition:transform .25s ease; z-index:61; }
+            body.ui-auto #game-clicker-section, body.ui-mobile #game-clicker-section { position:absolute; inset:0; bottom:calc(70px + env(safe-area-inset-bottom)); height:auto; padding:0; }
+            body.ui-auto #game-clicker-section > #skills-drawer, body.ui-mobile #game-clicker-section > #skills-drawer { position:fixed; top:max(60px,env(safe-area-inset-top)); left:0; bottom:calc(70px + env(safe-area-inset-bottom)); z-index:61; width:auto; padding:10px; overflow-y:auto; background:rgba(5,8,14,.95); backdrop-filter:blur(16px); transform:translateX(-120%); transition:transform .25s cubic-bezier(0.4, 0, 0.2, 1); border-right:1px solid rgba(255,255,255,0.1); border-radius:0 16px 16px 0; }
+            body.ui-auto #game-clicker-section > #skills-drawer.drawer-open, body.ui-mobile #game-clicker-section > #skills-drawer.drawer-open { transform:translateX(0); }
+            body.ui-auto #skills-container, body.ui-mobile #skills-container { width:3.25rem; }
+            body.ui-auto .skill-btn-wrapper, body.ui-mobile .skill-btn-wrapper { width:3.25rem;height:3.25rem; }
+            body.ui-auto .skill-btn, body.ui-auto .locked-skill-btn, body.ui-mobile .skill-btn, body.ui-mobile .locked-skill-btn { width:3.25rem;height:3.25rem;justify-content:center;padding:0; }
+            body.ui-auto #game-sidebar, body.ui-mobile #game-sidebar { top:max(60px,env(safe-area-inset-top)); right:0; left:auto; bottom:calc(70px + env(safe-area-inset-bottom)); width:min(94vw,520px); border-radius:18px 0 0 18px; transform:translateX(110%); transition:transform .25s ease; z-index:61; }
             body.ui-auto #game-sidebar.panel-open, body.ui-mobile #game-sidebar.panel-open { transform:translateX(0); }
-            body.ui-auto #main-nav, body.ui-mobile #main-nav { height:calc(74px + env(safe-area-inset-bottom)); padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right); scrollbar-width: none; overflow-x: auto; -webkit-overflow-scrolling: touch; display: flex; justify-content: flex-start; }
+            body.ui-auto #main-nav, body.ui-mobile #main-nav { height:calc(70px + env(safe-area-inset-bottom)); padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right); scrollbar-width: none; overflow-x: auto; -webkit-overflow-scrolling: touch; display: flex; justify-content: flex-start; }
             body.ui-auto #main-nav::-webkit-scrollbar, body.ui-mobile #main-nav::-webkit-scrollbar { display: none; }
-            body.ui-auto .tab-btn, body.ui-mobile .tab-btn { min-width:70px;min-height:58px;padding:7px 8px; flex-shrink: 0; }
-            body.ui-auto #drawer-overlay.active, body.ui-mobile #drawer-overlay.active { display:block;position:fixed;inset:0;z-index:59;background:rgba(0,0,0,.62); }
-            body.ui-auto #tab-content, body.ui-mobile #tab-content { padding:12px;padding-bottom:24px; }
+            body.ui-auto .tab-btn, body.ui-mobile .tab-btn { min-width:66px;min-height:54px;padding:6px 6px; flex-shrink: 0; }
+            body.ui-auto #drawer-overlay.active, body.ui-mobile #drawer-overlay.active { display:block;position:fixed;inset:0;z-index:59;background:rgba(0,0,0,.62); backdrop-filter:blur(3px); }
+            body.ui-auto #tab-content, body.ui-mobile #tab-content { padding:12px;padding-bottom:28px; }
             #generic-modal { padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); }
-            #modal-content { width:100%;max-height:92dvh;margin:0;padding:18px;overflow-y:auto; }
+            #modal-content { width:100%;max-height:90dvh;margin:0;padding:16px;overflow-y:auto; }
             #main-clicker { width:min(58vw,260px);height:min(58vw,260px); }
         }
         @media (min-width:1024px) { #mobile-drawer-buttons,#drawer-overlay,.drawer-close { display:none !important; } }
@@ -396,13 +428,13 @@
         <main id="game-main" class="flex-1 overflow-hidden relative">
             <section id="game-clicker-section" class="interactive pointer-events-none">
                 <div id="skills-drawer" class="absolute top-4 left-4 flex flex-col gap-2 pointer-events-auto z-20" aria-label="Навыки">
-                    <div class="flex items-center justify-between w-[56px] md:w-56 bg-black/50 backdrop-blur-md rounded-lg px-3 py-2 border border-white/10 shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
-                        <div class="hidden md:block text-xs text-gray-300 font-orbitron uppercase tracking-widest font-bold">Панель Навыков</div>
-                        <button class="drawer-close md:hidden w-11 h-11" onclick="closeDrawers()" aria-label="Закрыть навыки"><i class="fa-solid fa-xmark"></i></button><button onclick="toggleSkills()" class="text-sm text-gray-400 hover:text-white mx-auto md:mx-0 transition-transform hover:scale-110">
-                            <i class="fa-solid fa-eye-slash" id="skills-toggle-icon"></i>
+                    <div class="flex items-center justify-between w-14 bg-black/50 backdrop-blur-md rounded-xl p-1 border border-white/10 shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+                        <button class="drawer-close md:hidden w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 hover:text-white" onclick="closeDrawers()" aria-label="Закрыть навыки"><i class="fa-solid fa-xmark text-xs"></i></button>
+                        <button onclick="toggleSkills()" class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 hover:text-white mx-auto transition-transform hover:scale-110" title="Скрыть/показать навыки">
+                            <i class="fa-solid fa-eye-slash text-xs" id="skills-toggle-icon"></i>
                         </button>
                     </div>
-                    <div id="skills-container" class="flex flex-col w-14 md:w-56 transition-all gap-1">
+                    <div id="skills-container" class="flex flex-col w-14 transition-all gap-1.5">
                         <!-- JS Injects Skills Here -->
                     </div>
                 </div>
@@ -441,6 +473,10 @@
             </section>
 
             <div id="game-sidebar-container" class="interactive">
+                <div id="sidebar-resizer" class="interactive" aria-label="Изменить ширину панели" title="Перетащите для изменения ширины (двойной клик — сброс)">
+                    <div class="sidebar-resizer-line"></div>
+                    <div class="sidebar-resizer-thumb"><i class="fa-solid fa-grip-lines-vertical"></i></div>
+                </div>
                 <nav id="main-nav" class="scrollbar-hide interactive">
                     <button class="tab-btn nav-tab-core flex-1 min-w-[60px] md:min-w-0 px-2.5 py-3 md:px-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('core')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span> ЯДРО
@@ -479,7 +515,7 @@
     </div>
 
     <div id="drawer-overlay" onclick="closeDrawers()" aria-hidden="true"></div>
-    <div id="fps-hud" aria-live="polite">FPS -- · HIGH</div>
+    <div id="fps-hud" aria-live="polite" title="Перетащите для перемещения"><i class="fa-solid fa-grip-vertical opacity-40 text-[9px] pointer-events-none"></i><span id="fps-hud-text">FPS -- · HIGH</span></div>
     <div id="tutorial-layer" class="hidden">
         <div id="tutorial-card" class="glass-panel rounded-2xl border border-gold-400/50 p-4 shadow-glow-modal">
             <div class="flex justify-between gap-3"><div><div id="tutorial-title" class="font-orbitron font-black text-gold-300 text-sm"></div><div id="tutorial-text" class="text-xs text-gray-200 mt-2 leading-relaxed"></div></div><button onclick="skipTutorial()" class="text-xs text-gray-400 px-2">Пропустить</button></div>
@@ -787,6 +823,7 @@
             planet: 'mars',
             unlockedPlanets: { mars: true },
             uiMode: 'auto',
+            moveCoreOnResize: true,
             // STAGE 8: Auto may downgrade after sustained low FPS; manual High is never auto-downgraded.
             performance: { preference: 'auto', resolved: 'high', autoLow: false },
             tutorial: { currentStep: 0, completed: false, skipped: false, analyticsSent: false },
@@ -1131,6 +1168,7 @@
                     state.tutorial = { ...defaults.tutorial, ...(parsed.tutorial || {}) };
                     state.tutorial.currentStep = Math.max(0, Math.min(BALANCE.stage8.tutorial.steps.length - 1, Number(state.tutorial.currentStep) || 0));
                     state.sdkMeta = { ...defaults.sdkMeta, ...(parsed.sdkMeta || {}), analytics: { ...defaults.sdkMeta.analytics, ...((parsed.sdkMeta && parsed.sdkMeta.analytics) || {}) } };
+                    state.moveCoreOnResize = parsed.moveCoreOnResize !== undefined ? !!parsed.moveCoreOnResize : true;
                     
                     displayState.res.min = state.res.min;
                     displayState.res.sci = state.res.sci;
@@ -1229,6 +1267,21 @@
                     </div>
                     
                     <div>
+                        <div class="text-xs text-gray-400 font-orbitron tracking-widest uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-arrows-left-right"></i> Позиция Ядра при тяге окна</div>
+                        <div class="grid grid-cols-2 gap-2 bg-black/60 p-1.5 rounded-xl border border-white/10 shadow-inner">
+                            <button onclick="setMoveCoreOnResize(true)" class="py-3 px-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wider flex flex-col items-center justify-center gap-1 ${state.moveCoreOnResize !== false ? 'bg-mars-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}">
+                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-arrows-left-right"></i> Двигать ядро</span>
+                                <span class="text-[9px] font-normal opacity-80 lowercase">в свободной зоне</span>
+                            </button>
+                            <button onclick="setMoveCoreOnResize(false)" class="py-3 px-2 rounded-lg text-xs font-bold transition-all uppercase tracking-wider flex flex-col items-center justify-center gap-1 ${state.moveCoreOnResize === false ? 'bg-mars-600 text-white shadow-md' : 'text-gray-400 hover:text-white'}">
+                                <span class="flex items-center gap-1.5"><i class="fa-solid fa-bullseye"></i> Не двигать</span>
+                                <span class="text-[9px] font-normal opacity-80 lowercase">по центру экрана</span>
+                            </button>
+                        </div>
+                        <div class="text-[10px] text-gray-500 mt-2 text-center">${state.moveCoreOnResize !== false ? 'Ядро и 3D-планета плавно центрируются в рабочей области при изменении размера панели.' : 'Ядро и 3D-планета остаются строго по центру экрана и не смещаются при изменении панели.'}</div>
+                    </div>
+                    
+                    <div>
                         <div class="text-xs text-gray-400 font-orbitron tracking-widest uppercase mb-3 flex items-center gap-2"><i class="fa-solid fa-music"></i> Звук и Эффекты</div>
                         <button onclick="toggleSound(); openSettings();" class="w-full bg-black/40 border border-white/10 py-4 rounded-xl flex justify-between items-center px-5 hover:bg-white/5 transition-colors">
                             <span class="font-bold text-sm text-white flex items-center gap-3"><i class="fa-solid ${state.soundEnabled ? 'fa-volume-high text-green-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]' : 'fa-volume-xmark text-red-400'}"></i> Звук в игре</span>
@@ -1280,9 +1333,30 @@
             location.reload();
         }
 
+        function applyCoreLayoutMode() {
+            const isFixed = state.moveCoreOnResize === false;
+            document.body.classList.toggle('core-static-center', isFixed);
+            if (typeof updateCameraTarget === 'function') {
+                updateCameraTarget();
+            }
+        }
+
+        function setMoveCoreOnResize(val) {
+            state.moveCoreOnResize = !!val;
+            applyCoreLayoutMode();
+            saveGame();
+            if (!document.getElementById('generic-modal')?.classList.contains('hidden')) {
+                openSettings();
+            }
+            if (typeof showToast === 'function') {
+                showToast(state.moveCoreOnResize ? 'Ядро центрируется в свободной области' : 'Ядро зафиксировано по центру экрана');
+            }
+        }
+
         function setUIMode(mode) {
             state.uiMode = mode;
-            document.body.className = `antialiased text-gray-200 ui-${mode}`;
+            const isFixed = state.moveCoreOnResize === false;
+            document.body.className = `antialiased text-gray-200 ui-${mode}${isFixed ? ' core-static-center' : ''}`;
             saveGame();
             openSettings(); 
             
@@ -1291,7 +1365,14 @@
 
         let calc = { rate: {min: 0, sci: 0}, clickPower: 1, maxHeat: 100, marketRate: 0.01 };
         let heat = 0, isOverheated = false, combo = BALANCE.combo.min, comboTimer = 0, marketPhase = 0;
-        let skillActive = {};
+        let skillActiveState = {};
+        
+        function isSkillActive(id) {
+            const s = SKILLS[id];
+            if (!s || !s.duration) return false;
+            const lastUsed = (state && state.skills) ? (state.skills[id] || 0) : 0;
+            return (Date.now() - lastUsed) < (s.duration * 1000);
+        }
         // STAGE 7: persistent wall-time income buff.
         function incomeBuffActive() { return Number(state.monetization?.incomeBuffEndAt || 0) > Date.now(); }
         function updateIncomeBuffUI() {
@@ -1526,7 +1607,7 @@
             // STAGE 6: income x2 не протекает в clickPower через passive-share; click x3 остаётся отдельным множителем.
             const activeIncomeMult = randomEventState.active ? randomEventState.active.incomeMultiplier : 1;
             calc.clickPower = (1 + (calc.rate.min / activeIncomeMult) * BALANCE.economy.clickPassiveShare) * mult.click * combo;
-            if (skillActive['overdrive']) calc.clickPower *= 10;
+            if (isSkillActive('overdrive')) calc.clickPower *= 10;
         }
 
         let lastFrame = performance.now();
@@ -1557,8 +1638,12 @@
 
             for(let id in SKILLS) {
                 if(SKILLS[id].duration) {
-                    const elapsed = (now - (state.skills[id] || 0)) / 1000;
-                    skillActive[id] = elapsed < SKILLS[id].duration;
+                    const wasActive = !!skillActiveState[id];
+                    const isActive = isSkillActive(id);
+                    skillActiveState[id] = isActive;
+                    if (wasActive && !isActive) {
+                        if (id === 'overdrive') recalculate();
+                    }
                 }
             }
 
@@ -1580,7 +1665,7 @@
             if(isOverheated) {
                 heat -= calc.maxHeat * 0.2 * delta;
                 if(heat <= 0) { heat = 0; isOverheated = false; document.getElementById('heat-warning').classList.add('hidden'); }
-            } else if(!skillActive['freeze'] && heat > 0) {
+            } else if(!isSkillActive('freeze') && heat > 0) {
                 heat -= calc.maxHeat * 0.05 * delta;
                 if(heat < 0) heat = 0;
             }
@@ -1595,7 +1680,7 @@
                 }
             }
 
-            let autoRate = skillActive['swarm'] ? 8 : 0;
+            let autoRate = isSkillActive('swarm') ? 8 : 0;
             if (autoRate > 0 && !isOverheated) {
                 autoClickTimer += delta;
                 if (autoClickTimer >= (1/autoRate)) { doClick(false, true); autoClickTimer = 0; }
@@ -1670,7 +1755,7 @@
                 playSFX('click');
             }
 
-            if(!skillActive['freeze']) {
+            if(!isSkillActive('freeze')) {
                 heat += isAuto ? 1 : 4;
                 if(heat >= calc.maxHeat) {
                     isOverheated = true;
@@ -1795,41 +1880,46 @@
                 const isUnlocked = state.skillsUnlocked ? state.skillsUnlocked[id] : s.unlocked;
                 if(isUnlocked) {
                     html += `
-                    <div class="skill-btn-wrapper group">
-                        <button id="skill-btn-${id}" onclick="castSkill('${id}')" class="skill-btn ${s.border} md:p-3 md:justify-start md:gap-3">
+                    <div class="skill-btn-wrapper group relative" id="skill-wrapper-${id}">
+                        <button id="skill-btn-${id}" onclick="castSkill('${id}')" class="skill-btn ${s.border} relative overflow-hidden" aria-label="${s.name}" title="${s.name}">
                             <div class="skill-cooldown-container">
                                 <div id="skill-cd-${id}" class="skill-cooldown" style="height: 0%"></div>
                             </div>
-                            <span class="ico ${s.icon} text-lg md:text-2xl ${s.color} z-10 relative drop-shadow-[0_0_8px_currentColor]"></span>
-                            <div class="hidden md:flex flex-col items-start z-10 text-left leading-tight pointer-events-none w-full ml-1">
-                                <span class="text-xs font-bold text-white whitespace-nowrap drop-shadow-md">${s.name}</span>
-                                <span class="text-[10px] text-gray-500 font-bold tracking-wide">Готово</span>
-                                ${id === 'strike' ? '<span id="skill-hint-strike" class="skill-hint-hover text-[10px] text-mars-300/90 leading-snug mt-0.5">Нажми — мгновенно +15 минут добычи</span>' : ''}
-                            </div>
+                            <span class="ico ${s.icon} text-xl md:text-2xl ${s.color} z-10 relative drop-shadow-[0_0_8px_currentColor] flex-shrink-0 pointer-events-none"></span>
+                            <span id="skill-timer-${id}" class="absolute inset-0 flex items-center justify-center font-orbitron font-black text-xs text-white z-20 skill-timer-overlay pointer-events-none hidden"></span>
                             <div class="skill-tooltip">
-                                <div class="font-bold text-white text-base mb-2 border-b border-white/10 pb-2 flex items-center gap-2"><span class="ico ${s.icon} ${s.color}"></span> ${s.name}</div>
-                                <div class="text-gray-300 text-sm my-3 leading-relaxed whitespace-normal text-left">${s.desc}</div>
-                                <div class="text-mars-400 text-xs font-orbitron font-bold flex items-center gap-1 bg-black/50 p-2 rounded-lg border border-white/5"><i class="fa-solid fa-clock"></i> Откат: ${s.cd} сек</div>
+                                <div class="font-bold text-white text-sm mb-1.5 border-b border-white/10 pb-1.5 flex items-center justify-between gap-2">
+                                    <span class="flex items-center gap-2 truncate"><span class="ico ${s.icon} ${s.color}"></span> ${s.name}</span>
+                                    <span id="skill-tt-badge-${id}" class="text-[9px] uppercase font-orbitron px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">Готово</span>
+                                </div>
+                                <div class="text-gray-300 text-xs my-2 leading-relaxed whitespace-normal text-left">${s.desc}</div>
+                                <div class="flex items-center gap-2 mt-2 pt-2 border-t border-white/10 text-[10px] font-orbitron font-bold">
+                                    ${s.duration ? `<div class="text-cyan-300 flex items-center gap-1 bg-cyan-950/60 px-2 py-1 rounded border border-cyan-500/20"><i class="fa-solid fa-hourglass-half text-[9px]"></i> ${s.duration}с</div>` : ''}
+                                    <div class="text-mars-300 flex items-center gap-1 bg-black/60 px-2 py-1 rounded border border-white/10"><i class="fa-solid fa-rotate-right text-[9px]"></i> ${s.cd >= 60 ? (s.cd/60)+'м' : s.cd+'с'}</div>
+                                </div>
                             </div>
                         </button>
                     </div>`;
                 } else {
                     html += `
-                    <div class="skill-btn-wrapper group">
-                        <button onclick="buySkill('${id}')" class="locked-skill-btn md:p-3 md:justify-start md:gap-3 relative overflow-hidden">
-                            <i class="fa-solid fa-lock text-lg md:text-xl text-gray-500 z-10 relative"></i>
-                            <div class="hidden md:flex flex-col items-start z-10 text-left leading-tight pointer-events-none w-full ml-1">
-                                <span class="text-xs font-bold text-gray-300 whitespace-nowrap">${s.name}</span>
-                                <span class="text-[10px] text-gray-500 leading-snug line-clamp-2">${s.desc}</span>
-                                <span id="skill-price-${id}" class="text-[11px] mt-0.5 font-bold tracking-widest flex items-center gap-1 ${state.res.min >= s.cost ? 'text-mars-400' : 'text-gray-500'}"><i class="fa-solid fa-lock text-[8px]"></i>${formatNum(s.cost)} Мин.</span>
-                            </div>
+                    <div class="skill-btn-wrapper group relative" id="skill-wrapper-${id}">
+                        <button onclick="buySkill('${id}')" class="locked-skill-btn relative overflow-hidden" aria-label="Открыть ${s.name}" title="Открыть ${s.name}">
+                            <i class="fa-solid fa-lock text-lg md:text-xl text-gray-500 z-10 relative flex-shrink-0 pointer-events-none"></i>
                             <div class="skill-tooltip">
-                                <div class="font-bold text-gray-400 text-base mb-2 border-b border-white/10 pb-2"><i class="fa-solid fa-lock"></i> Недоступно</div>
-                                <div class="text-gray-300 text-sm my-3 leading-relaxed whitespace-normal text-left">${s.desc}</div>
-                                <div class="text-mars-400 text-xs font-bold mt-2 pt-2 border-t border-white/10 flex items-center gap-1 bg-black/50 p-2 rounded-lg border border-white/5">Цена: ${formatNum(s.cost)} Мин.</div>
+                                <div class="font-bold text-gray-200 text-sm mb-1.5 border-b border-white/10 pb-1.5 flex items-center justify-between gap-2">
+                                    <span class="flex items-center gap-2 truncate"><i class="fa-solid fa-lock text-amber-400"></i> ${s.name}</span>
+                                    <span class="text-[9px] uppercase font-orbitron px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold">Закрыто</span>
+                                </div>
+                                <div class="text-gray-300 text-xs my-2 leading-relaxed whitespace-normal text-left">${s.desc}</div>
+                                <div class="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-white/10 text-[10px]">
+                                    <div class="text-mars-400 font-bold font-orbitron flex items-center gap-1">
+                                        <span class="text-gray-400">Цена:</span> ${formatNum(s.cost)} Мин.
+                                    </div>
+                                    ${s.duration ? `<div class="text-cyan-300 font-orbitron font-bold"><i class="fa-solid fa-hourglass-half text-[9px] mr-1"></i>${s.duration}с</div>` : ''}
+                                </div>
                             </div>
-                            <div class="absolute bottom-0 left-0 h-[3px] bg-white/10 z-20" style="width: 100%">
-                                <div id="skill-prog-${id}" class="h-full ${state.res.min >= s.cost ? 'bg-mars-500' : 'bg-white/15'}" style="width: ${Math.min(100, (state.res.min / s.cost) * 100)}%"></div>
+                            <div class="absolute bottom-0 left-0 h-[3px] bg-white/10 z-20 w-full">
+                                <div id="skill-prog-${id}" class="h-full transition-all duration-200 ${state.res.min >= s.cost ? 'bg-mars-500 shadow-[0_0_8px_rgba(229,89,52,0.8)]' : 'bg-white/15'}" style="width: ${Math.min(100, (state.res.min / s.cost) * 100)}%"></div>
                             </div>
                         </button>
                     </div>`;
@@ -1837,7 +1927,7 @@
             }
             container.innerHTML = html;
             container.querySelectorAll(':scope > .skill-btn-wrapper').forEach((el, i) => {
-                el.style.animationDelay = (i * 0.06) + 's';
+                el.style.animationDelay = (i * 0.05) + 's';
                 el.classList.add('skill-in');
             });
         }
@@ -1869,78 +1959,143 @@
                     if(prog) {
                         const can = state.res.min >= s.cost;
                         prog.style.width = Math.min(100, (state.res.min / s.cost) * 100) + '%';
-                        prog.classList.toggle('bg-mars-500', can);
-                        prog.classList.toggle('bg-white/15', !can);
-                        const priceEl = document.getElementById(`skill-price-${id}`);
-                        if(priceEl) {
-                            priceEl.classList.toggle('text-mars-400', can);
-                            priceEl.classList.toggle('text-gray-500', !can);
-                        }
+                        prog.className = `h-full transition-all duration-200 ${can ? 'bg-mars-500 shadow-[0_0_8px_rgba(229,89,52,0.8)]' : 'bg-white/15'}`;
                     }
                     continue;
                 }
 
                 const cdTime = s.cd * 1000;
-                const elapsed = now - (state.skills[id] || 0);
+                const lastUsed = state.skills ? (state.skills[id] || 0) : 0;
+                const elapsed = now - lastUsed;
                 const onCd = elapsed < cdTime;
-                const cdPct = onCd ? 100 - (elapsed / cdTime) * 100 : 0;
+                const isActive = s.duration ? (elapsed < s.duration * 1000) : false;
+                const cdPct = onCd ? Math.max(0, Math.min(100, ((cdTime - elapsed) / cdTime) * 100)) : 0;
                 
                 const btn = document.getElementById(`skill-btn-${id}`);
                 const cdBar = document.getElementById(`skill-cd-${id}`);
-                const statusTxt = document.getElementById(`skill-status-${id}`);
+                const timerEl = document.getElementById(`skill-timer-${id}`);
+                const badgeEl = document.getElementById(`skill-tt-badge-${id}`);
                 
-                if (btn && cdBar && statusTxt) {
+                if (btn && cdBar) {
                     cdBar.style.height = `${cdPct}%`;
-                    if (onCd) {
-                        btn.classList.add('opacity-50', 'cursor-not-allowed', 'border-white/5');
+                    
+                    if (isActive) {
+                        btn.classList.remove('opacity-60', 'cursor-not-allowed', 'border-white/10');
+                        btn.classList.add('border-cyan-400', 'shadow-[0_0_16px_rgba(34,211,238,0.6)]');
+                        const remainingActive = Math.ceil((s.duration * 1000 - elapsed) / 1000);
+                        if (timerEl) {
+                            timerEl.classList.remove('hidden');
+                            timerEl.className = 'absolute inset-0 flex items-center justify-center font-orbitron font-black text-xs text-cyan-300 z-20 skill-timer-overlay pointer-events-none drop-shadow-[0_0_6px_rgba(34,211,238,0.9)] animate-pulse';
+                            timerEl.innerText = `${remainingActive}с`;
+                        }
+                        if (badgeEl) {
+                            badgeEl.className = 'text-[9px] uppercase font-orbitron px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold';
+                            badgeEl.innerText = `Активен (${remainingActive}с)`;
+                        }
+                    } else if (onCd) {
+                        btn.classList.remove('border-cyan-400', 'shadow-[0_0_16px_rgba(34,211,238,0.6)]');
+                        btn.classList.add('opacity-60', 'cursor-not-allowed', 'border-white/10');
                         btn.classList.remove(...s.border.split(' '));
                         
                         const remainingSec = Math.ceil((cdTime - elapsed) / 1000);
                         let timeStr = "";
-                        if (remainingSec >= 60) {
+                        if (remainingSec >= 3600) {
+                            const h = Math.floor(remainingSec / 3600);
+                            const m = Math.floor((remainingSec % 3600) / 60);
+                            timeStr = `${h}ч`;
+                        } else if (remainingSec >= 60) {
                             const m = Math.floor(remainingSec / 60);
                             const sec = remainingSec % 60;
-                            timeStr = `${m}м ${sec}с`;
+                            timeStr = sec > 0 ? `${m}м` : `${m}м`;
                         } else {
                             timeStr = `${remainingSec}с`;
                         }
-                        statusTxt.innerText = timeStr;
+                        
+                        if (timerEl) {
+                            timerEl.classList.remove('hidden');
+                            timerEl.className = 'absolute inset-0 flex items-center justify-center font-orbitron font-bold text-[11px] text-white/90 z-20 skill-timer-overlay pointer-events-none drop-shadow-md';
+                            timerEl.innerText = timeStr;
+                        }
+                        if (badgeEl) {
+                            badgeEl.className = 'text-[9px] uppercase font-orbitron px-1.5 py-0.5 rounded bg-black/40 text-gray-400 border border-white/10 font-bold';
+                            badgeEl.innerText = `Откат ${timeStr}`;
+                        }
                     } else {
-                        btn.classList.remove('opacity-50', 'cursor-not-allowed', 'border-white/5');
+                        btn.classList.remove('opacity-60', 'cursor-not-allowed', 'border-white/10', 'border-cyan-400', 'shadow-[0_0_16px_rgba(34,211,238,0.6)]');
                         btn.classList.add(...s.border.split(' '));
-                        statusTxt.innerText = 'Готово';
+                        
+                        if (timerEl) {
+                            timerEl.classList.add('hidden');
+                            timerEl.innerText = '';
+                        }
+                        if (badgeEl) {
+                            badgeEl.className = 'text-[9px] uppercase font-orbitron px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold';
+                            badgeEl.innerText = 'Готово';
+                        }
                     }
-                    if (id === 'strike') {
-                        btn.classList.toggle('skill-ready-pulse', !onCd);
-                    }
+                    
+                    btn.classList.toggle('skill-ready-pulse', !onCd && !isActive);
                 }
             }
         }
 
         function castSkill(id) {
             tutorialAction('skill');
-            const now = Date.now(), skill = SKILLS[id];
-            let cdTime = skill.cd * 1000;
-            if (now - (state.skills[id] || 0) < cdTime) return;
+            const skill = SKILLS[id];
+            if (!skill) return;
+            
+            const isUnlocked = state.skillsUnlocked ? state.skillsUnlocked[id] : skill.unlocked;
+            if (!isUnlocked) {
+                buySkill(id);
+                return;
+            }
+            
+            const now = Date.now();
+            const cdTime = skill.cd * 1000;
+            const lastUsed = state.skills ? (state.skills[id] || 0) : 0;
+            if (now - lastUsed < cdTime) {
+                const remSec = Math.ceil((cdTime - (now - lastUsed)) / 1000);
+                showToast(`Навык «${skill.name}» на перезарядке (${remSec}с)`);
+                playSFX('error');
+                return;
+            }
+            
+            state.skills = state.skills || {};
             state.skills[id] = now;
             
             if(id === 'strike') {
-                const amount = Math.max(100, calc.rate.min * 900);
+                const amount = Math.max(100, (calc.rate.min || 0) * 900);
                 state.res.min += amount;
                 addLifetimeMin(amount);
-                showToast("Удар: +" + formatNum(amount) + " Мин.");
+                showToast("Орбитальный удар: +" + formatNum(amount) + " Мин.");
                 
                 const f = document.createElement('div');
                 f.className = 'fixed inset-0 bg-white z-50 mix-blend-overlay opacity-100 pointer-events-none transition-opacity duration-300';
                 document.body.appendChild(f);
                 setTimeout(() => f.style.opacity = '0', 50);
                 setTimeout(() => f.remove(), 350);
-            }
-            if(id === 'coolant') { heat = 0; isOverheated = false; updateHeatUI(); document.getElementById('heat-warning').classList.add('hidden'); }
-            if(id === 'overdrive') recalculate();
-            if(id === 'timewarp') {
-                const amountMin = calc.rate.min * 7200; 
-                const amountSci = calc.rate.sci * 7200;
+                playSFX('epic');
+            } else if(id === 'freeze') {
+                showToast("Крио-Заморозка: рост тепла остановлен на 30 сек!");
+                playSFX('skill');
+            } else if(id === 'swarm') {
+                showToast("Нано-Рой: 8 авто-кликов/сек на 12 сек!");
+                playSFX('skill');
+            } else if(id === 'coolant') {
+                heat = 0;
+                isOverheated = false;
+                updateHeatUI();
+                const hw = document.getElementById('heat-warning');
+                if (hw) hw.classList.add('hidden');
+                showToast("Сброс Тепла: температура ядра 0%!");
+                playSFX('skill');
+            } else if(id === 'overdrive') {
+                recalculate();
+                showToast("Перегрузка: сила клика x10 на 15 сек!");
+                playSFX('epic');
+            } else if(id === 'timewarp') {
+                const amountMin = Math.max(100, (calc.rate.min || 0) * 7200); 
+                const amountSci = Math.max(50, (calc.rate.sci || 0) * 7200);
                 state.res.min += amountMin;
                 state.res.sci += amountSci;
                 addLifetimeMin(amountMin);
@@ -1950,6 +2105,7 @@
                 playSFX('skill');
             }
             
+            recalculate();
             updateSkillsUI();
             saveGame();
         }
@@ -3006,7 +3162,8 @@
             state.tech = {};
             state.skills = { ...DEFAULT_SKILLS };
             state.skillsUnlocked = { ...DEFAULT_SKILLS_UNLOCKED };
-            skillActive = {};
+            initSkills();
+            updateSkillsUI();
             state.planet = 'mars';
             state.unlockedPlanets = { mars: true };
             state.stats.totalMin = 0;
@@ -4553,9 +4710,15 @@
             updateFPSHud();
         }
         function updateFPSHud() {
-            const el=document.getElementById('fps-hud'); 
-            if(el) {
-                el.textContent=`FPS ${Math.round(perfState.fps||0)} · ${perfState.low?'LOW':'HIGH'}`; 
+            const textEl = document.getElementById('fps-hud-text');
+            const el = document.getElementById('fps-hud'); 
+            const text = `FPS ${Math.round(perfState.fps||0)} · ${perfState.low?'LOW':'HIGH'}`;
+            if (textEl) {
+                textEl.textContent = text;
+            } else if (el) {
+                el.textContent = text;
+            }
+            if (el) {
                 if (perfState.low) {
                     el.classList.add('text-yellow-400');
                     el.classList.remove('text-a7f3d0');
@@ -4564,6 +4727,176 @@
                     el.classList.add('text-a7f3d0');
                 }
             }
+        }
+        function initDraggableFpsHud() {
+            const el = document.getElementById('fps-hud');
+            if (!el) return;
+            const STORAGE_KEY = 'mars_fps_hud_pos';
+            try {
+                const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+                if (saved && typeof saved.x === 'number' && typeof saved.y === 'number') {
+                    const maxX = Math.max(0, window.innerWidth - (el.offsetWidth || 100) - 8);
+                    const maxY = Math.max(0, window.innerHeight - (el.offsetHeight || 28) - 8);
+                    const clampedX = Math.max(8, Math.min(saved.x, maxX));
+                    const clampedY = Math.max(8, Math.min(saved.y, maxY));
+                    el.style.left = `${clampedX}px`;
+                    el.style.top = `${clampedY}px`;
+                    el.style.right = 'auto';
+                    el.style.bottom = 'auto';
+                }
+            } catch(e) {}
+
+            let isDragging = false;
+            let startX = 0, startY = 0;
+            let initialLeft = 0, initialTop = 0;
+
+            el.addEventListener('pointerdown', e => {
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                isDragging = true;
+                el.classList.add('dragging');
+                try { el.setPointerCapture(e.pointerId); } catch(err) {}
+
+                const rect = el.getBoundingClientRect();
+                startX = e.clientX;
+                startY = e.clientY;
+                initialLeft = rect.left;
+                initialTop = rect.top;
+
+                el.style.left = `${initialLeft}px`;
+                el.style.top = `${initialTop}px`;
+                el.style.right = 'auto';
+                el.style.bottom = 'auto';
+                e.preventDefault();
+            });
+
+            el.addEventListener('pointermove', e => {
+                if (!isDragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                const maxLeft = Math.max(0, window.innerWidth - el.offsetWidth - 8);
+                const maxTop = Math.max(0, window.innerHeight - el.offsetHeight - 8);
+                const newLeft = Math.max(8, Math.min(initialLeft + dx, maxLeft));
+                const newTop = Math.max(8, Math.min(initialTop + dy, maxTop));
+
+                el.style.left = `${newLeft}px`;
+                el.style.top = `${newTop}px`;
+            });
+
+            const stopDragging = e => {
+                if (!isDragging) return;
+                isDragging = false;
+                el.classList.remove('dragging');
+                try {
+                    if (e && e.pointerId) el.releasePointerCapture(e.pointerId);
+                } catch(err) {}
+                const rect = el.getBoundingClientRect();
+                try {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify({ x: Math.round(rect.left), y: Math.round(rect.top) }));
+                } catch(e) {}
+            };
+
+            el.addEventListener('pointerup', stopDragging);
+            el.addEventListener('pointercancel', stopDragging);
+
+            window.addEventListener('resize', () => {
+                const rect = el.getBoundingClientRect();
+                const maxLeft = Math.max(0, window.innerWidth - el.offsetWidth - 8);
+                const maxTop = Math.max(0, window.innerHeight - el.offsetHeight - 8);
+                if (rect.left > maxLeft || rect.top > maxTop) {
+                    const clampX = Math.max(8, Math.min(rect.left, maxLeft));
+                    const clampY = Math.max(8, Math.min(rect.top, maxTop));
+                    el.style.left = `${clampX}px`;
+                    el.style.top = `${clampY}px`;
+                    el.style.right = 'auto';
+                    el.style.bottom = 'auto';
+                }
+            });
+        }
+        function initResizableSidebar() {
+            const resizer = document.getElementById('sidebar-resizer');
+            const container = document.getElementById('game-sidebar-container');
+            if (!resizer || !container) return;
+
+            const STORAGE_KEY = 'mars_sidebar_width';
+            const DEFAULT_WIDTH = 520;
+            const MIN_WIDTH = 340;
+
+            function getMaxWidth() {
+                return Math.max(MIN_WIDTH, Math.min(window.innerWidth * 0.82, window.innerWidth - 320));
+            }
+
+            function setWidth(w, save = false) {
+                const maxW = getMaxWidth();
+                const clamped = Math.max(MIN_WIDTH, Math.min(w, maxW));
+                document.documentElement.style.setProperty('--sidebar-width', `${clamped}px`);
+                if (save) {
+                    try { localStorage.setItem(STORAGE_KEY, clamped.toString()); } catch(e) {}
+                }
+                if (typeof updateCameraTarget === 'function') updateCameraTarget();
+            }
+
+            // Restore saved width
+            try {
+                const saved = parseInt(localStorage.getItem(STORAGE_KEY), 10);
+                if (!isNaN(saved) && saved >= MIN_WIDTH) {
+                    setWidth(saved, false);
+                }
+            } catch(e) {}
+
+            let isResizing = false;
+            let startX = 0;
+            let startWidth = DEFAULT_WIDTH;
+
+            resizer.addEventListener('pointerdown', e => {
+                if (e.pointerType === 'mouse' && e.button !== 0) return;
+                if (window.innerWidth < 768 && state.uiMode !== 'pc') return;
+
+                isResizing = true;
+                document.body.classList.add('resizing-sidebar');
+                try { resizer.setPointerCapture(e.pointerId); } catch(err) {}
+
+                startX = e.clientX;
+                startWidth = container.getBoundingClientRect().width;
+                e.preventDefault();
+            });
+
+            resizer.addEventListener('pointermove', e => {
+                if (!isResizing) return;
+                const deltaX = startX - e.clientX;
+                const newWidth = startWidth + deltaX;
+                setWidth(newWidth, false);
+            });
+
+            const stopResizing = e => {
+                if (!isResizing) return;
+                isResizing = false;
+                document.body.classList.remove('resizing-sidebar');
+                try {
+                    if (e && e.pointerId) resizer.releasePointerCapture(e.pointerId);
+                } catch(err) {}
+                const finalWidth = container.getBoundingClientRect().width;
+                setWidth(finalWidth, true);
+            };
+
+            resizer.addEventListener('pointerup', stopResizing);
+            resizer.addEventListener('pointercancel', stopResizing);
+
+            // Double-click to reset width to default
+            resizer.addEventListener('dblclick', () => {
+                setWidth(DEFAULT_WIDTH, true);
+                if (typeof showToast === 'function') {
+                    showToast('Ширина панели сброшена (520px)');
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth < 768 && state.uiMode !== 'pc') return;
+                const curW = container.getBoundingClientRect().width;
+                const maxW = getMaxWidth();
+                if (curW > maxW) {
+                    setWidth(maxW, false);
+                }
+            });
         }
         function startStage8Loops() {
             if (document.hidden) return;
@@ -4602,6 +4935,35 @@
         document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeDrawers(); if(!document.getElementById('generic-modal')?.classList.contains('hidden')) closeModal(); } });
         let scene, camera, renderer, marsMesh, atmosMesh, phobosMesh, rimLight, wireMesh, sunGlow, ringsMesh;
         let targetCameraX = 0, targetCameraY = 0;
+        let mouseParallaxX = 0, mouseParallaxY = 0;
+
+        function isMobileLayout() {
+            if (state.uiMode === 'pc') return false;
+            if (state.uiMode === 'mobile') return true;
+            return window.innerWidth < 768;
+        }
+
+        function getBaseCameraX() {
+            if (isMobileLayout() || state.moveCoreOnResize === false) {
+                return 0;
+            }
+            const container = document.getElementById('game-sidebar-container');
+            const sidebarWidth = container ? container.getBoundingClientRect().width : 520;
+            const totalW = window.innerWidth;
+            if (totalW <= 768) return 0;
+            
+            const pxOffset = -(sidebarWidth / 2);
+            const fovRad = (45 * Math.PI) / 180;
+            const visibleWidth = 2 * Math.tan(fovRad / 2) * 22;
+            const worldOffset = (pxOffset / totalW) * visibleWidth;
+            return -worldOffset;
+        }
+
+        function updateCameraTarget() {
+            const baseCamX = getBaseCameraX();
+            targetCameraX = baseCamX + mouseParallaxX;
+            targetCameraY = mouseParallaxY;
+        }
 
         function init3D() {
             scene = new THREE.Scene();
@@ -4609,7 +4971,7 @@
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.z = 22;
             
-            const initialCamX = window.innerWidth > 768 ? -6 : 0;
+            const initialCamX = getBaseCameraX();
             camera.position.x = initialCamX;
             targetCameraX = initialCamX;
 
@@ -4721,10 +5083,9 @@
 
             window.addEventListener('resize', () => {
                 camera.aspect = window.innerWidth / window.innerHeight;
-                const baseCamX = window.innerWidth > 768 ? -6 : 0;
-                targetCameraX = baseCamX;
                 camera.updateProjectionMatrix();
                 renderer.setSize(window.innerWidth, window.innerHeight);
+                updateCameraTarget();
                 resizeCanvas();
             });
             
@@ -4732,9 +5093,9 @@
             document.addEventListener('mousemove', (e) => {
                 const mouseX = (e.clientX / window.innerWidth) * 2 - 1;
                 const mouseY = -(e.clientY / window.innerHeight) * 2 + 1;
-                const baseCamX = window.innerWidth > 768 ? -6 : 0;
-                targetCameraX = baseCamX + mouseX * 1.5;
-                targetCameraY = mouseY * 1.5;
+                mouseParallaxX = mouseX * 1.5;
+                mouseParallaxY = mouseY * 1.5;
+                updateCameraTarget();
             });
 
             startStage8Loops();
@@ -4881,6 +5242,7 @@
             // STAGE 7: cloud/local reconciliation completes before migration and offline calculation.
             await bootstrapPersistence();
             loadGame(); 
+            applyCoreLayoutMode();
             init3D();
             updatePlanetVisuals();
             resizeCanvas();
@@ -4900,6 +5262,8 @@
             document.body.classList.toggle('perf-low', perfState.low);
             state.performance.resolved = perfState.low ? 'low' : 'high';
             updateFPSHud();
+            initDraggableFpsHud();
+            initResizableSidebar();
             setTimeout(renderTutorial, 500);
             // STAGE 6: первый оффер планируется на 10–20 минут активной видимой игры.
             scheduleNextRandomEvent();

@@ -1,12 +1,8 @@
-# Local tooling / scratch — not part of the game deploy
-postman/
-.postman/
-opencode.json
-setup_libs.ps1
-{
-
-# Redundant mirror of the inline <script> in index.html (kept locally for `node --check`)
-stage8_syntax.js
-
-# Local archives and generated packages
-*.zip
+node_modules/
+build/
+dist/
+coverage/
+.DS_Store
+*.log
+.env*
+!.env.example

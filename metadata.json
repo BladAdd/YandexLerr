@@ -1,0 +1,6 @@
+{
+  "name": "Марсианский Магнат: Сингулярность",
+  "description": "Инкрементальная научно-фантастическая игра про колонизацию Марса, автоматизацию добычи ресурсов и достижение сингулярности.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
