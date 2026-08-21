@@ -434,6 +434,8 @@
                 incomePerCore: 0.1, rewardedCoreBonus: 1,
                 flashFadeInMs: 50, flashHoldMs: 250, flashFadeOutMs: 700
             }),
+            // STAGE 3: честный оффлайн-доход по сохранённому snapshot.
+            offline: Object.freeze({ thresholdSeconds: 60, maxSeconds: 8 * 60 * 60, rewardedMultiplier: 2 }),
             casino: Object.freeze({
                 unlockLifetimeMin: 100000,
                 slots: Object.freeze({
@@ -588,8 +590,8 @@
             { id: 'q14', name: 'Повелитель Времени', desc: 'Собрать 1 Квинтиллион мин.', type: 'min', target: 1e18, reward: {prm: 2500} }
         ];
 
-        // STAGE 2: версия нужна для без потерь миграции старых сохранений к ядрам.
-        const SAVE_VERSION = 2;
+        // STAGE 3: версия добавляет timestamp, snapshot дохода и отложенную оффлайн-награду.
+        const SAVE_VERSION = 3;
         const DEFAULT_SKILLS = Object.freeze({ strike: 0, freeze: 0, swarm: 0, coolant: 0, overdrive: 0, timewarp: 0 });
         const DEFAULT_SKILLS_UNLOCKED = Object.freeze({ strike: true, freeze: false, swarm: false, coolant: false, overdrive: false, timewarp: false });
 
@@ -601,6 +603,8 @@
             stats: { totalTime: 0, clicks: 0, totalMin: 0, totalLifetime: 0 },
             rebirth: { count: 0, darkMatter: 0 },
             prestige: { cores: 0, count: 0, adCoreReady: false },
+            // STAGE 3: snapshot относится именно к моменту lastSavedAt; pending переживает перезагрузку до выбора.
+            offline: { lastSavedAt: Date.now(), incomeSnapshot: { min: 0, sci: 0 }, pending: null },
             skillsUnlocked: { ...DEFAULT_SKILLS_UNLOCKED },
             skillsVisible: true,
             questsCompleted: {},
@@ -613,6 +617,8 @@
         };
         
         let displayState = { res: { min: 0, sci: 0, prm: 50 }, darkMatter: 0 };
+        let legacyOfflineMigration = false;
+        let offlineClaimLocked = false;
 
         let currentTab = 'build';
         let sfx = {};
@@ -671,7 +677,13 @@
         }
 
         function showRewardedVideo(callback) {
-            if (!ysdk || !ysdk.adv) { callback(true); return; }
+            let completed = false;
+            const finish = success => {
+                if (completed) return;
+                completed = true;
+                callback(success);
+            };
+            if (!ysdk || !ysdk.adv) { finish(true); return; }
             let rewarded = false;
             try {
                 ysdk.adv.showRewardedVideo({
@@ -680,12 +692,12 @@
                         onRewarded: () => { rewarded = true; },
                         onClose: () => {
                             if (ysdk.gameplayStart) ysdk.gameplayStart();
-                            callback(rewarded);
+                            finish(rewarded);
                         },
-                        onError: () => { if (ysdk.gameplayStart) ysdk.gameplayStart(); callback(false); }
+                        onError: () => { if (ysdk.gameplayStart) ysdk.gameplayStart(); finish(false); }
                     }
                 });
-            } catch(e) { callback(true); }
+            } catch(e) { finish(true); }
         }
 
         let lastInterstitialAt = Date.now();
@@ -800,6 +812,15 @@
                     state.stats = { ...defaults.stats, ...(parsed.stats || {}) };
                     state.rebirth = { ...defaults.rebirth, ...(parsed.rebirth || {}) };
                     state.prestige = { ...defaults.prestige, ...(parsed.prestige || {}) };
+                    const parsedOffline = parsed.offline || {};
+                    legacyOfflineMigration = !parsed.offline;
+                    state.offline = {
+                        ...defaults.offline,
+                        ...parsedOffline,
+                        lastSavedAt: Number(parsedOffline.lastSavedAt || parsed.lastTick || Date.now()),
+                        incomeSnapshot: { ...defaults.offline.incomeSnapshot, ...(parsedOffline.incomeSnapshot || {}) },
+                        pending: parsedOffline.pending || null
+                    };
                     state.skillsUnlocked = { ...DEFAULT_SKILLS_UNLOCKED, ...(parsed.skillsUnlocked || {}) };
                     state.questsCompleted = { ...(parsed.questsCompleted || {}) };
                     state.unlockedPlanets = { mars: true, ...(parsed.unlockedPlanets || {}) };
@@ -817,21 +838,7 @@
                     if(sndIcon) sndIcon.className = state.soundEnabled ? "fa-solid fa-volume-high" : "fa-solid fa-volume-xmark";
 
                     recalculate();
-                    
-                    let now = Date.now();
-                    let diffSec = (now - state.lastTick) / 1000;
-                    if (diffSec > 60) {
-                        diffSec = Math.min(diffSec, 86400); 
-                        let offMin = calc.rate.min * diffSec;
-                        let offSci = calc.rate.sci * diffSec;
-                        
-                        if (offMin > 0 || offSci > 0) {
-                            state.res.min += offMin;
-                            state.res.sci += offSci;
-                            addLifetimeMin(offMin);
-                            showOfflineModal(diffSec, offMin, offSci);
-                        }
-                    }
+                    prepareOfflineReward(Date.now());
                 } catch(e) { console.error("Save Error", e); }
             }
             
@@ -842,12 +849,47 @@
         try { localStorage.setItem('__mars_t', '1'); localStorage.removeItem('__mars_t'); } catch(e) { storageOk = false; }
 
         function saveGame() {
-            state.lastTick = Date.now();
+            const now = Date.now();
+            state.lastTick = now;
             state.adBuffTimer = adBuffTimer;
+            state.offline = state.offline || { lastSavedAt: now, incomeSnapshot: { min: 0, sci: 0 }, pending: null };
+            state.offline.lastSavedAt = now;
+            state.offline.incomeSnapshot = {
+                min: Math.max(0, Number(calc.rate.min) || 0),
+                sci: Math.max(0, Number(calc.rate.sci) || 0)
+            };
             if (storageOk) {
                 try { localStorage.setItem('marsMagnateSave', JSON.stringify(state)); } catch(e) {}
             }
             queueCloudSave();
+        }
+
+        // STAGE 3: создаём отложенную награду из сохранённого snapshot, не начисляя её до выбора.
+        function prepareOfflineReward(now) {
+            const offline = state.offline;
+            if (!offline) return;
+            if (offline.pending) {
+                saveGame();
+                showOfflineModal();
+                return;
+            }
+
+            const actualSeconds = Math.max(0, (now - Number(offline.lastSavedAt || now)) / 1000);
+            const cappedSeconds = Math.min(actualSeconds, BALANCE.offline.maxSeconds);
+            const snapshot = legacyOfflineMigration
+                ? { min: Math.max(0, Number(calc.rate.min) || 0), sci: Math.max(0, Number(calc.rate.sci) || 0) }
+                : offline.incomeSnapshot;
+            const reward = {
+                min: Math.max(0, Number(snapshot.min) || 0) * cappedSeconds,
+                sci: Math.max(0, Number(snapshot.sci) || 0) * cappedSeconds
+            };
+            legacyOfflineMigration = false;
+
+            if (actualSeconds > BALANCE.offline.thresholdSeconds && (reward.min > 0 || reward.sci > 0)) {
+                offline.pending = { actualSeconds, cappedSeconds, reward };
+            }
+            saveGame();
+            if (offline.pending) showOfflineModal();
         }
 
         function addLifetimeMin(amount) {
@@ -1057,17 +1099,8 @@
             const now = Date.now();
             state.lastTick = now;
 
-            if (rawDelta > 2) {
-                const cap = Math.min(rawDelta, 86400);
-                const bgMin = calc.rate.min * cap;
-                const bgSci = calc.rate.sci * cap;
-                if (bgMin > 0 || bgSci > 0) {
-                    state.res.min += bgMin;
-                    addLifetimeMin(bgMin);
-                    state.res.sci += bgSci;
-                    showToast("Колония работала без вас: +" + formatNum(bgMin) + " Мин, +" + formatNum(bgSci) + " Науки");
-                }
-            }
+            // STAGE 3: пауза вкладки считается только через сохранённый snapshot и модалку выбора.
+            if (document.hidden || rawDelta > 2) return;
 
             submitTimer += delta;
             if (submitTimer >= 60) { submitTimer = 0; submitLeaderboard(); }
@@ -2899,34 +2932,71 @@
         style.innerHTML = `@keyframes modalOut { 0% { opacity: 1; transform: scale(1) translateY(0); } 100% { opacity: 0; transform: scale(0.9) translateY(20px); } }`;
         document.head.appendChild(style);
 
-        function showOfflineModal(seconds, min, sci) {
+        // STAGE 3: одноразовая модалка; награда находится в save до атомарного claim.
+        function formatOfflineDuration(seconds) {
+            const total = Math.max(0, Math.floor(seconds));
+            const hours = Math.floor(total / 3600);
+            const mins = Math.floor((total % 3600) / 60);
+            const secs = total % 60;
+            return [hours ? `${hours} ч` : '', mins ? `${mins} мин` : '', (!hours && secs) ? `${secs} сек` : ''].filter(Boolean).join(' ');
+        }
+
+        function showOfflineModal() {
+            const pending = state.offline && state.offline.pending;
+            if (!pending) return;
             const modal = document.getElementById('generic-modal');
             const content = document.getElementById('modal-content');
-            let hours = Math.floor(seconds / 3600);
-            let mins = Math.floor((seconds % 3600) / 60);
-            let timeStr = hours > 0 ? `${hours} ч. ${mins} м.` : `${mins} м.`;
-            
+            const reward = pending.reward || { min: 0, sci: 0 };
+            const cappedNote = pending.actualSeconds > pending.cappedSeconds ? `<div class="text-[10px] text-gold-400 mt-2">Награда ограничена ${formatOfflineDuration(BALANCE.offline.maxSeconds)}</div>` : '';
             content.innerHTML = `
                 <div class="text-center">
-                    <i class="fa-solid fa-moon text-5xl text-blue-400 mb-6 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-pulse"></i>
-                    <h3 class="font-orbitron font-black text-2xl text-white mb-3 tracking-wide">Вы вернулись!</h3>
-                    <p class="text-sm text-gray-300 mb-8">Ваша колония работала без вас: <span class="font-bold text-white">${timeStr}</span></p>
-                    <div class="grid grid-cols-2 gap-4 mb-8">
+                    <i class="fa-solid fa-moon text-5xl text-blue-400 mb-5 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)] animate-pulse"></i>
+                    <h3 class="font-orbitron font-black text-2xl text-white mb-3 tracking-wide">Пока тебя не было</h3>
+                    <p class="text-sm text-gray-300 mb-2">Колония работала <span class="font-bold text-white">${formatOfflineDuration(pending.actualSeconds)}</span></p>
+                    ${cappedNote}
+                    <div class="grid grid-cols-2 gap-4 my-7">
                         <div class="bg-black/50 border border-white/10 rounded-2xl p-4 flex flex-col items-center shadow-inner">
-                            <span class="ico ico-mineral text-mars-400 text-2xl mb-2 drop-shadow-[0_0_10px_rgba(229,89,52,0.8)]"></span>
-                            <span class="text-base font-black text-white">+${formatNum(min)}</span>
-                            <span class="text-[9px] text-gray-500 uppercase font-bold mt-1">Минералы</span>
+                            <span class="ico ico-mineral text-mars-400 text-2xl mb-2"></span><span class="text-base font-black text-white">+${formatNum(reward.min)}</span><span class="text-[9px] text-gray-500 uppercase font-bold mt-1">Минералы</span>
                         </div>
                         <div class="bg-black/50 border border-white/10 rounded-2xl p-4 flex flex-col items-center shadow-inner">
-                            <span class="ico ico-science text-sci-400 text-2xl mb-2 drop-shadow-[0_0_10px_rgba(74,222,128,0.8)]"></span>
-                            <span class="text-base font-black text-white">+${formatNum(sci)}</span>
-                            <span class="text-[9px] text-gray-500 uppercase font-bold mt-1">Наука</span>
+                            <span class="ico ico-science text-sci-400 text-2xl mb-2"></span><span class="text-base font-black text-white">+${formatNum(reward.sci)}</span><span class="text-[9px] text-gray-500 uppercase font-bold mt-1">Наука</span>
                         </div>
                     </div>
-                    <button onclick="closeModal()" class="w-full bg-gradient-to-r from-mars-600 to-mars-500 hover:from-mars-500 hover:to-mars-400 text-white py-4 rounded-xl font-bold font-orbitron uppercase tracking-widest transition-all shadow-[0_0_20px_rgba(229,89,52,0.5)] hover:shadow-[0_0_30px_rgba(229,89,52,0.8)] btn-shine">Продолжить</button>
-                </div>
-            `;
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button id="offline-claim-btn" onclick="claimOfflineReward(false)" class="bg-gradient-to-r from-mars-600 to-mars-500 text-white py-4 rounded-xl font-bold font-orbitron uppercase tracking-wider transition-all btn-shine">Забрать</button>
+                        <button id="offline-ad-btn" onclick="claimOfflineReward(true)" class="bg-gradient-to-r from-green-600 to-emerald-500 text-white py-4 rounded-xl font-bold font-orbitron uppercase tracking-wider transition-all btn-shine"><i class="fa-solid fa-video mr-2"></i>x${BALANCE.offline.rewardedMultiplier} за рекламу</button>
+                    </div>
+                </div>`;
             modal.classList.remove('hidden');
+        }
+
+        function claimOfflineReward(withRewarded) {
+            if (offlineClaimLocked || !state.offline || !state.offline.pending) return;
+            offlineClaimLocked = true;
+            document.querySelectorAll('#offline-claim-btn, #offline-ad-btn').forEach(btn => btn.disabled = true);
+            const finish = multiplier => {
+                const pending = state.offline && state.offline.pending;
+                if (!pending) return;
+                const reward = pending.reward || { min: 0, sci: 0 };
+                state.offline.pending = null;
+                state.res.min += reward.min * multiplier;
+                state.res.sci += reward.sci * multiplier;
+                addLifetimeMin(reward.min * multiplier);
+                saveGame();
+                updateHeaderUI();
+                closeModal();
+                showToast(`Оффлайн-награда x${multiplier} получена`);
+                playSFX('epic');
+            };
+            if (!withRewarded) { finish(1); return; }
+            showRewardedVideo(success => {
+                if (success) finish(BALANCE.offline.rewardedMultiplier);
+                else {
+                    offlineClaimLocked = false;
+                    document.querySelectorAll('#offline-claim-btn, #offline-ad-btn').forEach(btn => btn.disabled = false);
+                    showToast('Реклама не досмотрена. Награда не начислена.');
+                }
+            });
         }
 
         function renderHQ(container) {
@@ -3905,10 +3975,13 @@
                 saveGame();
                 if (ysdk && ysdk.gameplayStop) { try { ysdk.gameplayStop(); } catch(e) {} }
             } else {
+                prepareOfflineReward(Date.now());
+                lastFrame = performance.now();
                 if (ysdk && ysdk.gameplayStart) { try { ysdk.gameplayStart(); } catch(e) {} }
             }
         });
         window.addEventListener('pagehide', () => saveGame());
+        window.addEventListener('beforeunload', () => saveGame());
     </script>
 </body>
 </html>
