@@ -196,6 +196,10 @@
         .reel-line { position: absolute; left: 0; right: 0; top: 50%; height: 96px; margin-top: -48px; border-top: 1px solid rgba(251,191,36,0.35); border-bottom: 1px solid rgba(251,191,36,0.35); pointer-events: none; z-index: 10; box-shadow: 0 0 18px rgba(251,191,36,0.15) inset; }
         .chip-btn { transition: all 0.15s ease; }
         .crash-flash-green, .crash-flash-red { position: absolute; inset: 0; pointer-events: none; z-index: 20; opacity: 0.55; transition: opacity 0.6s ease; }
+        .reel-line-win { border-color: rgba(251,191,36,0.95) !important; box-shadow: 0 0 16px rgba(251,191,36,0.55), 0 0 34px rgba(251,191,36,0.25) inset !important; animation: reelLinePulse 0.7s ease-in-out infinite alternate; }
+        @keyframes reelLinePulse { from { filter: brightness(1); } to { filter: brightness(1.55); } }
+        @keyframes symBounceKf { 0% { transform: scale(1); } 35% { transform: scale(1.28); } 65% { transform: scale(0.92); } 100% { transform: scale(1); } }
+        .sym-win { animation: symBounceKf 0.6s cubic-bezier(.34,1.56,.64,1); filter: drop-shadow(0 0 12px currentColor); }
         
         .btn-shine { position: relative; overflow: hidden; }
         .btn-shine::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%); transform: skewX(-20deg); animation: shimmer 3s infinite; pointer-events: none; }
@@ -225,16 +229,16 @@
         /* ------ PC LAYOUT ------ */
         body.ui-pc #game-main { display: flex; flex-direction: row; height: 100%; position: relative; }
         body.ui-pc #game-clicker-section { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; bottom: auto; padding-bottom: 2.5rem; }
-        body.ui-pc #game-sidebar-container { position: relative; width: 460px; height: 100%; flex: none; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(8, 12, 20, 0.75) 0%, rgba(2, 4, 8, 0.9) 100%); backdrop-filter: blur(16px) saturate(150%); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 20; overflow: hidden; }
-        body.ui-pc #main-nav { position: relative; width: 100%; height: auto; bottom: auto; background: rgba(0,0,0,0.4); border-top: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0; display: flex; overflow-x: auto; flex-shrink: 0; }
+        body.ui-pc #game-sidebar-container { position: relative; width: 520px; height: 100%; flex: none; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(8, 12, 20, 0.75) 0%, rgba(2, 4, 8, 0.9) 100%); backdrop-filter: blur(16px) saturate(150%); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 20; overflow: hidden; }
+        body.ui-pc #main-nav { position: relative; width: 100%; height: auto; bottom: auto; background: rgba(0,0,0,0.4); border-top: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0; display: flex; gap: 4px; overflow-x: auto; flex-shrink: 0; }
         body.ui-pc #game-sidebar { position: relative; width: 100%; flex: 1; inset: auto; top: auto; bottom: auto; transform: none !important; border-radius: 0; border: none; background: transparent; box-shadow: none; z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
         body.ui-pc .nav-tab-core { display: none !important; }
 
         @media (min-width: 768px) {
             body.ui-auto #game-main { display: flex; flex-direction: row; height: 100%; position: relative; }
             body.ui-auto #game-clicker-section { position: relative; flex: 1; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; bottom: auto; padding-bottom: 2.5rem; }
-            body.ui-auto #game-sidebar-container { position: relative; width: 460px; height: 100%; flex: none; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(8, 12, 20, 0.75) 0%, rgba(2, 4, 8, 0.9) 100%); backdrop-filter: blur(16px) saturate(150%); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 20; overflow: hidden; }
-            body.ui-auto #main-nav { position: relative; width: 100%; height: auto; bottom: auto; background: rgba(0,0,0,0.4); border-top: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0; display: flex; overflow-x: auto; flex-shrink: 0; }
+            body.ui-auto #game-sidebar-container { position: relative; width: 520px; height: 100%; flex: none; display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(8, 12, 20, 0.75) 0%, rgba(2, 4, 8, 0.9) 100%); backdrop-filter: blur(16px) saturate(150%); border-left: 1px solid rgba(255,255,255,0.1); box-shadow: -10px 0 30px rgba(0,0,0,0.5); z-index: 20; overflow: hidden; }
+            body.ui-auto #main-nav { position: relative; width: 100%; height: auto; bottom: auto; background: rgba(0,0,0,0.4); border-top: none; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0; display: flex; gap: 4px; overflow-x: auto; flex-shrink: 0; }
             body.ui-auto #game-sidebar { position: relative; width: 100%; flex: 1; inset: auto; top: auto; bottom: auto; transform: none !important; border-radius: 0; border: none; background: transparent; box-shadow: none; z-index: 10; display: flex; flex-direction: column; overflow: hidden; }
             body.ui-auto .nav-tab-core { display: none !important; }
         }
@@ -366,28 +370,28 @@
 
             <div id="game-sidebar-container" class="interactive">
                 <nav id="main-nav" class="scrollbar-hide interactive">
-                    <button class="tab-btn nav-tab-core flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('core')">
+                    <button class="tab-btn nav-tab-core flex-1 min-w-[60px] md:min-w-0 px-2.5 py-3 md:px-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('core')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span> ЯДРО
                     </button>
-                    <button class="tab-btn active flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('build')">
+                    <button class="tab-btn active flex-1 min-w-[60px] md:min-w-0 px-2.5 py-3 md:px-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('build')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V11l7-6 7 6v10"/><path d="M9.5 21v-5h5v5"/></svg><span id="tab-badge-build" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> БАЗА
                     </button>
-                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('tech')">
+                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-2.5 py-3 md:px-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('tech')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.5L4.5 19a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 9.5V2"/><path d="M8.5 2h7"/><path d="M7 15h10"/></svg><span id="tab-badge-tech" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> НАУКА
                     </button>
-                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('crew')">
+                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-2.5 py-3 md:px-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('crew')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span id="tab-badge-crew" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> ЭКИП.
                     </button>
-                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('hq')">
+                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-2.5 py-3 md:px-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('hq')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21v-5a8 8 0 0 1 16 0v5"/><path d="M12 9V6"/><circle cx="12" cy="4.5" r="1.5"/></svg></span> ШТАБ
                     </button>
-                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('quests')">
+                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-2.5 py-3 md:px-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('quests')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg></span> ЗАДАЧИ
                     </button>
-                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('planets')">
+                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-2.5 py-3 md:px-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('planets')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-18 12 12)"/></svg><span id="tab-badge-planets" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> КОСМОС
                     </button>
-                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('casino')">
+                    <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-2.5 py-3 md:px-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('casino')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="8.75" cy="8.75" r="1.4" fill="currentColor" stroke="none"/><circle cx="15.25" cy="15.25" r="1.4" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.4" fill="currentColor" stroke="none"/></svg><span id="tab-badge-casino" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> КАЗИНО
                     </button>
                 </nav>
@@ -548,7 +552,7 @@
             planet: 'mars',
             unlockedPlanets: { mars: true },
             uiMode: 'auto',
-            casino: { slotsPity: 0, crashHistory: [], wheelLastFree: 0, wheelSpins: 0, visited: false, lastGame: 'slots', stats: { spins: 0, bestCrash: 0, biggestWin: 0, wagered: 0, won: 0 } }
+            casino: { slotsPity: 0, slotsLastWins: [], crashHistory: [], wheelLastFree: 0, wheelSpins: 0, visited: false, lastGame: 'slots', stats: { spins: 0, bestCrash: 0, biggestWin: 0, wagered: 0, won: 0 } }
         };
         
         let displayState = { res: { min: 0, sci: 0, prm: 50 }, darkMatter: 0 };
@@ -1421,18 +1425,18 @@
                 adCostPrm: 50,
                 spinMs: 3600,
                 segments: [
-                    { id: 'min30m', label: 'Мин 30м',   weight: 20, type: 'min',     sec: 1800,  color: '#E55934' },
-                    { id: 'dust1',  label: 'Пыль',      weight: 8,  type: 'none',                 color: '#374151' },
-                    { id: 'prm10',  label: '+10 Крист', weight: 6,  type: 'prm', amount: 10,    color: '#a855f7' },
-                    { id: 'min2h',  label: 'Мин 2ч',    weight: 8,  type: 'min',     sec: 7200,  color: '#C7411E' },
-                    { id: 'buff5',  label: 'Бафф x2',   weight: 6,  type: 'buff',    sec: 300,   color: '#22c55e' },
-                    { id: 'dust2',  label: 'Пыль',      weight: 8,  type: 'none',                 color: '#4b5563' },
-                    { id: 'sci30m', label: 'Наука 30м', weight: 8,  type: 'sci',     sec: 1800,  color: '#16a34a' },
-                    { id: 'min10m', label: 'Мин 10м',   weight: 10, type: 'min',     sec: 600,   color: '#FF7B59' },
-                    { id: 'prm50',  label: '+50 Крист', weight: 3,  type: 'prm', amount: 50,    color: '#c084fc' },
-                    { id: 'dust3',  label: 'Пыль',      weight: 9,  type: 'none',                 color: '#374151' },
-                    { id: 'buff15', label: 'Бафф x2',   weight: 4,  type: 'buff',    sec: 900,   color: '#4ade80' },
-                    { id: 'jack',   label: 'ДЖЕКПОТ',   weight: 1,  type: 'jackpot', sec: 86400, color: '#fbbf24' }
+                    { id: 'min30m', label: 'Мин 30м',   weight: 20, type: 'min',     sec: 1800,  accent: '#E55934' },
+                    { id: 'dust1',  label: 'Пыль',      weight: 8,  type: 'none',                 accent: '#6b7280' },
+                    { id: 'prm10',  label: '+10 Крист', weight: 6,  type: 'prm', amount: 10,    accent: '#8b7bd8' },
+                    { id: 'min2h',  label: 'Мин 2ч',    weight: 8,  type: 'min',     sec: 7200,  accent: '#E55934' },
+                    { id: 'buff5',  label: 'Бафф x2',   weight: 6,  type: 'buff',    sec: 300,   accent: '#4c9a5f' },
+                    { id: 'dust2',  label: 'Пыль',      weight: 8,  type: 'none',                 accent: '#6b7280' },
+                    { id: 'sci30m', label: 'Наука 30м', weight: 8,  type: 'sci',     sec: 1800,  accent: '#4c9a5f' },
+                    { id: 'min10m', label: 'Мин 10м',   weight: 10, type: 'min',     sec: 600,   accent: '#E55934' },
+                    { id: 'prm50',  label: '+50 Крист', weight: 3,  type: 'prm', amount: 50,    accent: '#8b7bd8' },
+                    { id: 'dust3',  label: 'Пыль',      weight: 9,  type: 'none',                 accent: '#6b7280' },
+                    { id: 'buff15', label: 'Бафф x2',   weight: 4,  type: 'buff',    sec: 900,   accent: '#4c9a5f' },
+                    { id: 'jack',   label: 'ДЖЕКПОТ',   weight: 1,  type: 'jackpot', sec: 86400, accent: '#fbbf24' }
                 ]
             }
         };
@@ -1567,6 +1571,7 @@
 
         let _casinoSub = 'slots';
         let _slotsBetIdx = 1, _slotsBetCustom = 0, _crashBetIdx = 1, _crashBetCustom = 0;
+        let _slotsCustomVal = 0, _crashCustomVal = 0, _slotsFast = false;
         let _slotSpinning = false, _nmTimer = null;
 
         function renderCasino(content) {
@@ -1640,11 +1645,12 @@
             const el = document.getElementById('casino-stats'); if (!el) return;
             const st = state.casino.stats;
             const profit = (st.won || 0) - (st.wagered || 0);
+            const fmtSigned = n => (n < 0 ? '-' : '+') + formatNum(Math.abs(n));
             el.innerHTML = '<div class="grid grid-cols-4 gap-2">' +
                 casinoStatCell('Спинов', formatNum(st.spins || 0)) +
                 casinoStatCell('Лучший краш', st.bestCrash ? st.bestCrash.toFixed(2) + 'x' : '—') +
                 casinoStatCell('Макс выигрыш', formatNum(st.biggestWin || 0)) +
-                casinoStatCell('Профит', (profit >= 0 ? '+' : '') + formatNum(profit), profit >= 0 ? 'text-green-400' : 'text-red-400') +
+                casinoStatCell('Профит', fmtSigned(profit), profit >= 0 ? 'text-green-400' : 'text-red-400') +
                 '</div>';
         }
 
@@ -1653,12 +1659,42 @@
                 CASINO_CONFIG.slots.chips.map((v, i) => '<button id="' + prefix + '-chip-' + i + '" onclick="casinoPickBet(\'' + prefix + '\',' + i + ')" class="chip-btn flex-1 min-w-[64px] py-2.5 rounded-xl border text-xs font-orbitron font-bold">' + formatNum(v) + '</button>').join('') +
                 '<button id="' + prefix + '-chip-max" onclick="casinoPickBet(\'' + prefix + '\',\'max\')" class="chip-btn flex-1 min-w-[64px] py-2.5 rounded-xl border text-xs font-orbitron font-bold text-gold-300 border-gold-500/40 bg-gold-500/5">MAX</button>' +
                 '</div>' +
+                '<div class="flex items-center gap-2 mt-2">' +
+                '<input id="' + prefix + '-bet-input" type="number" min="1" step="1" inputmode="numeric" oninput="casinoBetInput(\'' + prefix + '\', this.value)" placeholder="Своя ставка" class="flex-1 min-w-0 bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-sm font-orbitron font-bold text-gold-200 text-center focus:outline-none focus:border-gold-400/60 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">' +
+                '<button onclick="casinoBetMult(\'' + prefix + '\',0.5)" class="chip-btn px-3.5 py-2.5 rounded-xl border border-white/15 bg-white/5 text-xs font-orbitron font-bold text-gray-300 hover:bg-white/10">½</button>' +
+                '<button onclick="casinoBetMult(\'' + prefix + '\',2)" class="chip-btn px-3.5 py-2.5 rounded-xl border border-white/15 bg-white/5 text-xs font-orbitron font-bold text-gray-300 hover:bg-white/10">x2</button>' +
+                '<button onclick="casinoBetMaxAll(\'' + prefix + '\')" class="chip-btn px-3.5 py-2.5 rounded-xl border border-gold-500/40 bg-gold-500/10 text-xs font-orbitron font-bold text-gold-300 hover:bg-gold-500/20">MAX</button>' +
+                '</div>' +
                 '<div class="text-center text-[11px] text-gray-400 mt-2">Ставка: <span id="' + prefix + '-bet-val" class="text-gold-300 font-bold font-orbitron"></span></div>';
         }
         function casinoBetValue(prefix) {
             const idx = prefix === 'slots' ? _slotsBetIdx : _crashBetIdx;
-            if (idx === 'max') return prefix === 'slots' ? _slotsBetCustom : _crashBetCustom;
-            return CASINO_CONFIG.slots.chips[idx];
+            let v;
+            if (idx === 'max') v = prefix === 'slots' ? _slotsBetCustom : _crashBetCustom;
+            else if (idx === 'custom') v = prefix === 'slots' ? _slotsCustomVal : _crashCustomVal;
+            else v = CASINO_CONFIG.slots.chips[idx];
+            return Math.max(1, Math.min(Math.floor(state.res.min) || 1, Math.floor(v) || 1));
+        }
+        function casinoSetCustom(prefix, v) {
+            v = Math.max(1, Math.min(Math.floor(state.res.min) || 1, Math.floor(v) || 1));
+            if (prefix === 'slots') { _slotsCustomVal = v; _slotsBetIdx = 'custom'; } else { _crashCustomVal = v; _crashBetIdx = 'custom'; }
+            casinoSFX('tick');
+            casinoUpdateBetUI(prefix);
+        }
+        function casinoBetInput(prefix, raw) {
+            let v = Math.floor(parseFloat(raw));
+            if (!isFinite(v) || v < 1) v = 1;
+            const bal = Math.floor(state.res.min);
+            if (v > bal) v = bal;
+            if (prefix === 'slots') { _slotsCustomVal = v; _slotsBetIdx = 'custom'; } else { _crashCustomVal = v; _crashBetIdx = 'custom'; }
+            casinoUpdateBetUI(prefix);
+        }
+        function casinoBetMult(prefix, k) {
+            const cur = casinoBetValue(prefix);
+            casinoSetCustom(prefix, cur * k);
+        }
+        function casinoBetMaxAll(prefix) {
+            casinoSetCustom(prefix, Math.floor(state.res.min) || 1);
         }
         function casinoPickBet(prefix, i) {
             if (prefix === 'slots' && _slotSpinning) return;
@@ -1685,10 +1721,13 @@
             const mx = document.getElementById(prefix + '-chip-max');
             if (mx) mx.className = 'chip-btn flex-1 min-w-[64px] py-2.5 rounded-xl border text-xs font-orbitron font-bold ' +
                 (idx === 'max' ? 'border-gold-400 bg-gold-500/20 text-gold-200' : 'text-gold-300 border-gold-500/40 bg-gold-500/5 hover:bg-gold-500/15');
+            const inp = document.getElementById(prefix + '-bet-input');
+            if (inp && document.activeElement !== inp) inp.value = casinoBetValue(prefix);
             const bv = document.getElementById(prefix + '-bet-val');
             if (bv) bv.textContent = formatNum(casinoBetValue(prefix));
             const act = document.getElementById(prefix === 'slots' ? 'slots-spin' : 'crash-start');
             if (act) act.disabled = state.res.min < casinoBetValue(prefix) || (prefix === 'slots' && _slotSpinning) || (prefix === 'crash' && _crash && !_crash.done);
+            if (prefix === 'slots') casinoUpdatePaytable();
         }
 
         /* ---------- СЛОТЫ «РУДНЫЙ АВТОМАТ» ---------- */
@@ -1716,7 +1755,10 @@
                 <div class="glass-card p-4 md:p-5 rounded-2xl border border-gold-500/20 relative overflow-hidden" id="slots-host">
                     <div class="flex justify-between items-center mb-4">
                         <div class="font-orbitron font-black text-sm text-gold-300 tracking-widest uppercase">Рудный автомат</div>
-                        <div class="text-[10px] text-gray-500">Pity: <span id="slots-pity" class="text-gray-300 font-bold">${state.casino.slotsPity}/${CASINO_CONFIG.slots.pityLimit}</span></div>
+                        <div class="flex items-center gap-2">
+                            <button id="slots-fast" onclick="casinoToggleFast()" class="text-[10px] font-orbitron tracking-wider uppercase px-2.5 py-1.5 rounded-lg border transition-all ${_slotsFast ? 'border-gold-400/70 bg-gold-500/15 text-gold-300' : 'border-white/15 bg-white/5 text-gray-400 hover:text-gray-200'}">⚡ Быстро</button>
+                            <div class="text-[10px] text-gray-500">Pity: <span id="slots-pity" class="text-gray-300 font-bold">${state.casino.slotsPity}/${CASINO_CONFIG.slots.pityLimit}</span></div>
+                        </div>
                     </div>
                     <div class="relative grid grid-cols-3 gap-2 md:gap-3 px-1">
                         <div class="reel-line"></div>
@@ -1725,21 +1767,44 @@
                         <div class="reel-window"><div class="reel-strip" id="reel-2"></div></div>
                     </div>
                     <div id="slots-msg" class="text-center text-xs font-orbitron tracking-widest text-gray-500 h-5 mt-3 uppercase"></div>
+                    <div id="slots-lastwins" class="flex gap-1.5 mt-2 overflow-hidden justify-center flex-wrap"></div>
                     <div class="mt-3">${casinoBetChips('slots')}</div>
                     <button id="slots-spin" onclick="casinoSpin()" class="w-full mt-3 bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white py-4 rounded-xl font-orbitron font-black tracking-widest uppercase text-sm transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(34,197,94,0.35)] disabled:opacity-40 disabled:cursor-not-allowed disabled:saturate-50">Крутить</button>
                     <details class="mt-4">
                         <summary class="cursor-pointer text-[10px] font-orbitron tracking-widest text-gray-500 uppercase hover:text-gray-300 list-none">Таблица выплат ▾</summary>
-                        <div class="mt-2 grid grid-cols-2 gap-x-4 gap-y-0 text-[11px] text-gray-400">
-                            ${CASINO_CONFIG.slots.symbols.map(s => '<div class="flex justify-between border-b border-white/5 py-1"><span class="flex items-center gap-1.5"><span class="inline-flex w-4 h-4 text-gray-300">' + casinoSymIcon(s.id, 'w-3.5 h-3.5') + '</span>' + s.name + ' ×3</span><span class="font-bold text-gold-300">x' + s.mult3 + '</span></div>').join('')}
-                            ${CASINO_CONFIG.slots.symbols.map(s => '<div class="flex justify-between border-b border-white/5 py-1"><span class="truncate">Пара: ' + s.name + '</span><span class="font-bold text-gold-300">x' + s.mult2 + '</span></div>').join('')}
-                        </div>
+                        <div id="slots-paytable" class="mt-2 grid grid-cols-2 gap-x-4 gap-y-0 text-[11px] text-gray-400"></div>
                     </details>
                 </div>`;
             [0, 1, 2].forEach(i => {
                 const strip = document.getElementById('reel-' + i);
                 if (strip) { strip.style.transition = 'none'; strip.style.transform = 'translateY(0)'; strip.innerHTML = casinoReelFiller() + casinoReelCell(CASINO_CONFIG.slots.symbols[i]); }
             });
+            casinoRenderLastWins();
             casinoUpdateBetUI('slots');
+        }
+        function casinoUpdatePaytable() {
+            const el = document.getElementById('slots-paytable'); if (!el) return;
+            const bet = casinoBetValue('slots');
+            el.innerHTML =
+                CASINO_CONFIG.slots.symbols.map(s =>
+                    '<div class="flex justify-between border-b border-white/5 py-1 gap-2"><span class="flex items-center gap-1.5 min-w-0"><span class="inline-flex w-4 h-4 text-gray-300 shrink-0">' + casinoSymIcon(s.id, 'w-3.5 h-3.5') + '</span><span class="truncate">' + s.name + ' ×3</span></span><span class="shrink-0"><span class="font-bold text-gold-300">x' + s.mult3 + '</span> <span class="text-gray-500">(' + formatNum(bet * s.mult3) + ')</span></span></div>'
+                ).join('') +
+                CASINO_CONFIG.slots.symbols.map(s =>
+                    '<div class="flex justify-between border-b border-white/5 py-1 gap-2"><span class="truncate">Пара: ' + s.name + '</span><span class="shrink-0"><span class="font-bold text-gold-300">x' + s.mult2 + '</span> <span class="text-gray-500">(' + formatNum(Math.floor(bet * s.mult2)) + ')</span></span></div>'
+                ).join('');
+        }
+        function casinoToggleFast() {
+            _slotsFast = !_slotsFast;
+            const b = document.getElementById('slots-fast');
+            if (b) b.className = 'text-[10px] font-orbitron tracking-wider uppercase px-2.5 py-1.5 rounded-lg border transition-all ' + (_slotsFast ? 'border-gold-400/70 bg-gold-500/15 text-gold-300' : 'border-white/15 bg-white/5 text-gray-400 hover:text-gray-200');
+            casinoSFX('tick');
+        }
+        function casinoRenderLastWins() {
+            const el = document.getElementById('slots-lastwins'); if (!el) return;
+            const arr = state.casino.slotsLastWins || [];
+            el.innerHTML = arr.length
+                ? arr.slice().reverse().map(v => '<span class="shrink-0 px-2 py-0.5 rounded-md border border-gold-500/40 bg-gold-500/10 text-gold-300 text-[10px] font-orbitron font-bold">+' + formatNum(v) + '</span>').join('')
+                : '<span class="text-[10px] text-gray-600">Последние выигрыши появятся здесь</span>';
         }
         function casinoAnimateReel(idx, finalSym, dur, onStop) {
             const strip = document.getElementById('reel-' + idx);
@@ -1764,6 +1829,8 @@
             if (window.CASINO_DEBUG === true && !ev) { do { syms = [casinoWeightedPick(C.symbols), casinoWeightedPick(C.symbols), casinoWeightedPick(C.symbols)]; } while (!casinoEvalSlots(syms)); ev = casinoEvalSlots(syms); }
             else if (st.slotsPity >= C.pityLimit && !ev) { syms = [C.symbols[0], C.symbols[0], C.symbols[0]]; ev = casinoEvalSlots(syms); }
             const nearMiss = !ev && syms[0].id === 'ares' && syms[1].id === 'ares';
+            const lineEl = document.querySelector('.reel-line');
+            if (lineEl) lineEl.classList.remove('reel-line-win');
             const msg = document.getElementById('slots-msg');
             if (msg) msg.textContent = '';
             casinoUpdateBetUI('slots');
@@ -1775,9 +1842,10 @@
                 if (_nmTimer) { clearTimeout(_nmTimer); _nmTimer = null; }
                 casinoSpinResult(bet, syms, ev);
             };
+            const times = _slotsFast ? [350, 450, 550] : C.reelTimes;
             syms.forEach((sym, i) => {
-                let dur = C.reelTimes[i];
-                if (nearMiss && i === 2) {
+                let dur = times[i];
+                if (nearMiss && i === 2 && !_slotsFast) {
                     dur += C.nearMissExtraMs;
                     let gap = 220;
                     const chain = () => { _nmTimer = setTimeout(() => { casinoSFX('near'); gap = Math.max(70, gap * 0.85); chain(); }, gap); };
@@ -1796,6 +1864,17 @@
                 st.stats.won += payout;
                 if (payout > (st.stats.biggestWin || 0)) st.stats.biggestWin = payout;
                 st.slotsPity = 0;
+                if (!st.slotsLastWins) st.slotsLastWins = [];
+                st.slotsLastWins.push(payout);
+                while (st.slotsLastWins.length > 5) st.slotsLastWins.shift();
+                casinoRenderLastWins();
+                const winLine = document.querySelector('.reel-line');
+                if (winLine) winLine.classList.add('reel-line-win');
+                syms.forEach((s, i) => {
+                    if (s.id !== ev.sym.id) return;
+                    const strip = document.getElementById('reel-' + i);
+                    if (strip && strip.lastElementChild && strip.lastElementChild.firstElementChild) strip.lastElementChild.firstElementChild.classList.add('sym-win');
+                });
                 const jackpot = ev.sym.id === 'ares';
                 casinoFloat(host, '+' + formatNum(payout), jackpot ? '#fde047' : '#fbbf24');
                 casinoBurst(host, jackpot ? ['#fbbf24', '#f59e0b', '#fde047', '#ffffff'] : ['#fbbf24', '#E55934', '#ffffff'], jackpot ? 28 : 14);
@@ -2064,23 +2143,33 @@
             const segs = CASINO_CONFIG.wheel.segments, n = segs.length, arc = Math.PI * 2 / n;
             ctx.clearRect(0, 0, W, W);
             for (let i = 0; i < n; i++) {
+                const seg = segs[i];
                 const a0 = rot + i * arc - Math.PI / 2 - arc / 2;
                 ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, R, a0, a0 + arc); ctx.closePath();
-                ctx.fillStyle = segs[i].color; ctx.fill();
-                ctx.strokeStyle = 'rgba(0,0,0,0.5)'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.fillStyle = seg.type === 'jackpot' ? '#2b2413' : (i % 2 === 0 ? '#1b2331' : '#141a25');
+                if (seg.type === 'jackpot') { ctx.shadowColor = 'rgba(251,191,36,0.45)'; ctx.shadowBlur = 18; }
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = 'rgba(0,0,0,0.55)'; ctx.lineWidth = 2; ctx.stroke();
+                ctx.beginPath(); ctx.arc(cx, cy, R - 4, a0 + 0.03, a0 + arc - 0.03);
+                ctx.strokeStyle = seg.accent;
+                ctx.globalAlpha = seg.type === 'none' ? 0.3 : 0.8;
+                ctx.lineWidth = 3; ctx.stroke();
+                ctx.globalAlpha = 1;
                 ctx.save();
                 ctx.translate(cx, cy); ctx.rotate(a0 + arc / 2);
                 ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
-                ctx.fillStyle = 'rgba(255,255,255,0.92)';
-                ctx.font = 'bold 13px Orbitron, sans-serif';
-                ctx.fillText(segs[i].label, R - 14, 0);
+                ctx.font = (seg.type === 'jackpot' ? 'bold 14px' : 'bold 12px') + ' Orbitron, sans-serif';
+                ctx.fillStyle = seg.type === 'none' ? 'rgba(156,163,175,0.55)' : seg.accent;
+                if (seg.type === 'jackpot') { ctx.shadowColor = 'rgba(251,191,36,0.8)'; ctx.shadowBlur = 10; }
+                ctx.fillText(seg.label, R - 16, 0);
                 ctx.restore();
             }
             ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2);
-            ctx.lineWidth = 6; ctx.strokeStyle = '#fbbf24'; ctx.stroke();
+            ctx.lineWidth = 5; ctx.strokeStyle = '#39424f'; ctx.stroke();
             ctx.beginPath(); ctx.arc(cx, cy, 26, 0, Math.PI * 2);
             ctx.fillStyle = '#111827'; ctx.fill();
-            ctx.lineWidth = 3; ctx.strokeStyle = '#fbbf24'; ctx.stroke();
+            ctx.lineWidth = 3; ctx.strokeStyle = '#39424f'; ctx.stroke();
         }
         function casinoWheelSpinFree() {
             if (_wheelSpin || !casinoWheelFreeReady()) return;
@@ -2150,6 +2239,7 @@
                     casinoBurst(host, ['#fbbf24', '#E55934'], 14);
                     casinoSFX('win');
                     if (res) res.textContent = '+' + formatNum(amt) + ' минералов';
+                    showToast('Колесо Фобоса: +' + formatNum(amt) + ' минералов (' + Math.round(seg.sec / 60) + ' мин добычи)');
                     break;
                 }
                 case 'sci': {
@@ -2158,6 +2248,7 @@
                     casinoFloat(host, '+' + formatNum(amt) + ' науки', '#4ade80');
                     casinoSFX('win');
                     if (res) res.textContent = '+' + formatNum(amt) + ' науки';
+                    showToast('Колесо Фобоса: +' + formatNum(amt) + ' науки (30 минут генерации)');
                     break;
                 }
                 case 'prm': {
@@ -2166,6 +2257,7 @@
                     casinoBurst(host, ['#c084fc', '#a855f7'], 18);
                     casinoSFX('bigwin');
                     if (res) res.textContent = '+' + seg.amount + ' кристаллов';
+                    showToast('Колесо Фобоса: +' + seg.amount + ' кристаллов!');
                     break;
                 }
                 case 'buff': {
@@ -2173,10 +2265,11 @@
                     casinoFloat(host, 'Бафф x2 · ' + Math.round(seg.sec / 60) + ' мин', '#4ade80');
                     casinoSFX('bigwin');
                     if (res) res.textContent = 'Турбо x2 на ' + Math.round(seg.sec / 60) + ' мин';
+                    showToast('Колесо Фобоса: Турбо x2 на ' + Math.round(seg.sec / 60) + ' минут!');
                     break;
                 }
                 case 'jackpot': {
-                    const amt = Math.max(5000, Math.floor(calc.rate.min * seg.sec));
+                    const amt = Math.max(5000, Math.floor(Math.max(calc.rate.min * seg.sec, state.res.min * 0.1)));
                     casinoGainMin(amt);
                     casinoFloat(host, '+' + formatNum(amt), '#fde047');
                     casinoBurst(host, ['#fbbf24', '#fde047', '#ffffff'], 30);
