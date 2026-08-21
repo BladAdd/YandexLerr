@@ -179,6 +179,8 @@
         .hover-bg-ufo-blur:hover { background: radial-gradient(circle, rgba(34,211,238,0.6) 0%, rgba(34,211,238,0.15) 55%, transparent 75%); }
         @keyframes skillReadyPulse { 0%, 100% { box-shadow: 0 0 5px rgba(229,89,52,0.2); border-color: rgba(229,89,52,0.45); } 50% { box-shadow: 0 0 16px rgba(229,89,52,0.55); border-color: rgba(229,89,52,0.95); } }
         .skill-ready-pulse { animation: skillReadyPulse 2s ease-in-out infinite; }
+        .skill-hint-hover { display: none; }
+        .skill-btn-wrapper:hover .skill-hint-hover { display: inline-block; }
         
         .btn-shine { position: relative; overflow: hidden; }
         .btn-shine::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%); transform: skewX(-20deg); animation: shimmer 3s infinite; pointer-events: none; }
@@ -1224,7 +1226,7 @@
                             <div class="hidden md:flex flex-col items-start z-10 text-left leading-tight pointer-events-none w-full ml-1">
                                 <span class="text-xs font-bold text-white whitespace-nowrap drop-shadow-md">${s.name}</span>
                                 <span id="skill-status-${id}" class="text-[10px] text-gray-300 font-bold tracking-wide">Готово</span>
-                                ${id === 'strike' ? '<span id="skill-hint-strike" class="hidden text-[9px] text-mars-300/90 leading-snug mt-0.5">Нажми — мгновенно +2 часа добычи</span>' : ''}
+                                ${id === 'strike' ? '<span id="skill-hint-strike" class="skill-hint-hover text-[9px] text-mars-300/90 leading-snug mt-0.5">Нажми — мгновенно +2 часа добычи</span>' : ''}
                             </div>
                             <div class="skill-tooltip">
                                 <div class="font-bold text-white text-base mb-2 border-b border-white/10 pb-2 flex items-center gap-2"><span class="ico ${s.icon} ${s.color}"></span> ${s.name}</div>
@@ -1332,8 +1334,6 @@
                     }
                     if (id === 'strike') {
                         btn.classList.toggle('skill-ready-pulse', !onCd);
-                        const hint = document.getElementById('skill-hint-strike');
-                        if(hint) hint.classList.toggle('hidden', onCd);
                     }
                 }
             }
