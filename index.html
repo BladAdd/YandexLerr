@@ -44,7 +44,18 @@
     <script src="/sdk.js"></script>
 
     <style>
-        body { margin: 0; overflow: hidden; background-color: #030508; color: white; user-select: none; -webkit-touch-callout: none; font-family: 'Rajdhani', sans-serif; touch-action: none; }
+        body { margin: 0; overflow: hidden; background-color: #030508; color: white; user-select: none; -webkit-touch-callout: none; font-family: 'Rajdhani', sans-serif; touch-action: pan-x pan-y pinch-zoom; }
+        /* STAGE 8: manipulation prevents accidental double-tap zoom only on game controls. */
+        button, .tab-btn, #main-clicker, [role="button"] { touch-action: manipulation; }
+        button { min-height: 44px; }
+        body.perf-low .text-glow, body.perf-low [class*="shadow-["], body.perf-low [class*="drop-shadow-["] { text-shadow: none !important; filter: none !important; }
+        body.perf-low .animate-pulse-fast, body.perf-low .animate-spin-slow, body.perf-low .casino-shake, body.perf-low .btn-shine::after { animation: none !important; }
+        body.perf-low .glass-panel, body.perf-low .glass-card { backdrop-filter: none !important; }
+        #fps-hud { position:fixed; right:max(8px,env(safe-area-inset-right)); top:max(8px,env(safe-area-inset-top)); z-index:65; pointer-events:none; padding:4px 7px; border-radius:8px; background:rgba(0,0,0,.72); border:1px solid rgba(255,255,255,.15); font:700 10px Orbitron,sans-serif; color:#a7f3d0; }
+        .tutorial-target { position:relative !important; z-index:84 !important; outline:3px solid #fbbf24 !important; outline-offset:4px; filter:drop-shadow(0 0 16px rgba(251,191,36,.8)); }
+        #tutorial-card { position:fixed; left:50%; bottom:calc(82px + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:85; width:min(92vw,420px); pointer-events:auto; }
+        #drawer-overlay { display:none; }
+        #mobile-drawer-buttons { display:none; }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
 
         .ico { display: inline-block; width: 1.2em; height: 1.2em; background-color: currentColor; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat; -webkit-mask-size: contain; mask-size: contain; -webkit-mask-position: center; mask-position: center; vertical-align: -0.15em; }
@@ -243,6 +254,38 @@
             body.ui-auto .nav-tab-core { display: none !important; }
         }
 
+        /* STAGE 8: responsive mobile shell; desktop remains the Stage 7 layout. */
+        @media (max-width: 1023px) {
+            body.ui-auto header, body.ui-mobile header { padding: max(6px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) 6px max(8px,env(safe-area-inset-left)); flex-wrap:nowrap; min-height:64px; }
+            body.ui-auto header h1, body.ui-mobile header h1 { font-size:15px; }
+            body.ui-auto header p, body.ui-mobile header p { display:none; }
+            body.ui-auto header > div:first-child > div:first-child, body.ui-mobile header > div:first-child > div:first-child { width:38px;height:38px; }
+            body.ui-auto header > div:last-child, body.ui-mobile header > div:last-child { flex-wrap:nowrap; overflow-x:auto; justify-content:flex-start; }
+            body.ui-auto header > div:last-child > button:not(#mobile-left-drawer-btn):not(#mobile-right-drawer-btn):not([onclick="openSettings()"]), body.ui-mobile header > div:last-child > button:not(#mobile-left-drawer-btn):not(#mobile-right-drawer-btn):not([onclick="openSettings()"]) { display:none; }
+            body.ui-auto header [class*="min-w-[130px]"], body.ui-mobile header [class*="min-w-[130px]"] { min-width:92px;height:44px;padding-left:6px;padding-right:6px; }
+            body.ui-auto #mobile-drawer-buttons, body.ui-mobile #mobile-drawer-buttons { display:flex; gap:6px; }
+            body.ui-auto #game-main, body.ui-mobile #game-main { display:block; height:100%; position:relative; }
+            body.ui-auto #game-sidebar-container, body.ui-mobile #game-sidebar-container { display:block; }
+            body.ui-auto #game-clicker-section, body.ui-mobile #game-clicker-section { position:absolute; inset:0; bottom:calc(74px + env(safe-area-inset-bottom)); height:auto; padding:0; }
+            body.ui-auto #game-clicker-section > .absolute, body.ui-mobile #game-clicker-section > .absolute { position:fixed; top:max(64px,env(safe-area-inset-top)); left:0; bottom:calc(74px + env(safe-area-inset-bottom)); z-index:61; width:min(86vw,320px); padding:12px; overflow-y:auto; background:rgba(5,8,14,.98); transform:translateX(-110%); transition:transform .25s ease; }
+            body.ui-auto #game-clicker-section > .absolute.drawer-open, body.ui-mobile #game-clicker-section > .absolute.drawer-open { transform:translateX(0); }
+            body.ui-auto #game-clicker-section > .absolute > div:first-child, body.ui-mobile #game-clicker-section > .absolute > div:first-child { width:100%;min-height:44px; }
+            body.ui-auto #skills-container, body.ui-mobile #skills-container { width:100%; }
+            body.ui-auto .skill-btn-wrapper, body.ui-mobile .skill-btn-wrapper { width:100%;height:64px; }
+            body.ui-auto .skill-btn, body.ui-auto .locked-skill-btn, body.ui-mobile .skill-btn, body.ui-mobile .locked-skill-btn { justify-content:flex-start;padding:12px;gap:12px; }
+            body.ui-auto .skill-btn .hidden.md\:flex, body.ui-auto .locked-skill-btn .hidden.md\:flex, body.ui-mobile .skill-btn .hidden.md\:flex, body.ui-mobile .locked-skill-btn .hidden.md\:flex { display:flex; }
+            body.ui-auto #game-sidebar, body.ui-mobile #game-sidebar { top:max(64px,env(safe-area-inset-top)); right:0; left:auto; bottom:calc(74px + env(safe-area-inset-bottom)); width:min(94vw,520px); border-radius:18px 0 0 18px; transform:translateX(110%); transition:transform .25s ease; z-index:61; }
+            body.ui-auto #game-sidebar.panel-open, body.ui-mobile #game-sidebar.panel-open { transform:translateX(0); }
+            body.ui-auto #main-nav, body.ui-mobile #main-nav { height:calc(74px + env(safe-area-inset-bottom)); padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right); }
+            body.ui-auto .tab-btn, body.ui-mobile .tab-btn { min-width:70px;min-height:58px;padding:7px 8px; }
+            body.ui-auto #drawer-overlay.active, body.ui-mobile #drawer-overlay.active { display:block;position:fixed;inset:0;z-index:59;background:rgba(0,0,0,.62); }
+            body.ui-auto #tab-content, body.ui-mobile #tab-content { padding:12px;padding-bottom:24px; }
+            #generic-modal { padding:max(8px,env(safe-area-inset-top)) max(8px,env(safe-area-inset-right)) max(8px,env(safe-area-inset-bottom)) max(8px,env(safe-area-inset-left)); }
+            #modal-content { width:100%;max-height:92dvh;margin:0;padding:18px;overflow-y:auto; }
+            #main-clicker { width:min(58vw,260px);height:min(58vw,260px); }
+        }
+        @media (min-width:1024px) { #mobile-drawer-buttons,#drawer-overlay,.drawer-close { display:none !important; } }
+        @media (max-width:480px) { #tutorial-card { bottom:calc(78px + env(safe-area-inset-bottom)); } .reel-window,.reel-cell,.reel-line{height:78px}.reel-line{margin-top:-39px} }
         </style>
 </head>
 <body class="antialiased text-gray-200 ui-auto">
@@ -252,7 +295,7 @@
     <canvas id="ui-particles"></canvas>
 
     <div id="ui-layer">
-        <header class="glass-panel w-full p-2 md:p-3 flex flex-wrap justify-between items-center interactive z-30 relative border-b border-white/10">
+        <header id="game-header" class="glass-panel w-full p-2 md:p-3 flex flex-wrap justify-between items-center interactive z-30 relative border-b border-white/10">
             <div class="flex items-center gap-3 mb-2 md:mb-0 cursor-pointer group" onclick="handleLogoClick()" title="Арес Корп">
                 <div class="relative w-12 h-12 flex items-center justify-center bg-black/40 rounded-xl border border-white/10 shadow-inner group-hover:border-mars-500/50 transition-colors">
                     <div class="absolute inset-0 border-2 border-mars-500/50 rounded-xl animate-spin-slow opacity-50 group-hover:opacity-100 group-hover:border-mars-400 transition-all"></div>
@@ -268,6 +311,11 @@
             </div>
             
             <div class="flex gap-2 flex-wrap md:flex-nowrap justify-end items-center">
+                <!-- STAGE 8: explicit, accessible controls for mutually-exclusive mobile drawers. -->
+                <div id="mobile-drawer-buttons">
+                    <button id="mobile-left-drawer-btn" onclick="toggleDrawer('left')" aria-label="Открыть навыки" aria-controls="skills-drawer" aria-expanded="false" class="w-11 h-11 rounded-lg bg-white/5 border border-white/10"><i class="fa-solid fa-bars"></i></button>
+                    <button id="mobile-right-drawer-btn" onclick="toggleDrawer('right')" aria-label="Открыть панель базы" aria-controls="game-sidebar" aria-expanded="false" class="w-11 h-11 rounded-lg bg-white/5 border border-white/10"><i class="fa-solid fa-layer-group"></i></button>
+                </div>
                 <button onclick="toggleSound()" class="mr-1 text-gray-400 hover:text-white transition-all hover:scale-110 w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)]" title="Звук: включить/выключить игровые эффекты">
                     <i id="sound-icon" class="fa-solid fa-volume-high"></i>
                 </button>
@@ -336,10 +384,10 @@
 
         <main id="game-main" class="flex-1 overflow-hidden relative">
             <section id="game-clicker-section" class="interactive pointer-events-none">
-                <div class="absolute top-4 left-4 flex flex-col gap-2 pointer-events-auto z-20">
+                <div id="skills-drawer" class="absolute top-4 left-4 flex flex-col gap-2 pointer-events-auto z-20" aria-label="Навыки">
                     <div class="flex items-center justify-between w-[56px] md:w-56 bg-black/50 backdrop-blur-md rounded-lg px-3 py-2 border border-white/10 shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
                         <div class="hidden md:block text-xs text-gray-300 font-orbitron uppercase tracking-widest font-bold">Панель Навыков</div>
-                        <button onclick="toggleSkills()" class="text-sm text-gray-400 hover:text-white mx-auto md:mx-0 transition-transform hover:scale-110">
+                        <button class="drawer-close md:hidden w-11 h-11" onclick="closeDrawers()" aria-label="Закрыть навыки"><i class="fa-solid fa-xmark"></i></button><button onclick="toggleSkills()" class="text-sm text-gray-400 hover:text-white mx-auto md:mx-0 transition-transform hover:scale-110">
                             <i class="fa-solid fa-eye-slash" id="skills-toggle-icon"></i>
                         </button>
                     </div>
@@ -409,13 +457,23 @@
                     </button>
                 </nav>
 
-                <aside id="game-sidebar" class="interactive">
+                <aside id="game-sidebar" class="interactive" aria-label="Панель разделов">
+                    <button class="drawer-close absolute top-2 right-2 z-20 w-11 h-11 rounded-full bg-black/60 border border-white/10" onclick="closeDrawers()" aria-label="Закрыть панель"><i class="fa-solid fa-xmark"></i></button>
                     <div id="tab-content" class="flex-1 overflow-y-auto relative p-4 scroll-smooth">
                         <!-- JS Injects Content Here -->
                     </div>
                 </aside>
             </div>
         </main>
+    </div>
+
+    <div id="drawer-overlay" onclick="closeDrawers()" aria-hidden="true"></div>
+    <div id="fps-hud" aria-live="polite">FPS -- · HIGH</div>
+    <div id="tutorial-layer" class="hidden">
+        <div id="tutorial-card" class="glass-panel rounded-2xl border border-gold-400/50 p-4 shadow-glow-modal">
+            <div class="flex justify-between gap-3"><div><div id="tutorial-title" class="font-orbitron font-black text-gold-300 text-sm"></div><div id="tutorial-text" class="text-xs text-gray-200 mt-2 leading-relaxed"></div></div><button onclick="skipTutorial()" class="text-xs text-gray-400 px-2">Пропустить</button></div>
+            <div class="flex items-center justify-between mt-3"><span id="tutorial-progress" class="text-[10px] text-gray-500 font-orbitron"></span><button id="tutorial-next" onclick="tutorialNext()" class="px-4 py-2 rounded-xl bg-gold-500 text-black font-bold text-xs">Далее</button></div>
+        </div>
     </div>
 
     <div id="generic-modal" class="fixed inset-0 bg-black/90 z-[70] flex items-center justify-center hidden interactive backdrop-blur-xl transition-opacity">
@@ -519,6 +577,20 @@
                     Object.freeze({ id: 'vein', name: 'Богатая жила', description: 'Пассивная добыча и отображаемый доход увеличены в 2 раза.', weight: 4, durationSeconds: 120, clickMultiplier: 1, incomeMultiplier: 2 }),
                     Object.freeze({ id: 'geostorm', name: 'Геошторм', description: 'Комбо не спадает, пока бушует шторм.', weight: 2, durationSeconds: 45, clickMultiplier: 1, incomeMultiplier: 1 })
                 ])
+            }),
+            // STAGE 8: all onboarding copy/timing and performance policy are centralized.
+            stage8: Object.freeze({
+                mobileBreakpoint: 1024,
+                performance: Object.freeze({ fpsLowThreshold: 45, lowForSeconds: 10, sampleSeconds: 1, highSegments: 64, lowSegments: 16 }),
+                tutorial: Object.freeze({
+                    steps: Object.freeze([
+                        Object.freeze({ id:'mine', title:'1. Добыча', text:'Нажмите на ядро, чтобы добыть первые минералы.', target:'#main-clicker', action:'mine' }),
+                        Object.freeze({ id:'upgrade', title:'2. Первый апгрейд', text:'Откройте Базу и купите первый доступный апгрейд. Можно продолжить и без покупки.', target:'#btn-bld-rover', tab:'build', action:'upgrade' }),
+                        Object.freeze({ id:'tabs', title:'3. Разделы', text:'Используйте нижнюю навигацию — откройте любой другой раздел.', target:'#main-nav', action:'tab' }),
+                        Object.freeze({ id:'skill', title:'4. Навык', text:'Откройте навыки и примените «Орбитальный удар». Если он пока недоступен, продолжайте без блокировки.', target:'#skill-btn-strike', drawer:'left', action:'skill' }),
+                        Object.freeze({ id:'casino', title:'5. Казино', text:'Откройте казино и сделайте спин, когда оно станет доступно. Этот шаг не блокирует игру.', target:'.tab-btn[onclick*="casino"]', action:'casino' })
+                    ])
+                })
             }),
             casino: Object.freeze({
                 unlockLifetimeMin: 100000,
@@ -676,7 +748,7 @@
 
         // STAGE 5: версия добавляет достижения и стабильные ежедневные задания.
         // STAGE 7: wall-time buffs/cloud metadata and ad/session policy migration.
-        const SAVE_VERSION = 6;
+        const SAVE_VERSION = 7; // STAGE 8: tutorial + performance preferences
         const DEFAULT_SKILLS = Object.freeze({ strike: 0, freeze: 0, swarm: 0, coolant: 0, overdrive: 0, timewarp: 0 });
         const DEFAULT_SKILLS_UNLOCKED = Object.freeze({ strike: true, freeze: false, swarm: false, coolant: false, overdrive: false, timewarp: false });
 
@@ -704,6 +776,9 @@
             planet: 'mars',
             unlockedPlanets: { mars: true },
             uiMode: 'auto',
+            // STAGE 8: Auto may downgrade after sustained low FPS; manual High is never auto-downgraded.
+            performance: { preference: 'auto', resolved: 'high', autoLow: false },
+            tutorial: { currentStep: 0, completed: false, skipped: false, analyticsSent: false },
             // STAGE 7: persistent wall-time/ad/analytics state; session-only flags stay outside the save.
             monetization: { incomeBuffEndAt: 0, wheelRewardedDate: null, wheelRewardedCount: 0, wheelRewardedLastAt: 0 },
             sdkMeta: { updatedAt: 0, firstPrestigeSent: false, analytics: {}, lastLeaderboardAt: 0 },
@@ -1011,6 +1086,10 @@
                     if (!state.monetization.incomeBuffEndAt && Number(parsed.adBuffTimer) > 0) {
                         state.monetization.incomeBuffEndAt = Date.now() + Math.min(Number(parsed.adBuffTimer) * 1000, BALANCE.yandex.incomeBuffMs);
                     }
+                    // STAGE 8: lossless migration of onboarding/performance fields.
+                    state.performance = { ...defaults.performance, ...(parsed.performance || {}) };
+                    state.tutorial = { ...defaults.tutorial, ...(parsed.tutorial || {}) };
+                    state.tutorial.currentStep = Math.max(0, Math.min(BALANCE.stage8.tutorial.steps.length - 1, Number(state.tutorial.currentStep) || 0));
                     state.sdkMeta = { ...defaults.sdkMeta, ...(parsed.sdkMeta || {}), analytics: { ...defaults.sdkMeta.analytics, ...((parsed.sdkMeta && parsed.sdkMeta.analytics) || {}) } };
                     
                     displayState.res.min = state.res.min;
@@ -1116,6 +1195,13 @@
                         </button>
                     </div>
                     
+                    <div>
+                        <div class="text-xs text-gray-400 font-orbitron tracking-widest uppercase mb-3"><i class="fa-solid fa-gauge-high"></i> Производительность</div>
+                        <div class="grid grid-cols-3 gap-2 bg-black/60 p-1.5 rounded-xl border border-white/10">
+                            ${['auto','high','low'].map(mode => `<button onclick="setPerformancePreference('${mode}')" class="rounded-lg text-xs font-bold uppercase ${state.performance.preference===mode?'bg-mars-600 text-white':'text-gray-400'}">${mode}</button>`).join('')}
+                        </div>
+                        <div class="text-[10px] text-gray-500 mt-2 text-center">FPS: ${Math.round(perfState.fps || 0)} · режим ${perfState.low ? 'LOW' : 'HIGH'}. Auto включает LOW после ${BALANCE.stage8.performance.lowForSeconds}с ниже ${BALANCE.stage8.performance.fpsLowThreshold} FPS; ручной High не меняется.</div>
+                    </div>
                     <div class="pt-6 border-t border-white/10">
                         <button onclick="confirmReset()" class="w-full bg-red-900/20 hover:bg-red-600 text-red-400 hover:text-white py-4 rounded-xl text-sm font-bold transition-all border border-red-500/30 shadow-[0_0_15px_rgba(255,0,0,0.1)] uppercase tracking-widest font-orbitron">Сбросить весь прогресс</button>
                     </div>
@@ -1399,10 +1485,13 @@
         }
 
         let lastFrame = performance.now();
+        let gameRaf = 0, render3DRaf = 0, canvasRaf = 0; // STAGE 8: one RAF per loop, paused while hidden.
         let autoClickTimer = 0, autoSaveTimer = 0, submitTimer = 0;
 
         function gameLoop(time) {
-            requestAnimationFrame(gameLoop);
+            gameRaf = 0;
+            if (document.hidden) return;
+            gameRaf = requestAnimationFrame(gameLoop);
             const rawDelta = (time - lastFrame) / 1000;
             lastFrame = time;
             if (rawDelta <= 0) return;
@@ -1504,6 +1593,7 @@
             isManual = (isManual === undefined) ? true : isManual;
             isAuto = (isAuto === undefined) ? false : isAuto;
             if(isOverheated) return;
+            if (isManual) tutorialAction('mine');
             if(state.res.min < 10 && isManual) {
                 state.res.min += 1;
             }
@@ -1781,6 +1871,7 @@
         }
 
         function castSkill(id) {
+            tutorialAction('skill');
             const now = Date.now(), skill = SKILLS[id];
             let cdTime = skill.cd * 1000;
             if (now - (state.skills[id] || 0) < cdTime) return;
@@ -1918,7 +2009,7 @@
             setTimeout(() => el.remove(), 1500);
         }
         function casinoBurst(host, colors, count) {
-            if (!host) return;
+            if (!host || perfState.low) return; // STAGE 8
             for (let i = 0; i < (count || 16); i++) {
                 const p = document.createElement('div');
                 p.className = 'casino-ptc';
@@ -1936,6 +2027,7 @@
             }
         }
         function casinoShake() {
+            if (perfState.low) return; // STAGE 8
             const el = document.getElementById('game-sidebar') || document.body;
             el.classList.remove('casino-shake'); void el.offsetWidth; el.classList.add('casino-shake');
         }
@@ -2200,6 +2292,7 @@
             setTimeout(onStop, dur);
         }
         function casinoSpin() {
+            tutorialAction('casino');
             if (_slotSpinning) return;
             const bet = casinoBetValue('slots');
             if (!casinoSpendMin(bet)) { showToast('Недостаточно минералов для ставки'); return; }
@@ -2698,6 +2791,7 @@
         function switchTab(tab) {
             const prevTab = currentTab;
             currentTab = tab;
+            if (tab !== 'core' && prevTab !== tab) tutorialAction('tab');
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             const activeBtns = document.querySelectorAll(`.tab-btn[onclick*="'${tab}'"]`);
             activeBtns.forEach(b => b.classList.add('active'));
@@ -2705,9 +2799,11 @@
             const sidebar = document.getElementById('game-sidebar');
             if (tab === 'core') {
                 if (sidebar) sidebar.classList.remove('panel-open');
+                closeDrawers();
                 return;
             } else {
                 if (sidebar) sidebar.classList.add('panel-open');
+                if (isMobileLayout()) openDrawer('right');
             }
 
             const content = document.getElementById('tab-content');
@@ -2901,6 +2997,7 @@
                 state.bld[id] = lvl + 1;
                 // STAGE 5: единый lifetime-счётчик покупок зданий/апгрейдов.
                 state.stats.upgradePurchases = (state.stats.upgradePurchases || 0) + 1;
+                tutorialAction('upgrade');
                 recalculate(); 
                 saveGame();
                 switchTab('build'); 
@@ -4306,6 +4403,110 @@
             if (currentTab === 'quests') updateQuestsUI();
         }
 
+        /* ================= MOBILE / ONBOARDING / PERFORMANCE · STAGE 8 ================= */
+        const perfState = { low:false, fps:0, frames:0, sampleAt:0, lowSince:0 };
+        let tutorialTarget = null;
+        function isMobileLayout() { return state.uiMode === 'mobile' || (state.uiMode === 'auto' && innerWidth < BALANCE.stage8.mobileBreakpoint); }
+        function closeDrawers() {
+            document.getElementById('skills-drawer')?.classList.remove('drawer-open');
+            document.getElementById('game-sidebar')?.classList.remove('panel-open');
+            document.getElementById('drawer-overlay')?.classList.remove('active');
+            document.getElementById('mobile-left-drawer-btn')?.setAttribute('aria-expanded','false');
+            document.getElementById('mobile-right-drawer-btn')?.setAttribute('aria-expanded','false');
+        }
+        function openDrawer(side) {
+            if (!isMobileLayout()) return;
+            closeDrawers();
+            const el = document.getElementById(side === 'left' ? 'skills-drawer' : 'game-sidebar');
+            el?.classList.add(side === 'left' ? 'drawer-open' : 'panel-open');
+            document.getElementById('drawer-overlay')?.classList.add('active');
+            document.getElementById(side === 'left' ? 'mobile-left-drawer-btn' : 'mobile-right-drawer-btn')?.setAttribute('aria-expanded','true');
+            playSFX('panel_open');
+        }
+        function toggleDrawer(side) {
+            const open = side === 'left' ? document.getElementById('skills-drawer')?.classList.contains('drawer-open') : document.getElementById('game-sidebar')?.classList.contains('panel-open');
+            open ? closeDrawers() : openDrawer(side);
+        }
+        function currentSphereSegments() { return perfState.low ? BALANCE.stage8.performance.lowSegments : BALANCE.stage8.performance.highSegments; }
+        function recreatePlanetGeometry() {
+            if (!marsMesh || !atmosMesh) return;
+            const seg = currentSphereSegments();
+            const oldMars = marsMesh.geometry, oldAtmos = atmosMesh.geometry;
+            marsMesh.geometry = new THREE.SphereGeometry(8, seg, seg);
+            atmosMesh.geometry = new THREE.SphereGeometry(8.3, Math.max(16,seg/2), Math.max(16,seg/2));
+            oldMars.dispose(); oldAtmos.dispose();
+        }
+        function applyPerformanceMode(low, persistAuto=false) {
+            low = !!low;
+            if (perfState.low === low && document.body.classList.contains('perf-low') === low) return;
+            perfState.low = low;
+            state.performance.resolved = low ? 'low' : 'high';
+            if (persistAuto) state.performance.autoLow = low;
+            document.body.classList.toggle('perf-low', low);
+            if (ringsMesh) ringsMesh.visible = !low;
+            if (sunGlow) sunGlow.visible = !low;
+            particles.length = 0;
+            recreatePlanetGeometry();
+            updateFPSHud(); saveGame();
+        }
+        function setPerformancePreference(pref) {
+            if (!['auto','high','low'].includes(pref)) return;
+            state.performance.preference = pref;
+            if (pref === 'high') { state.performance.autoLow=false; applyPerformanceMode(false); }
+            else if (pref === 'low') applyPerformanceMode(true);
+            else applyPerformanceMode(!!state.performance.autoLow);
+            saveGame(); openSettings();
+        }
+        function sampleFPS(now) {
+            perfState.frames++;
+            if (!perfState.sampleAt) perfState.sampleAt = now;
+            const elapsed = (now - perfState.sampleAt) / 1000;
+            if (elapsed < BALANCE.stage8.performance.sampleSeconds) return;
+            perfState.fps = perfState.frames / elapsed; perfState.frames=0; perfState.sampleAt=now;
+            if (state.performance.preference === 'auto' && !perfState.low) {
+                if (perfState.fps < BALANCE.stage8.performance.fpsLowThreshold) {
+                    if (!perfState.lowSince) perfState.lowSince = now;
+                    if ((now-perfState.lowSince)/1000 >= BALANCE.stage8.performance.lowForSeconds) applyPerformanceMode(true,true);
+                } else perfState.lowSince=0;
+            }
+            updateFPSHud();
+        }
+        function updateFPSHud() { const el=document.getElementById('fps-hud'); if(el) el.textContent=`FPS ${Math.round(perfState.fps||0)} · ${perfState.low?'LOW':'HIGH'}`; }
+        function startStage8Loops() {
+            if (document.hidden) return;
+            lastFrame = performance.now();
+            if (!gameRaf) gameRaf=requestAnimationFrame(gameLoop);
+            if (renderer && !render3DRaf) render3DRaf=requestAnimationFrame(animate3D);
+            if (!canvasRaf) canvasRaf=requestAnimationFrame(animateCanvas);
+        }
+        function clearTutorialTarget() { if(tutorialTarget) tutorialTarget.classList.remove('tutorial-target'); tutorialTarget=null; }
+        function renderTutorial() {
+            clearTutorialTarget();
+            const t=state.tutorial;
+            const layer=document.getElementById('tutorial-layer');
+            if (!t || t.completed || t.skipped) { layer?.classList.add('hidden'); return; }
+            const step=BALANCE.stage8.tutorial.steps[t.currentStep]; if(!step) return finishTutorial(false);
+            layer.classList.remove('hidden');
+            document.getElementById('tutorial-title').textContent=step.title;
+            document.getElementById('tutorial-text').textContent=step.text;
+            document.getElementById('tutorial-progress').textContent=`${t.currentStep+1} / ${BALANCE.stage8.tutorial.steps.length}`;
+            document.getElementById('tutorial-next').textContent=t.currentStep===BALANCE.stage8.tutorial.steps.length-1?'Готово':'Далее';
+            if(step.tab && currentTab!==step.tab) switchTab(step.tab);
+            if(step.drawer) openDrawer(step.drawer);
+            setTimeout(()=>{ tutorialTarget=document.querySelector(step.target); tutorialTarget?.classList.add('tutorial-target'); tutorialTarget?.scrollIntoView({block:'center',behavior:'smooth'}); },120);
+            saveGame();
+        }
+        function tutorialNext() { const t=state.tutorial; if(!t||t.completed||t.skipped)return; t.currentStep++; t.currentStep>=BALANCE.stage8.tutorial.steps.length?finishTutorial(false):renderTutorial(); }
+        function tutorialAction(action) { const t=state.tutorial; if(!t||t.completed||t.skipped)return; const step=BALANCE.stage8.tutorial.steps[t.currentStep]; if(step?.action===action) tutorialNext(); }
+        function finishTutorial(skipped) {
+            clearTutorialTarget(); const t=state.tutorial; if(!t)return;
+            t.skipped=!!skipped; t.completed=!skipped; t.currentStep=Math.min(t.currentStep,BALANCE.stage8.tutorial.steps.length-1);
+            document.getElementById('tutorial-layer')?.classList.add('hidden');
+            if(!skipped && !t.analyticsSent){ t.analyticsSent=true; window.trackTutorialDone(); }
+            saveGame();
+        }
+        function skipTutorial(){ finishTutorial(true); }
+        document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ closeDrawers(); if(!document.getElementById('generic-modal')?.classList.contains('hidden')) closeModal(); } });
         let scene, camera, renderer, marsMesh, atmosMesh, phobosMesh, rimLight, wireMesh, sunGlow, ringsMesh;
         let targetCameraX = 0, targetCameraY = 0;
 
@@ -4334,11 +4535,11 @@
             rimLight.position.set(-10, -5, -10);
             scene.add(rimLight);
             
-            const geo = new THREE.SphereGeometry(8, 64, 64);
+            const geo = new THREE.SphereGeometry(8, currentSphereSegments(), currentSphereSegments()); // STAGE 8
             marsMesh = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({ color: 0x8a2610, roughness: 0.7, metalness: 0.2 }));
             scene.add(marsMesh);
             
-            atmosMesh = new THREE.Mesh(new THREE.SphereGeometry(8.3, 32, 32), new THREE.MeshBasicMaterial({ color: 0xE55934, transparent: true, opacity: 0.2, side: THREE.BackSide, blending: THREE.AdditiveBlending }));
+            atmosMesh = new THREE.Mesh(new THREE.SphereGeometry(8.3, Math.max(16,currentSphereSegments()/2), Math.max(16,currentSphereSegments()/2)), new THREE.MeshBasicMaterial({ color: 0xE55934, transparent: true, opacity: 0.2, side: THREE.BackSide, blending: THREE.AdditiveBlending }));
             scene.add(atmosMesh);
 
             wireMesh = new THREE.Mesh(new THREE.SphereGeometry(8.4, 16, 16), new THREE.MeshBasicMaterial({ color: 0xE55934, wireframe: true, transparent: true, opacity: 0.05, blending: THREE.AdditiveBlending }));
@@ -4443,14 +4644,17 @@
                 targetCameraY = mouseY * 1.5;
             });
 
-            animate3D();
+            startStage8Loops();
         }
 
         let phobosAngle = 0;
         let currentPlanetScale = 1;
 
-        function animate3D() {
-            requestAnimationFrame(animate3D);
+        function animate3D(now) {
+            render3DRaf = 0;
+            if (document.hidden) return;
+            render3DRaf = requestAnimationFrame(animate3D);
+            sampleFPS(now);
             
             if(marsMesh) marsMesh.rotation.y += 0.0004;
             if(atmosMesh) atmosMesh.rotation.y += 0.0006;
@@ -4514,6 +4718,7 @@
         }
         
         function spawnParticles() {
+            if (perfState.low) return; // STAGE 8
             const rect = document.getElementById('main-clicker').getBoundingClientRect();
             const cx = rect.left + rect.width/2;
             const cy = rect.top + rect.height/2;
@@ -4533,7 +4738,9 @@
         }
 
         function animateCanvas() {
-            requestAnimationFrame(animateCanvas);
+            canvasRaf = 0;
+            if (document.hidden) return;
+            canvasRaf = requestAnimationFrame(animateCanvas);
             ctx.clearRect(0, 0, uiCanvas.width, uiCanvas.height);
             
             for(let i = floaters.length - 1; i >= 0; i--) {
@@ -4585,11 +4792,21 @@
             resizeCanvas();
             
             const clicker = document.getElementById('main-clicker');
-            clicker.addEventListener('mousedown', () => doClick(true));
-            clicker.addEventListener('touchstart', (e) => { e.preventDefault(); doClick(true); });
+            // STAGE 8: a single primary pointer path avoids synthetic click/touch duplicates.
+            clicker.addEventListener('pointerdown', e => {
+                if (!e.isPrimary || (e.pointerType === 'mouse' && e.button !== 0)) return;
+                e.preventDefault(); doClick(true);
+            });
+            clicker.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); doClick(true); } });
+            clicker.setAttribute('role','button'); clicker.setAttribute('tabindex','0'); clicker.setAttribute('aria-label','Добывать минералы');
             
-            initSkills(); 
+            initSkills();
             recalculate();
+            perfState.low = state.performance.preference === 'low' || (state.performance.preference === 'auto' && state.performance.autoLow);
+            document.body.classList.toggle('perf-low', perfState.low);
+            state.performance.resolved = perfState.low ? 'low' : 'high';
+            updateFPSHud();
+            setTimeout(renderTutorial, 500);
             // STAGE 6: первый оффер планируется на 10–20 минут активной видимой игры.
             scheduleNextRandomEvent();
             if (new URLSearchParams(location.search).has('dev')) {
@@ -4608,9 +4825,7 @@
                 switchTab('build');
             }
             
-            requestAnimationFrame(gameLoop);
-            requestAnimationFrame(animateCanvas);
-            lastFrame = performance.now();
+            startStage8Loops();
 
             submitLeaderboard();
             updateIncomeBuffUI();
@@ -4631,6 +4846,7 @@
                 updateStage5UI();
                 scheduleStartupModal();
                 lastFrame = performance.now();
+                startStage8Loops(); // STAGE 8: fresh timing, guarded against duplicate RAF.
                 gameplayMarker(true);
                 setTimeout(() => maybeShowInterstitial(backgroundMs), BALANCE.yandex.devRewardDelayMs);
             }
