@@ -177,6 +177,13 @@
         @keyframes modalIn { 0% { opacity: 0; transform: scale(0.8) translateY(30px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
         .ach-fade-in { animation: achFadeIn 0.28s cubic-bezier(0.4, 0, 0.2, 1) both; }
         @keyframes achFadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .no-scrollbar { scrollbar-width: none; -ms-overflow-style: none; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .ach-chip { min-height: 30px; }
+        .ach-scroll { scrollbar-width: thin; scrollbar-color: rgba(251,191,36,0.45) rgba(255,255,255,0.05); }
+        .ach-scroll::-webkit-scrollbar { width: 3px; }
+        .ach-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 3px; }
+        .ach-scroll::-webkit-scrollbar-thumb { background: rgba(251,191,36,0.45); border-radius: 3px; }
         
         .rarity-common { border-color: rgba(148,163,184,0.5); box-shadow: inset 0 0 15px rgba(148,163,184,0.1); }
         .rarity-rare { border-color: rgba(59,130,246,0.6); box-shadow: inset 0 0 20px rgba(59,130,246,0.2); }
@@ -3848,33 +3855,48 @@
             badge.classList.toggle('flex', count > 0);
         }
 
-        function openAchievementsModal(category = achievementCategory, preserveScroll = false) {
-            const prevItems = document.getElementById('ach-items');
-            const prevScroll = prevItems ? prevItems.scrollTop : 0;
+        // Карточка достижения; единый шаблон для списка и точечного обновления после claim.
+        function achievementCardHTML(a) {
+            const claimed = state.achievements?.claimed || {};
+            const progress = achievementProgress(a), done = progress >= a.target, got = !!claimed[a.id];
+            const pct = Math.min(100, progress / a.target * 100);
+            return `<div id="ach-card-${a.id}" class="rounded-xl border ${done && !got ? 'border-green-500/50 bg-green-950/20' : 'border-white/10 bg-black/30'} p-3 transition-all duration-300 hover:border-white/20">
+                <div class="flex items-center justify-between gap-3"><div class="min-w-0"><div class="font-bold ${got ? 'text-gray-500' : 'text-white'}">${a.name}</div><div class="text-[10px] text-gray-500 uppercase">${a.category} · ${formatNum(progress)} / ${formatNum(a.target)}</div></div>
+                ${got ? '<span class="shrink-0 text-green-500 text-xs font-bold">ПОЛУЧЕНО</span>' : done ? `<button onclick="claimAchievement('${a.id}', this)" class="shrink-0 px-3 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95">Забрать +${a.reward} <span class="ico ico-crystal"></span></button>` : `<span class="shrink-0 text-prem-300 text-xs font-bold">+${a.reward} <span class="ico ico-crystal"></span></span>`}</div>
+                <div class="h-1.5 rounded-full bg-black/70 mt-2 overflow-hidden"><div class="h-full ${done ? 'bg-green-500' : 'bg-gold-500'} transition-all duration-500" style="width:${pct}%"></div></div>
+            </div>`;
+        }
+
+        // Перерисовывает только список карточек; скелет модалки не трогает.
+        // resetScroll=true — при смене категории список новый и начинается сверху;
+        // при claim вызывается без флага, поэтому позиция скролла сохраняется.
+        function renderAchievementList(category = achievementCategory, resetScroll = false) {
+            achievementCategory = category;
+            const list = document.getElementById('ach-items');
+            if (!list) return;
+            const filtered = BALANCE.achievements.filter(a => category === 'Все' || a.category === category);
+            list.innerHTML = filtered.map(achievementCardHTML).join('');
+            if (resetScroll) list.scrollTop = 0;
+            document.querySelectorAll('.ach-chip').forEach(b => {
+                const active = b.dataset.cat === category;
+                b.className = `ach-chip shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all duration-200 ${active ? 'bg-gold-500/20 border-gold-400 text-gold-300' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}`;
+            });
+            const claimedCount = Object.keys(state.achievements?.claimed || {}).length;
+            const total = BALANCE.achievements.length;
+            const sub = document.getElementById('ach-subtitle');
+            if (sub) sub.textContent = `${claimedCount} из ${total} получено · ${total - claimedCount} доступно`;
+        }
+
+        function openAchievementsModal(category = achievementCategory) {
             achievementCategory = category;
             const modal = document.getElementById('generic-modal');
             const content = document.getElementById('modal-content');
             const categories = ['Все', ...new Set(BALANCE.achievements.map(a => a.category))];
-            const claimed = state.achievements?.claimed || {};
-            const items = BALANCE.achievements.filter(a => category === 'Все' || a.category === category).map(a => {
-                const progress = achievementProgress(a), done = progress >= a.target, got = !!claimed[a.id];
-                const pct = Math.min(100, progress / a.target * 100);
-                return `<div id="ach-card-${a.id}" class="rounded-xl border ${done && !got ? 'border-green-500/50 bg-green-950/20' : 'border-white/10 bg-black/30'} p-3 transition-all duration-300 hover:border-white/20">
-                    <div class="flex items-center justify-between gap-3"><div class="min-w-0"><div class="font-bold ${got ? 'text-gray-500' : 'text-white'}">${a.name}</div><div class="text-[10px] text-gray-500 uppercase">${a.category} · ${formatNum(progress)} / ${formatNum(a.target)}</div></div>
-                    ${got ? '<span class="text-green-500 text-xs font-bold">ПОЛУЧЕНО</span>' : done ? `<button onclick="claimAchievement('${a.id}', this)" class="shrink-0 px-3 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white text-xs font-bold transition-all duration-200 hover:scale-105 active:scale-95">Забрать +${a.reward} <span class="ico ico-crystal"></span></button>` : `<span class="text-prem-300 text-xs font-bold">+${a.reward} <span class="ico ico-crystal"></span></span>`}</div>
-                    <div class="h-1.5 rounded-full bg-black/70 mt-2 overflow-hidden"><div class="h-full ${done ? 'bg-green-500' : 'bg-gold-500'} transition-all duration-500" style="width:${pct}%"></div></div>
-                </div>`;
-            }).join('');
-            content.innerHTML = `<div class="flex justify-between items-center border-b border-white/10 pb-4 mb-3 shrink-0"><div><h3 class="font-orbitron font-black text-xl text-gold-300"><i class="fa-solid fa-trophy mr-2"></i>ДОСТИЖЕНИЯ</h3><div class="text-[10px] text-gray-500 uppercase">24 награды за развитие колонии</div></div><button onclick="closeModal()" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 transition-all"><i class="fa-solid fa-xmark"></i></button></div>
-                <div class="flex gap-2 overflow-x-auto pb-3 shrink-0">${categories.map(c => `<button onclick="openAchievementsModal('${c}')" class="shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all duration-200 hover:scale-105 ${c === category ? 'bg-gold-500/20 border-gold-400 text-gold-300' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}">${c}</button>`).join('')}</div>
-                <div id="ach-items" class="ach-fade-in flex-1 min-h-0 overflow-y-auto pr-1 space-y-2">${items}</div>`;
+            content.innerHTML = `<div class="flex justify-between items-center border-b border-white/10 pb-4 mb-3 shrink-0"><div><h3 class="font-orbitron font-black text-xl text-gold-300"><i class="fa-solid fa-trophy mr-2"></i>ДОСТИЖЕНИЯ</h3><div id="ach-subtitle" class="text-[10px] text-gray-500 uppercase"></div></div><button onclick="closeModal()" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 transition-all"><i class="fa-solid fa-xmark"></i></button></div>
+                <div class="no-scrollbar flex gap-2 overflow-x-auto pb-3 shrink-0">${categories.map(c => `<button data-cat="${c}" onclick="renderAchievementList('${c}', true)" class="ach-chip shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-bold border transition-all duration-200 ${c === category ? 'bg-gold-500/20 border-gold-400 text-gold-300' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10'}">${c}</button>`).join('')}</div>
+                <div id="ach-items" class="ach-fade-in ach-scroll flex-1 min-h-0 overflow-y-auto pr-1 space-y-2"></div>`;
+            renderAchievementList(category);
             modal.classList.remove('hidden');
-            if (preserveScroll) {
-                const itemsEl = document.getElementById('ach-items');
-                if (itemsEl) {
-                    itemsEl.scrollTop = prevScroll;
-                }
-            }
         }
 
         function claimAchievement(id, button) {
@@ -3888,29 +3910,9 @@
             saveGame(); updateHeaderUI(); updateAchievementBadge(); playSFX('epic');
             showToast(`Достижение «${a.name}»: +${a.reward} кристаллов`);
             achievementClaimLocked = false;
-            
-            // Точечное обновление карточки без перерисовки всего списка
-            const card = document.getElementById(`ach-card-${id}`);
-            if (card) {
-                const progress = achievementProgress(a);
-                const pct = Math.min(100, progress / a.target * 100);
-                card.className = 'rounded-xl border border-green-500/50 bg-green-950/20 p-3 transition-all duration-300 hover:border-white/20';
-                card.innerHTML = `<div class="flex items-center justify-between gap-3"><div class="min-w-0"><div class="font-bold text-gray-500">${a.name}</div><div class="text-[10px] text-gray-500 uppercase">${a.category} · ${formatNum(progress)} / ${formatNum(a.target)}</div></div><span class="text-green-500 text-xs font-bold">ПОЛУЧЕНО</span></div><div class="h-1.5 rounded-full bg-black/70 mt-2 overflow-hidden"><div class="h-full bg-green-500 transition-all duration-500" style="width:${pct}%"></div></div>`;
-            }
-        }
 
-        function claimAchievement(id, button) {
-            if (achievementClaimLocked) return;
-            const a = BALANCE.achievements.find(x => x.id === id);
-            if (!a || state.achievements.claimed[id] || achievementProgress(a) < a.target) return;
-            achievementClaimLocked = true;
-            if (button) button.disabled = true;
-            state.achievements.claimed[id] = true;
-            state.res.prm += a.reward;
-            saveGame(); updateHeaderUI(); updateAchievementBadge(); playSFX('epic');
-            showToast(`Достижение «${a.name}»: +${a.reward} кристаллов`);
-            achievementClaimLocked = false;
-            openAchievementsModal(achievementCategory);
+            // Перерисовка только списка карточек — контейнер и позиция скролла не меняются.
+            renderAchievementList(achievementCategory);
         }
 
         // STAGE 5: стабильный seeded-выбор трёх разных типов на локальную дату.
