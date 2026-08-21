@@ -428,6 +428,12 @@
                 nexus: 1.25, starforge: 1.24, weaver: 1.25, engine: 1.25
             }) }),
             combo: Object.freeze({ min: 1.0, max: 3.0, gainPerClick: 0.05, holdSeconds: 1.5, decayPerSecond: 0.5 }),
+            // STAGE 2: престиж «Перезапуск колонии».
+            prestige: Object.freeze({
+                unlockLifetime: 1e12, coreBaseAward: 5, formulaExponent: 0.5,
+                incomePerCore: 0.1, rewardedCoreBonus: 1,
+                flashFadeInMs: 50, flashHoldMs: 250, flashFadeOutMs: 700
+            }),
             casino: Object.freeze({
                 unlockLifetimeMin: 100000,
                 slots: Object.freeze({
@@ -582,13 +588,20 @@
             { id: 'q14', name: 'Повелитель Времени', desc: 'Собрать 1 Квинтиллион мин.', type: 'min', target: 1e18, reward: {prm: 2500} }
         ];
 
+        // STAGE 2: версия нужна для без потерь миграции старых сохранений к ядрам.
+        const SAVE_VERSION = 2;
+        const DEFAULT_SKILLS = Object.freeze({ strike: 0, freeze: 0, swarm: 0, coolant: 0, overdrive: 0, timewarp: 0 });
+        const DEFAULT_SKILLS_UNLOCKED = Object.freeze({ strike: true, freeze: false, swarm: false, coolant: false, overdrive: false, timewarp: false });
+
         let state = {
+            saveVersion: SAVE_VERSION,
             res: { min: 0, sci: 0, prm: 50 },
             bld: {}, tech: {}, crew: {},
-            skills: { strike: 0, freeze: 0, swarm: 0, coolant: 0, overdrive: 0, timewarp: 0 },
+            skills: { ...DEFAULT_SKILLS },
             stats: { totalTime: 0, clicks: 0, totalMin: 0, totalLifetime: 0 },
             rebirth: { count: 0, darkMatter: 0 },
-            skillsUnlocked: { strike: true, freeze: false, swarm: false, coolant: false, overdrive: false, timewarp: false },
+            prestige: { cores: 0, count: 0, adCoreReady: false },
+            skillsUnlocked: { ...DEFAULT_SKILLS_UNLOCKED },
             skillsVisible: true,
             questsCompleted: {},
             lastTick: Date.now(),
@@ -775,23 +788,25 @@
             if (saved) {
                 try {
                     let parsed = JSON.parse(saved);
-                    if(parsed.res) state.res = {...state.res, ...parsed.res};
-                    if(parsed.bld) state.bld = {...state.bld, ...parsed.bld};
-                    if(parsed.tech) state.tech = {...state.tech, ...parsed.tech};
-                    if(parsed.crew) state.crew = {...state.crew, ...parsed.crew};
-                    if(parsed.skills) state.skills = {...state.skills, ...parsed.skills};
-                    if(parsed.stats) state.stats = {...state.stats, ...parsed.stats};
-                    if(parsed.rebirth) state.rebirth = {...state.rebirth, ...parsed.rebirth};
-                    if(parsed.skillsUnlocked) state.skillsUnlocked = {...state.skillsUnlocked, ...parsed.skillsUnlocked};
-                    if(parsed.questsCompleted) state.questsCompleted = {...state.questsCompleted, ...parsed.questsCompleted};
-                    if(parsed.lastTick) state.lastTick = parsed.lastTick;
-                    if(parsed.skillsVisible !== undefined) state.skillsVisible = parsed.skillsVisible;
-                    if(parsed.soundEnabled !== undefined) state.soundEnabled = parsed.soundEnabled;
-                    if(parsed.planet) state.planet = parsed.planet;
-                    if(parsed.unlockedPlanets) state.unlockedPlanets = {...state.unlockedPlanets, ...parsed.unlockedPlanets};
-                    if(parsed.uiMode) state.uiMode = parsed.uiMode;
+                    // STAGE 2: миграция сохраняет неизвестные/будущие поля, затем дополняет новые defaults.
+                    const defaults = state;
+                    state = { ...defaults, ...parsed };
+                    state.saveVersion = SAVE_VERSION;
+                    state.res = { ...defaults.res, ...(parsed.res || {}) };
+                    state.bld = { ...(parsed.bld || {}) };
+                    state.tech = { ...(parsed.tech || {}) };
+                    state.crew = { ...(parsed.crew || {}) };
+                    state.skills = { ...DEFAULT_SKILLS, ...(parsed.skills || {}) };
+                    state.stats = { ...defaults.stats, ...(parsed.stats || {}) };
+                    state.rebirth = { ...defaults.rebirth, ...(parsed.rebirth || {}) };
+                    state.prestige = { ...defaults.prestige, ...(parsed.prestige || {}) };
+                    state.skillsUnlocked = { ...DEFAULT_SKILLS_UNLOCKED, ...(parsed.skillsUnlocked || {}) };
+                    state.questsCompleted = { ...(parsed.questsCompleted || {}) };
+                    state.unlockedPlanets = { mars: true, ...(parsed.unlockedPlanets || {}) };
+                    const dc = defaults.casino;
+                    state.casino = { ...dc, ...(parsed.casino || {}), stats: { ...dc.stats, ...((parsed.casino && parsed.casino.stats) || {}) } };
+                    if(!Array.isArray(state.casino.crashHistory)) state.casino.crashHistory = [];
                     if(parsed.adBuffTimer) adBuffTimer = parsed.adBuffTimer;
-                    if(parsed.casino) { const dc = state.casino; state.casino = { ...dc, ...parsed.casino, stats: { ...dc.stats, ...(parsed.casino.stats || {}) } }; if(!Array.isArray(state.casino.crashHistory)) state.casino.crashHistory = []; }
                     
                     displayState.res.min = state.res.min;
                     displayState.res.sci = state.res.sci;
@@ -988,6 +1003,12 @@
             mult.min *= (1 + rebirthBonus);
             mult.sci *= (1 + rebirthBonus);
             mult.click *= (1 + rebirthBonus);
+
+            // STAGE 2: каждое накопленное Аномальное ядро усиливает весь доход.
+            const coreMult = 1 + BALANCE.prestige.incomePerCore * (state.prestige?.cores || 0);
+            mult.min *= coreMult;
+            mult.sci *= coreMult;
+            mult.click *= coreMult;
 
             let crewMinBonus = 0, crewSciBonus = 0, crewCostDiscount = 0;
             CREW_DATA.forEach(char => {
@@ -2339,8 +2360,39 @@
             if (prevTab !== tab) maybeShowInterstitial();
         }
 
+        // STAGE 2: формула и доступная награда отделены от рекламных ядер.
+        function calculatePrestigeCores(lifetime) {
+            if (lifetime < BALANCE.prestige.unlockLifetime) return 0;
+            return Math.floor(BALANCE.prestige.coreBaseAward * Math.pow(lifetime / BALANCE.prestige.unlockLifetime, BALANCE.prestige.formulaExponent));
+        }
+
+        function getPrestigeAward() {
+            const formulaTotal = calculatePrestigeCores(state.stats.totalLifetime || 0);
+            return Math.max(0, formulaTotal - (state.prestige?.formulaCores || 0));
+        }
+
+        function renderPrestigeCard() {
+            const lifetime = state.stats.totalLifetime || 0;
+            const unlocked = lifetime >= BALANCE.prestige.unlockLifetime;
+            const award = getPrestigeAward();
+            const cores = state.prestige?.cores || 0;
+            const pct = Math.min(100, lifetime / BALANCE.prestige.unlockLifetime * 100);
+            return `<div class="glass-card rounded-2xl p-5 mb-5 border ${unlocked ? 'border-mars-400/70 shadow-[0_0_24px_rgba(229,89,52,0.25)]' : 'border-white/10'} bg-gradient-to-br from-black/90 to-mars-900/30 relative overflow-hidden">
+                <div class="absolute -right-5 -top-6 text-8xl text-mars-500/10 pointer-events-none"><i class="fa-solid fa-atom"></i></div>
+                <div class="relative z-10">
+                    <div class="flex items-start justify-between gap-3 mb-3">
+                        <div><div class="font-orbitron font-black text-sm text-white tracking-widest">ПЕРЕЗАПУСК КОЛОНИИ</div><div class="text-[10px] text-mars-300 uppercase tracking-wider mt-1">Аномальные ядра · глобальный доход</div></div>
+                        <div class="shrink-0 bg-black/60 border border-mars-500/30 rounded-xl px-3 py-2 text-center"><div class="font-orbitron font-black text-mars-300">${formatNum(cores)}</div><div class="text-[8px] text-gray-500 uppercase">ядер · x${(1 + cores * BALANCE.prestige.incomePerCore).toFixed(1)}</div></div>
+                    </div>
+                    <div class="flex justify-between text-[10px] text-gray-400 mb-1"><span>${unlocked ? 'Сигнал стабилен' : 'До открытия: ' + formatNum(Math.max(0, BALANCE.prestige.unlockLifetime - lifetime))}</span><span>${formatNum(lifetime)} / ${formatNum(BALANCE.prestige.unlockLifetime)}</span></div>
+                    <div class="h-2 rounded-full bg-black/70 border border-white/10 overflow-hidden mb-4"><div class="h-full bg-gradient-to-r from-mars-600 to-orange-400 transition-all" style="width:${pct}%"></div></div>
+                    <button onclick="openPrestigeModal()" class="w-full py-3 rounded-xl font-orbitron font-black text-xs tracking-widest uppercase transition-all ${award > 0 ? 'bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white shadow-[0_0_18px_rgba(34,197,94,0.35)] btn-shine' : 'bg-white/5 text-gray-500 border border-white/10 cursor-not-allowed'}" ${award > 0 ? '' : 'disabled'}>${award > 0 ? 'Перезапуск · +' + formatNum(award) + ' ядер' : (unlocked ? 'Накопите больше lifetime' : 'Требуется 1T lifetime')}</button>
+                </div>
+            </div>`;
+        }
+
         function renderBuild(container) {
-            let html = '<div class="space-y-4">';
+            let html = '<div class="space-y-4">' + renderPrestigeCard();
             let crewCostDiscount = 0;
             CREW_DATA.forEach(c => { if(c.rarity==='rare' && c.effect.includes('Скидка')) crewCostDiscount += 0.02 * (state.crew[c.id] || 0); });
             let costMultGlobal = Math.max(0.1, 1 - crewCostDiscount);
@@ -2380,6 +2432,85 @@
             container.innerHTML = html + '</div>';
         }
         
+        // STAGE 2: модалка в стиле Спонсорской Сети, без системного confirm.
+        function openPrestigeModal() {
+            const award = getPrestigeAward();
+            if (award <= 0) return;
+            state.prestige.adCoreReady = false;
+            const modal = document.getElementById('generic-modal');
+            const content = document.getElementById('modal-content');
+            content.innerHTML = `
+                <div class="flex justify-between items-center border-b border-white/10 pb-4 mb-5">
+                    <div><h3 class="font-orbitron font-black text-xl text-white tracking-wider">ПЕРЕЗАПУСК КОЛОНИИ</h3><div class="text-[10px] text-mars-300 uppercase tracking-widest mt-1">Протокол аномалии</div></div>
+                    <button onclick="closeModal()" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="bg-gradient-to-r from-mars-900/60 to-orange-900/20 border border-mars-500/40 rounded-2xl p-4 mb-4 text-center">
+                    <div class="text-xs text-gray-400 uppercase tracking-widest">Награда</div>
+                    <div id="prestige-award-text" class="font-orbitron font-black text-3xl text-mars-300 my-2">+${formatNum(award)} ядер</div>
+                    <div class="text-[11px] text-gray-300">Итоговый множитель: x${(1 + ((state.prestige.cores || 0) + award) * BALANCE.prestige.incomePerCore).toFixed(1)}</div>
+                </div>
+                <button id="prestige-ad-btn" onclick="addPrestigeAdCore()" class="w-full mb-4 py-3 rounded-xl border border-green-500/40 bg-green-500/10 hover:bg-green-500/20 text-green-300 font-orbitron font-bold text-xs tracking-wider uppercase transition-all"><i class="fa-solid fa-video mr-2"></i>+${BALANCE.prestige.rewardedCoreBonus} ядро за rewarded</button>
+                <div class="grid grid-cols-2 gap-3 mb-5 text-[11px]">
+                    <div class="rounded-xl bg-red-950/25 border border-red-500/20 p-3"><div class="font-bold text-red-300 uppercase mb-2">Сгорит</div><div class="text-gray-400 leading-relaxed">Минералы, наука, здания, технологии, навыки и открытые планеты.</div></div>
+                    <div class="rounded-xl bg-green-950/25 border border-green-500/20 p-3"><div class="font-bold text-green-300 uppercase mb-2">Останется</div><div class="text-gray-400 leading-relaxed">Ядра, достижения, казино, ежедневные награды, кристаллы, экипаж, lifetime и версия сейва.</div></div>
+                </div>
+                <div class="flex gap-3"><button onclick="closeModal()" class="flex-1 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 font-bold">Отмена</button><button onclick="performPrestigeReset()" class="flex-1 py-3 rounded-xl bg-gradient-to-r from-green-600 to-green-500 hover:from-green-500 hover:to-green-400 text-white font-orbitron font-black text-xs tracking-wider btn-shine">ПОДТВЕРДИТЬ</button></div>`;
+            modal.classList.remove('hidden');
+        }
+
+        function addPrestigeAdCore() {
+            const btn = document.getElementById('prestige-ad-btn');
+            if (!btn || state.prestige.adCoreReady) return;
+            btn.disabled = true;
+            showRewardedVideo(success => {
+                if (!success) { btn.disabled = false; showToast('Реклама не досмотрена — бонус не начислен.'); return; }
+                state.prestige.adCoreReady = true;
+                btn.textContent = '+' + BALANCE.prestige.rewardedCoreBonus + ' ядро добавлено';
+                const reward = document.getElementById('prestige-award-text');
+                if (reward) reward.textContent = '+' + formatNum(getPrestigeAward() + BALANCE.prestige.rewardedCoreBonus) + ' ядер';
+            });
+        }
+
+        function performPrestigeReset() {
+            const formulaAward = getPrestigeAward();
+            if (formulaAward <= 0) return;
+            const adAward = state.prestige.adCoreReady ? BALANCE.prestige.rewardedCoreBonus : 0;
+            state.prestige.cores = (state.prestige.cores || 0) + formulaAward + adAward;
+            state.prestige.formulaCores = (state.prestige.formulaCores || 0) + formulaAward;
+            state.prestige.count = (state.prestige.count || 0) + 1;
+            state.prestige.adCoreReady = false;
+            state.res.min = 0;
+            state.res.sci = 0;
+            state.bld = {};
+            state.tech = {};
+            state.skills = { ...DEFAULT_SKILLS };
+            state.skillsUnlocked = { ...DEFAULT_SKILLS_UNLOCKED };
+            skillActive = {};
+            state.planet = 'mars';
+            state.unlockedPlanets = { mars: true };
+            state.stats.totalMin = 0;
+            heat = 0; isOverheated = false; combo = BALANCE.combo.min; comboTimer = 0;
+            recalculate();
+            closeModal();
+            saveGame();
+            updatePlanetVisuals();
+            switchTab('build');
+            playSFX('epic');
+            prestigeSceneFlash();
+            showToast('Колония перезапущена: +' + formatNum(formulaAward + adAward) + ' Аномальных ядер');
+        }
+
+        function prestigeSceneFlash() {
+            const flash = document.createElement('div');
+            flash.className = 'fixed inset-0 z-[90] pointer-events-none bg-white opacity-0 transition-opacity';
+            flash.style.transitionDuration = BALANCE.prestige.flashFadeInMs + 'ms';
+            document.body.appendChild(flash);
+            targetPlanetScale = 0.35;
+            setTimeout(() => { flash.style.opacity = '1'; }, 0);
+            setTimeout(() => { updatePlanetVisuals(); targetPlanetScale = 1.25; flash.style.transitionDuration = BALANCE.prestige.flashFadeOutMs + 'ms'; flash.style.opacity = '0'; }, BALANCE.prestige.flashHoldMs);
+            setTimeout(() => flash.remove(), BALANCE.prestige.flashHoldMs + BALANCE.prestige.flashFadeOutMs);
+        }
+
         function buyBld(id) {
             let crewCostDiscount = 0;
             CREW_DATA.forEach(c => { if(c.rarity==='rare' && c.effect.includes('Скидка')) crewCostDiscount += 0.02 * (state.crew[c.id] || 0); });
