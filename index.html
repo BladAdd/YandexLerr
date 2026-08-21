@@ -344,11 +344,8 @@
                         <div id="combo-bar-fill" class="h-full rounded-full" style="width: 0%; background: linear-gradient(90deg, #f59e0b, #fde047);"></div>
                     </div>
 
-                    <div class="w-64 md:w-72 bg-black/80 h-4 rounded-full border-2 border-white/10 relative heat-bar-bg overflow-hidden shadow-[0_10px_20px_rgba(0,0,0,0.8)]" id="heat-bar-container">
-                        <div id="heat-bar-fill" class="h-full bg-gradient-to-r from-orange-500 via-red-500 to-red-700 w-0 transition-all duration-100 relative shadow-[0_0_20px_rgba(255,0,0,0.9)]">
-                            <div class="absolute inset-0 opacity-50 heat-bar-fill-texture"></div>
-                            <div class="absolute right-0 top-0 bottom-0 w-4 bg-white/50 blur-[2px]"></div>
-                        </div>
+                    <div id="heat-bar-container" class="w-56 sm:w-64 md:w-80 h-[7px] rounded-full border border-white/[0.12] relative" style="background: rgba(255,255,255,0.06)">
+                        <div id="heat-bar-fill" class="h-full w-0 rounded-full transition-all duration-100 relative" style="background: linear-gradient(90deg, #fde047, #f59e0b); box-shadow: 0 0 8px rgba(255,200,0,0.35);"></div>
                     </div>
                     <div id="heat-warning" class="text-sm text-red-500 font-orbitron font-black hidden uppercase tracking-widest animate-pulse drop-shadow-[0_0_15px_rgba(255,0,0,1)] bg-black/50 px-4 py-1 rounded-full border border-red-500/50">Внимание: ЯДРО ПЕРЕГРЕТО!</div>
                 </div>
@@ -425,6 +422,12 @@
             starforge: { name: 'Звездная Кузница', desc: 'Ковка из плазмы звезд.', icon: 'ico-starforge', base: {min: 100000000000}, costMult: 1.24, prod: {min: 500000000} },
             weaver: { name: 'Ткач Реальности', desc: 'Создание материи из пустоты.', icon: 'ico-weaver', base: {min: 5000000000000}, costMult: 1.26, prod: {min: 25000000000} },
             engine: { name: 'Сингулярный Двигатель', desc: 'Сжатие пространства-времени.', icon: 'ico-engine', base: {min: 1000000000000000}, costMult: 1.30, prod: {min: 5000000000000} }
+        };
+
+        const BLD_SVG = {
+            nexus: '<svg class="w-6 h-6 md:w-7 md:h-7 shrink-0 text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 12c0-2.8 2.2-5 5-5 3.3 0 6 2.7 6 6 0 5-4 9-9 9S3 18 3 13c0-2 1-4.5 3-6"/><path d="M12 12c0 2.8-2.2 5-5 5"/></svg>',
+            starforge: '<svg class="w-6 h-6 md:w-7 md:h-7 shrink-0 text-gray-300 drop-shadow-[0_0_8px_rgba(200,200,200,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/><path d="M6 21c2-1.5 3-3.5 2.5-6"/><path d="M18 21c-2-1.5-3-3.5-2.5-6"/><path d="M12 21c.8-1.2.8-2.6 0-4"/></svg>',
+            engine: '<svg class="w-6 h-6 md:w-7 md:h-7 shrink-0 text-gray-300 drop-shadow-[0_0_8px_rgba(200,200,200,0.5)]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><ellipse cx="12" cy="12" rx="9.5" ry="3.2" transform="rotate(-22 12 12)"/><path d="M5 5l2 2M19 5l-2 2M5 19l2-2M19 19l-2-2"/></svg>'
         };
 
         const TECH_DATA = {
@@ -1427,11 +1430,11 @@
                     
                     <div class="flex items-center gap-4 relative z-10 overflow-hidden flex-1 pr-2">
                         <div class="w-14 h-14 shrink-0 rounded-xl bg-black/60 border border-white/10 flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
-                            <span class="ico ${d.icon} text-2xl ${d.isSci ? 'text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]' : 'text-gray-300 drop-shadow-[0_0_8px_rgba(200,200,200,0.5)]'}"></span>
+                            ${BLD_SVG[id] || `<span class="ico ${d.icon} text-2xl ${d.isSci ? 'text-sci-400 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]' : 'text-gray-300 drop-shadow-[0_0_8px_rgba(200,200,200,0.5)]'}"></span>`}
                         </div>
                         
                         <div class="flex flex-col items-start min-w-0 flex-1">
-                            <h4 class="font-black text-base text-white tracking-wide truncate w-full">${d.name}</h4>
+                            <h4 class="font-black text-base text-white tracking-wide leading-[1.2] w-full">${d.name}</h4>
                             <div class="text-[10px] font-bold text-mars-300 bg-mars-900/50 px-2 py-0.5 rounded border border-mars-500/30 mt-0.5 mb-1 shrink-0 uppercase tracking-widest whitespace-nowrap">Ур. ${lvl}</div>
                             <div class="text-[11px] text-gray-400 leading-tight w-full truncate" title="${d.desc}">${d.desc}</div>
                             <div class="text-xs mt-1 font-orbitron font-bold ${d.isSci ? 'text-sci-400' : 'text-mars-400'} drop-shadow-md">
