@@ -351,6 +351,11 @@
                     </div>
                     
                     <div id="main-clicker" class="relative w-56 h-56 sm:w-64 sm:h-64 md:w-80 md:h-80 cursor-crosshair group flex items-center justify-center rounded-full">
+                        <!-- STAGE 6: компактный индикатор активного случайного события; обновляется только текст. -->
+                        <div id="random-event-buff" class="hidden absolute -top-5 left-1/2 -translate-x-1/2 z-30 pointer-events-none min-w-[190px] rounded-full border border-cyan-300/60 bg-black/85 px-4 py-2 text-center shadow-[0_0_24px_rgba(34,211,238,0.45)] backdrop-blur-md">
+                            <span id="random-event-buff-name" class="font-orbitron text-[10px] font-black uppercase tracking-wider text-cyan-200"></span>
+                            <span id="random-event-buff-time" class="ml-2 font-orbitron text-xs font-black text-white"></span>
+                        </div>
                         <div class="absolute inset-0 border-[3px] border-solid border-mars-500/30 rounded-full animate-[spin_12s_linear_infinite_reverse] pointer-events-none transition-all group-active:scale-90 group-active:border-mars-400/70 box-shadow-[0_0_30px_rgba(229,89,52,0.2)]"></div>
                         <div class="absolute inset-5 border-[4px] border-dotted border-orange-400/40 rounded-full animate-[spin_8s_linear_infinite] pointer-events-none transition-all group-active:scale-85 group-active:border-orange-400/80"></div>
                         <div class="absolute inset-10 border-[2px] border-dashed border-white/20 rounded-full animate-[spin_5s_linear_infinite_reverse] pointer-events-none transition-all group-active:scale-75"></div>
@@ -490,6 +495,18 @@
                     Object.freeze({ type: 'upgrades', label: 'Купить апгрейды', base: 3, scale: 0.01, min: 2, max: 20 })
                 ]),
                 rewards: Object.freeze({ crystals: Object.freeze([5, 8, 12]), incomeSeconds: Object.freeze([300, 600, 900]), mineralFloor: Object.freeze([500, 1500, 5000]) })
+            }),
+            // STAGE 6: события используют только активное видимое время и не сохраняются между сессиями.
+            randomEvents: Object.freeze({
+                minIntervalSeconds: 10 * 60,
+                maxIntervalSeconds: 20 * 60,
+                offerTtlSeconds: 15,
+                uiUpdateSeconds: 0.1,
+                events: Object.freeze([
+                    Object.freeze({ id: 'meteor', name: 'Метеоритный дождь', description: 'Мощность клика увеличена в 3 раза.', weight: 4, durationSeconds: 60, clickMultiplier: 3, incomeMultiplier: 1 }),
+                    Object.freeze({ id: 'vein', name: 'Богатая жила', description: 'Пассивная добыча и отображаемый доход увеличены в 2 раза.', weight: 4, durationSeconds: 120, clickMultiplier: 1, incomeMultiplier: 2 }),
+                    Object.freeze({ id: 'geostorm', name: 'Геошторм', description: 'Комбо не спадает, пока бушует шторм.', weight: 2, durationSeconds: 45, clickMultiplier: 1, incomeMultiplier: 1 })
+                ])
             }),
             casino: Object.freeze({
                 unlockLifetimeMin: 100000,
@@ -941,9 +958,11 @@
             state.adBuffTimer = adBuffTimer;
             state.offline = state.offline || { lastSavedAt: now, incomeSnapshot: { min: 0, sci: 0 }, pending: null };
             state.offline.lastSavedAt = now;
+            // STAGE 6: сессионный income-бафф не попадает в offline snapshot и не становится постоянным после reload.
+            const eventIncomeMult = randomEventState.active ? randomEventState.active.incomeMultiplier : 1;
             state.offline.incomeSnapshot = {
-                min: Math.max(0, Number(calc.rate.min) || 0),
-                sci: Math.max(0, Number(calc.rate.sci) || 0)
+                min: Math.max(0, Number(calc.rate.min) || 0) / eventIncomeMult,
+                sci: Math.max(0, Number(calc.rate.sci) || 0) / eventIncomeMult
             };
             if (storageOk) {
                 try { localStorage.setItem('marsMagnateSave', JSON.stringify(state)); } catch(e) {}
@@ -1060,6 +1079,101 @@
         let skillActive = {};
         let adBuffTimer = 0;
 
+        // STAGE 6: события намеренно сессионные; active-time не попадает в save и не идёт в offline reward.
+        const randomEventState = { nextIn: 0, offer: null, offerRemaining: 0, active: null, activeRemaining: 0, uiAccumulator: 0 };
+
+        function scheduleNextRandomEvent() {
+            const cfg = BALANCE.randomEvents;
+            randomEventState.nextIn = cfg.minIntervalSeconds + Math.random() * (cfg.maxIntervalSeconds - cfg.minIntervalSeconds);
+        }
+
+        function pickRandomEvent() {
+            const events = BALANCE.randomEvents.events;
+            const totalWeight = events.reduce((sum, event) => sum + event.weight, 0);
+            let roll = Math.random() * totalWeight;
+            for (const event of events) {
+                roll -= event.weight;
+                if (roll < 0) return event;
+            }
+            return events[events.length - 1];
+        }
+
+        function showRandomEventOffer(forcedId) {
+            if (randomEventState.offer || randomEventState.active) return false;
+            const event = BALANCE.randomEvents.events.find(item => item.id === forcedId) || pickRandomEvent();
+            randomEventState.offer = event;
+            randomEventState.offerRemaining = BALANCE.randomEvents.offerTtlSeconds;
+            const toast = document.createElement('div');
+            toast.id = 'random-event-offer';
+            toast.className = 'fixed top-24 left-1/2 -translate-x-1/2 z-[105] interactive w-[min(92vw,430px)] rounded-2xl border border-cyan-300/40 bg-gradient-to-br from-gray-900/95 to-black/95 p-4 text-white shadow-[0_18px_45px_rgba(0,0,0,0.8),0_0_24px_rgba(34,211,238,0.25)] backdrop-blur-xl';
+            toast.innerHTML = `<div class="flex items-start gap-3"><i class="fa-solid fa-bolt text-cyan-300 text-xl mt-1"></i><div class="min-w-0 flex-1"><div class="font-orbitron font-black text-sm text-cyan-200">${event.name}</div><div class="mt-1 text-xs text-gray-300">${event.description}</div></div><div id="random-event-offer-time" class="font-orbitron font-black text-sm text-white">${Math.ceil(randomEventState.offerRemaining)}с</div></div><button onclick="activateRandomEvent()" class="mt-3 w-full rounded-xl bg-gradient-to-r from-green-600 to-emerald-400 py-2.5 font-orbitron text-xs font-black uppercase tracking-wider text-white hover:brightness-110">Активировать</button>`;
+            document.body.appendChild(toast);
+            return true;
+        }
+
+        function removeRandomEventOffer() {
+            const toast = document.getElementById('random-event-offer');
+            if (toast) toast.remove();
+            randomEventState.offer = null;
+            randomEventState.offerRemaining = 0;
+        }
+
+        function activateRandomEvent() {
+            const event = randomEventState.offer;
+            if (!event || randomEventState.active) return;
+            removeRandomEventOffer();
+            randomEventState.active = event;
+            randomEventState.activeRemaining = event.durationSeconds;
+            randomEventState.uiAccumulator = BALANCE.randomEvents.uiUpdateSeconds;
+            const badge = document.getElementById('random-event-buff');
+            const name = document.getElementById('random-event-buff-name');
+            if (badge) badge.classList.remove('hidden');
+            if (name) name.textContent = event.name;
+            recalculate();
+            updateRandomEventUI(true);
+        }
+
+        function finishRandomEvent() {
+            const ended = randomEventState.active;
+            randomEventState.active = null;
+            randomEventState.activeRemaining = 0;
+            const badge = document.getElementById('random-event-buff');
+            if (badge) badge.classList.add('hidden');
+            recalculate();
+            scheduleNextRandomEvent();
+            if (ended) showToast(`${ended.name}: эффект завершён`);
+        }
+
+        function updateRandomEventUI(force) {
+            if (!randomEventState.active) return;
+            if (!force && randomEventState.uiAccumulator < BALANCE.randomEvents.uiUpdateSeconds) return;
+            randomEventState.uiAccumulator = 0;
+            const time = document.getElementById('random-event-buff-time');
+            if (time) time.textContent = Math.ceil(randomEventState.activeRemaining) + 'с';
+        }
+
+        function tickRandomEvents(delta) {
+            if (randomEventState.active) {
+                randomEventState.activeRemaining -= delta;
+                randomEventState.uiAccumulator += delta;
+                if (randomEventState.activeRemaining <= 0) finishRandomEvent();
+                else updateRandomEventUI(false);
+                return;
+            }
+            if (randomEventState.offer) {
+                randomEventState.offerRemaining -= delta;
+                const time = document.getElementById('random-event-offer-time');
+                if (time) time.textContent = Math.max(0, Math.ceil(randomEventState.offerRemaining)) + 'с';
+                if (randomEventState.offerRemaining <= 0) {
+                    removeRandomEventOffer();
+                    scheduleNextRandomEvent();
+                }
+                return;
+            }
+            randomEventState.nextIn -= delta;
+            if (randomEventState.nextIn <= 0) showRandomEventOffer();
+        }
+
         function formatNum(num) {
             if (num === 0) return "0";
             if (num < 1000) return (num % 1 !== 0) ? num.toFixed(1) : Math.floor(num).toString();
@@ -1159,6 +1273,13 @@
                 mult.sci *= 2;
             }
 
+            // STAGE 6: каждый событийный множитель применяется ровно один раз в общей формуле.
+            if (randomEventState.active) {
+                mult.min *= randomEventState.active.incomeMultiplier;
+                mult.sci *= randomEventState.active.incomeMultiplier;
+                mult.click *= randomEventState.active.clickMultiplier;
+            }
+
             calc.rate = { min: 0, sci: 0 };
             for (let id in BLD_DATA) {
                 const lvl = state.bld[id] || 0;
@@ -1170,7 +1291,9 @@
             calc.rate.sci *= mult.sci;
             calc.maxHeat = 100 * mult.heat;
             
-            calc.clickPower = (1 + calc.rate.min * BALANCE.economy.clickPassiveShare) * mult.click * combo;
+            // STAGE 6: income x2 не протекает в clickPower через passive-share; click x3 остаётся отдельным множителем.
+            const activeIncomeMult = randomEventState.active ? randomEventState.active.incomeMultiplier : 1;
+            calc.clickPower = (1 + (calc.rate.min / activeIncomeMult) * BALANCE.economy.clickPassiveShare) * mult.click * combo;
             if (skillActive['overdrive']) calc.clickPower *= 10;
         }
 
@@ -1205,13 +1328,17 @@
             marketPhase += delta * 0.05;
             calc.marketRate = Math.max(0.005, 0.02 + Math.sin(marketPhase) * 0.015); 
 
-            if(combo > BALANCE.combo.min) {
+            // STAGE 6: Геошторм замораживает и hold-таймер, и decay комбо.
+            const comboFrozen = randomEventState.active && randomEventState.active.id === 'geostorm';
+            if(combo > BALANCE.combo.min && !comboFrozen) {
                 comboTimer -= delta;
                 if(comboTimer <= 0) {
                     combo = Math.max(BALANCE.combo.min, combo - delta * BALANCE.combo.decayPerSecond);
                     updateComboUI();
                 }
             }
+
+            tickRandomEvents(delta);
 
             if(isOverheated) {
                 heat -= calc.maxHeat * 0.2 * delta;
@@ -4344,6 +4471,11 @@
             
             initSkills(); 
             recalculate();
+            // STAGE 6: первый оффер планируется на 10–20 минут активной видимой игры.
+            scheduleNextRandomEvent();
+            if (new URLSearchParams(location.search).has('dev')) {
+                window.stage6Event = id => showRandomEventOffer(id);
+            }
             // STAGE 4: offline имеет приоритет; daily создаётся заранее и показывается после него.
             prepareDailyReward(Date.now());
             // STAGE 5: набор заданий генерируется после recalculate и затем замораживается.
