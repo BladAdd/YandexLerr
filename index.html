@@ -398,12 +398,12 @@
         "use strict";
         
         const SKILLS = {
-            strike: { name: 'Орбитальный удар', icon: 'ico-strike', color: 'text-mars-400', border: 'border-mars-500/50', cd: 300, desc: 'Мгновенно дает минералы, равные 2 часам вашей добычи.', active: false, cost: 0, unlocked: true },
-            freeze: { name: 'Крио-Заморозка', icon: 'ico-freeze', color: 'text-blue-400', border: 'border-blue-500/50', cd: 600, desc: 'Замораживает шкалу перегрева на 30 секунд.', active: false, duration: 30, cost: 2500, unlocked: false },
-            swarm: { name: 'Нано-Рой', icon: 'ico-swarm', color: 'text-sci-400', border: 'border-sci-500/50', cd: 120, desc: '15 авто-кликов в секунду на 15 секунд.', active: false, duration: 15, cost: 15000, unlocked: false },
-            coolant: { name: 'Сброс Тепла', icon: 'ico-coolant', color: 'text-teal-400', border: 'border-teal-500/50', cd: 60, desc: 'Мгновенно охлаждает ядро до 0%.', active: false, cost: 75000, unlocked: false },
-            overdrive: { name: 'Перегрузка', icon: 'ico-overdrive', color: 'text-purple-400', border: 'border-purple-500/50', cd: 300, desc: 'Сила ручного клика x25 на 20 секунд.', active: false, duration: 20, cost: 500000, unlocked: false },
-            timewarp: { name: 'Искажение времени', icon: 'ico-timewarp', color: 'text-yellow-400', border: 'border-yellow-500/50', cd: 3600, desc: 'Мгновенно дает весь пассивный доход за 24 часа.', active: false, cost: 25000000, unlocked: false }
+            strike: { name: 'Орбитальный удар', icon: 'ico-strike', color: 'text-mars-400', border: 'border-mars-500/50', cd: 600, desc: 'Мгновенно дает минералы, равные 15 минутам вашей добычи.', active: false, cost: 0, unlocked: true },
+            freeze: { name: 'Крио-Заморозка', icon: 'ico-freeze', color: 'text-blue-400', border: 'border-blue-500/50', cd: 480, desc: 'Замораживает шкалу перегрева на 30 секунд.', active: false, duration: 30, cost: 2500, unlocked: false },
+            swarm: { name: 'Нано-Рой', icon: 'ico-swarm', color: 'text-sci-400', border: 'border-sci-500/50', cd: 240, desc: '8 авто-кликов в секунду на 12 секунд.', active: false, duration: 12, cost: 15000, unlocked: false },
+            coolant: { name: 'Сброс Тепла', icon: 'ico-coolant', color: 'text-teal-400', border: 'border-teal-500/50', cd: 180, desc: 'Мгновенно охлаждает ядро до 0%.', active: false, cost: 75000, unlocked: false },
+            overdrive: { name: 'Перегрузка', icon: 'ico-overdrive', color: 'text-purple-400', border: 'border-purple-500/50', cd: 600, desc: 'Сила ручного клика x10 на 15 секунд.', active: false, duration: 15, cost: 500000, unlocked: false },
+            timewarp: { name: 'Искажение времени', icon: 'ico-timewarp', color: 'text-yellow-400', border: 'border-yellow-500/50', cd: 14400, desc: 'Мгновенно дает весь пассивный доход за 2 часа.', active: false, cost: 8000000, unlocked: false }
         };
 
         const BLD_DATA = {
@@ -953,7 +953,7 @@
             calc.maxHeat = 100 * mult.heat;
             
             calc.clickPower = (1 + calc.rate.min * 0.02) * mult.click * combo;
-            if (skillActive['overdrive']) calc.clickPower *= 25;
+            if (skillActive['overdrive']) calc.clickPower *= 10;
         }
 
         let lastFrame = performance.now();
@@ -1022,7 +1022,7 @@
                 }
             }
 
-            let autoRate = skillActive['swarm'] ? 15 : 0;
+            let autoRate = skillActive['swarm'] ? 8 : 0;
             if (autoRate > 0 && !isOverheated) {
                 autoClickTimer += delta;
                 if (autoClickTimer >= (1/autoRate)) { doClick(false, true); autoClickTimer = 0; }
@@ -1222,7 +1222,7 @@
                             <div class="hidden md:flex flex-col items-start z-10 text-left leading-tight pointer-events-none w-full ml-1">
                                 <span class="text-xs font-bold text-white whitespace-nowrap drop-shadow-md">${s.name}</span>
                                 <span id="skill-status-${id}" class="text-[10px] text-gray-300 font-bold tracking-wide">Готово</span>
-                                ${id === 'strike' ? '<span id="skill-hint-strike" class="skill-hint-hover text-[9px] text-mars-300/90 leading-snug mt-0.5">Нажми — мгновенно +2 часа добычи</span>' : ''}
+                                ${id === 'strike' ? '<span id="skill-hint-strike" class="skill-hint-hover text-[9px] text-mars-300/90 leading-snug mt-0.5">Нажми — мгновенно +15 минут добычи</span>' : ''}
                             </div>
                             <div class="skill-tooltip">
                                 <div class="font-bold text-white text-base mb-2 border-b border-white/10 pb-2 flex items-center gap-2"><span class="ico ${s.icon} ${s.color}"></span> ${s.name}</div>
@@ -1342,7 +1342,7 @@
             state.skills[id] = now;
             
             if(id === 'strike') {
-                const amount = Math.max(100, calc.rate.min * 7200);
+                const amount = Math.max(100, calc.rate.min * 900);
                 state.res.min += amount;
                 addLifetimeMin(amount);
                 showToast("Удар: +" + formatNum(amount) + " Мин.");
@@ -1356,8 +1356,8 @@
             if(id === 'coolant') { heat = 0; isOverheated = false; updateHeatUI(); document.getElementById('heat-warning').classList.add('hidden'); }
             if(id === 'overdrive') recalculate();
             if(id === 'timewarp') {
-                const amountMin = calc.rate.min * 86400; 
-                const amountSci = calc.rate.sci * 86400;
+                const amountMin = calc.rate.min * 7200; 
+                const amountSci = calc.rate.sci * 7200;
                 state.res.min += amountMin;
                 state.res.sci += amountSci;
                 addLifetimeMin(amountMin);
