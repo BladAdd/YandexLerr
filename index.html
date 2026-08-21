@@ -419,6 +419,50 @@
     <script>
         "use strict";
         
+        // STAGE 1: единый источник параметров, изменённых аудитом экономики.
+        const BALANCE = Object.freeze({
+            economy: Object.freeze({ clickPassiveShare: 0.02, upgradeGrowthMin: 1.15, upgradeGrowthMax: 1.25 }),
+            buildings: Object.freeze({ growth: Object.freeze({
+                rover: 1.15, drill: 1.16, extractor: 1.17, lab: 1.25, factory: 1.18,
+                collider: 1.25, station: 1.20, terraformer: 1.25, dyson: 1.22,
+                nexus: 1.25, starforge: 1.24, weaver: 1.25, engine: 1.25
+            }) }),
+            combo: Object.freeze({ min: 1.0, max: 3.0, gainPerClick: 0.05, holdSeconds: 1.5, decayPerSecond: 0.5 }),
+            casino: Object.freeze({
+                unlockLifetimeMin: 100000,
+                slots: Object.freeze({
+                    symbols: Object.freeze([
+                        Object.freeze({ id: 'min', name: 'Минерал', weight: 30, mult3: 2, mult2: 1 }),
+                        Object.freeze({ id: 'rover', name: 'Ровер', weight: 25, mult3: 3, mult2: 1.4 }),
+                        Object.freeze({ id: 'drill', name: 'Бур', weight: 18, mult3: 5, mult2: 1.8 }),
+                        Object.freeze({ id: 'ship', name: 'Шаттл', weight: 12, mult3: 10, mult2: 2.5 }),
+                        Object.freeze({ id: 'cryst', name: 'Кристалл', weight: 10, mult3: 25, mult2: 1 }),
+                        Object.freeze({ id: 'ares', name: 'АРЕС', weight: 5, mult3: 100, mult2: 8 })
+                    ]),
+                    chips: Object.freeze([1000, 10000, 100000, 1000000]), reelTimes: Object.freeze([1400, 1700, 2000]),
+                    nearMissExtraMs: 1400, cellPx: 96, pityLimit: 5, targetRtpMin: 0.85, targetRtpMax: 0.92
+                }),
+                crash: Object.freeze({ growth: 0.15, edge: 0.93, maxMult: 100, historyMax: 12 }),
+                wheel: Object.freeze({
+                    freeCdMs: 4 * 3600 * 1000, adCostPrm: 50, spinMs: 3600,
+                    segments: Object.freeze([
+                        Object.freeze({ id: 'min30m', label: 'Мин 30м', weight: 20, type: 'min', sec: 1800, accent: '#E55934' }),
+                        Object.freeze({ id: 'dust1', label: 'Пыль', weight: 8, type: 'none', accent: '#6b7280' }),
+                        Object.freeze({ id: 'prm10', label: '+10 Крист', weight: 6, type: 'prm', amount: 10, accent: '#8b7bd8' }),
+                        Object.freeze({ id: 'min2h', label: 'Мин 2ч', weight: 8, type: 'min', sec: 7200, accent: '#E55934' }),
+                        Object.freeze({ id: 'buff5', label: 'Бафф x2', weight: 6, type: 'buff', sec: 300, accent: '#4c9a5f' }),
+                        Object.freeze({ id: 'dust2', label: 'Пыль', weight: 8, type: 'none', accent: '#6b7280' }),
+                        Object.freeze({ id: 'sci30m', label: 'Наука 30м', weight: 8, type: 'sci', sec: 1800, accent: '#4c9a5f' }),
+                        Object.freeze({ id: 'min10m', label: 'Мин 10м', weight: 10, type: 'min', sec: 600, accent: '#E55934' }),
+                        Object.freeze({ id: 'prm50', label: '+50 Крист', weight: 3, type: 'prm', amount: 50, accent: '#8b7bd8' }),
+                        Object.freeze({ id: 'dust3', label: 'Пыль', weight: 9, type: 'none', accent: '#6b7280' }),
+                        Object.freeze({ id: 'buff15', label: 'Бафф x2', weight: 4, type: 'buff', sec: 900, accent: '#4c9a5f' }),
+                        Object.freeze({ id: 'jack', label: 'ДЖЕКПОТ', weight: 1, type: 'jackpot', sec: 86400, accent: '#fbbf24' })
+                    ])
+                })
+            })
+        });
+
         const SKILLS = {
             strike: { name: 'Орбитальный удар', icon: 'ico-strike', color: 'text-mars-400', border: 'border-mars-500/50', cd: 600, desc: 'Мгновенно дает минералы, равные 15 минутам вашей добычи.', active: false, cost: 0, unlocked: true },
             freeze: { name: 'Крио-Заморозка', icon: 'ico-freeze', color: 'text-blue-400', border: 'border-blue-500/50', cd: 480, desc: 'Замораживает шкалу перегрева на 30 секунд.', active: false, duration: 30, cost: 2500, unlocked: false },
@@ -429,19 +473,19 @@
         };
 
         const BLD_DATA = {
-            rover: { name: 'Авто-Ровер', desc: 'Сборник пыли на поверхности.', icon: 'ico-rover', base: {min: 15}, costMult: 1.15, prod: {min: 1} },
-            drill: { name: 'Плазменный Бур', desc: 'Бурение твердой коры Марса.', icon: 'ico-drill', base: {min: 200}, costMult: 1.16, prod: {min: 10} },
-            extractor: { name: 'Экстрактор', desc: 'Промышленная добыча.', icon: 'ico-extractor', base: {min: 3000}, costMult: 1.17, prod: {min: 120} },
-            lab: { name: 'Лаборатория', desc: 'Генерация очков Науки.', icon: 'ico-lab', base: {min: 10000}, costMult: 1.25, prod: {sci: 1}, isSci: true },
-            factory: { name: 'Обогатитель', desc: 'Синтез редких сплавов.', icon: 'ico-factory', base: {min: 50000}, costMult: 1.18, prod: {min: 1500} },
-            collider: { name: 'Суперколлайдер', desc: 'Изучение физики.', icon: 'ico-collider', base: {min: 500000}, costMult: 1.30, prod: {sci: 25}, isSci: true },
-            station: { name: 'Орбитальная Станция', desc: 'Добыча астероидов.', icon: 'ico-station', base: {min: 3000000}, costMult: 1.20, prod: {min: 65000} },
-            terraformer: { name: 'Терраформер', desc: 'Ускорение процессов.', icon: 'ico-terraformer', base: {min: 25000000}, costMult: 1.35, prod: {sci: 1000}, isSci: true },
-            dyson: { name: 'Сфера Дайсона', desc: 'Сбор энергии звезды.', icon: 'ico-dyson', base: {min: 250000000}, costMult: 1.22, prod: {min: 4000000} },
-            nexus: { name: 'Галактический Нексус', desc: 'Квантовое познание.', icon: 'ico-nexus', base: {min: 5000000000}, costMult: 1.40, prod: {sci: 150000}, isSci: true },
-            starforge: { name: 'Звездная Кузница', desc: 'Ковка из плазмы звезд.', icon: 'ico-starforge', base: {min: 100000000000}, costMult: 1.24, prod: {min: 500000000} },
-            weaver: { name: 'Ткач Реальности', desc: 'Создание материи из пустоты.', icon: 'ico-weaver', base: {min: 5000000000000}, costMult: 1.26, prod: {min: 25000000000} },
-            engine: { name: 'Сингулярный Двигатель', desc: 'Сжатие пространства-времени.', icon: 'ico-engine', base: {min: 1000000000000000}, costMult: 1.30, prod: {min: 5000000000000} }
+            rover: { name: 'Авто-Ровер', desc: 'Сборник пыли на поверхности.', icon: 'ico-rover', base: {min: 15}, costMult: BALANCE.buildings.growth.rover, prod: {min: 1} },
+            drill: { name: 'Плазменный Бур', desc: 'Бурение твердой коры Марса.', icon: 'ico-drill', base: {min: 200}, costMult: BALANCE.buildings.growth.drill, prod: {min: 10} },
+            extractor: { name: 'Экстрактор', desc: 'Промышленная добыча.', icon: 'ico-extractor', base: {min: 3000}, costMult: BALANCE.buildings.growth.extractor, prod: {min: 120} },
+            lab: { name: 'Лаборатория', desc: 'Генерация очков Науки.', icon: 'ico-lab', base: {min: 10000}, costMult: BALANCE.buildings.growth.lab, prod: {sci: 1}, isSci: true },
+            factory: { name: 'Обогатитель', desc: 'Синтез редких сплавов.', icon: 'ico-factory', base: {min: 50000}, costMult: BALANCE.buildings.growth.factory, prod: {min: 1500} },
+            collider: { name: 'Суперколлайдер', desc: 'Изучение физики.', icon: 'ico-collider', base: {min: 500000}, costMult: BALANCE.buildings.growth.collider, prod: {sci: 25}, isSci: true },
+            station: { name: 'Орбитальная Станция', desc: 'Добыча астероидов.', icon: 'ico-station', base: {min: 3000000}, costMult: BALANCE.buildings.growth.station, prod: {min: 65000} },
+            terraformer: { name: 'Терраформер', desc: 'Ускорение процессов.', icon: 'ico-terraformer', base: {min: 25000000}, costMult: BALANCE.buildings.growth.terraformer, prod: {sci: 1000}, isSci: true },
+            dyson: { name: 'Сфера Дайсона', desc: 'Сбор энергии звезды.', icon: 'ico-dyson', base: {min: 250000000}, costMult: BALANCE.buildings.growth.dyson, prod: {min: 4000000} },
+            nexus: { name: 'Галактический Нексус', desc: 'Квантовое познание.', icon: 'ico-nexus', base: {min: 5000000000}, costMult: BALANCE.buildings.growth.nexus, prod: {sci: 150000}, isSci: true },
+            starforge: { name: 'Звездная Кузница', desc: 'Ковка из плазмы звезд.', icon: 'ico-starforge', base: {min: 100000000000}, costMult: BALANCE.buildings.growth.starforge, prod: {min: 500000000} },
+            weaver: { name: 'Ткач Реальности', desc: 'Создание материи из пустоты.', icon: 'ico-weaver', base: {min: 5000000000000}, costMult: BALANCE.buildings.growth.weaver, prod: {min: 25000000000} },
+            engine: { name: 'Сингулярный Двигатель', desc: 'Сжатие пространства-времени.', icon: 'ico-engine', base: {min: 1000000000000000}, costMult: BALANCE.buildings.growth.engine, prod: {min: 5000000000000} }
         };
 
         const BLD_SVG = {
@@ -868,7 +912,7 @@
         }
 
         let calc = { rate: {min: 0, sci: 0}, clickPower: 1, maxHeat: 100, marketRate: 0.01 };
-        let heat = 0, isOverheated = false, combo = 1.0, comboTimer = 0, marketPhase = 0;
+        let heat = 0, isOverheated = false, combo = BALANCE.combo.min, comboTimer = 0, marketPhase = 0;
         let skillActive = {};
         let adBuffTimer = 0;
 
@@ -976,7 +1020,7 @@
             calc.rate.sci *= mult.sci;
             calc.maxHeat = 100 * mult.heat;
             
-            calc.clickPower = (1 + calc.rate.min * 0.02) * mult.click * combo;
+            calc.clickPower = (1 + calc.rate.min * BALANCE.economy.clickPassiveShare) * mult.click * combo;
             if (skillActive['overdrive']) calc.clickPower *= 10;
         }
 
@@ -1020,10 +1064,10 @@
             marketPhase += delta * 0.05;
             calc.marketRate = Math.max(0.005, 0.02 + Math.sin(marketPhase) * 0.015); 
 
-            if(combo > 1.0) {
+            if(combo > BALANCE.combo.min) {
                 comboTimer -= delta;
                 if(comboTimer <= 0) {
-                    combo = Math.max(1.0, combo - delta * 0.5);
+                    combo = Math.max(BALANCE.combo.min, combo - delta * BALANCE.combo.decayPerSecond);
                     updateComboUI();
                 }
             }
@@ -1099,8 +1143,8 @@
             if(isManual) state.stats.clicks++;
 
             if(isManual) {
-                combo = Math.min(3.0, combo + 0.05);
-                comboTimer = 1.5;
+                combo = Math.min(BALANCE.combo.max, combo + BALANCE.combo.gainPerClick);
+                comboTimer = BALANCE.combo.holdSeconds;
                 updateComboUI();
                 spawnFloatingText("+" + formatNum(calc.clickPower));
                 spawnParticles();
@@ -1117,7 +1161,7 @@
                 heat += isAuto ? 1 : 4;
                 if(heat >= calc.maxHeat) {
                     isOverheated = true;
-                    combo = 1.0;
+                    combo = BALANCE.combo.min;
                     document.getElementById('heat-warning').classList.remove('hidden');
                 }
             }
@@ -1147,7 +1191,7 @@
             const bar = document.getElementById('combo-bar');
             if(bar) {
                 bar.style.opacity = combo > 1.0 ? '1' : '0';
-                document.getElementById('combo-bar-fill').style.width = (Math.max(0, Math.min(1, comboTimer / 1.5)) * 100) + '%';
+                document.getElementById('combo-bar-fill').style.width = (Math.max(0, Math.min(1, comboTimer / BALANCE.combo.holdSeconds)) * 100) + '%';
             }
         }
 
@@ -1400,46 +1444,8 @@
         /* ================= КАЗИНО «ФОБОС» ================== */
         /* ================================================== */
         // CASINO STAGE 1: конфиг, точка входа, слоты
-        const CASINO_CONFIG = {
-            unlockLifetimeMin: 100000,
-            slots: {
-                symbols: [
-                    { id: 'min',   name: 'Минерал',  weight: 30, mult3: 2,   mult2: 1   },
-                    { id: 'rover', name: 'Ровер',    weight: 25, mult3: 3,   mult2: 1.4 },
-                    { id: 'drill', name: 'Бур',      weight: 18, mult3: 5,   mult2: 1.8 },
-                    { id: 'ship',  name: 'Шаттл',    weight: 12, mult3: 10,  mult2: 2.5 },
-                    { id: 'cryst', name: 'Кристалл', weight: 10, mult3: 25,  mult2: 1   },
-                    { id: 'ares',  name: 'АРЕС',     weight: 5,  mult3: 100, mult2: 8   }
-                ],
-                chips: [1000, 10000, 100000, 1000000],
-                reelTimes: [1400, 1700, 2000],
-                nearMissExtraMs: 1400,
-                cellPx: 96,
-                pityLimit: 5
-            },
-            // CASINO STAGE 2: краш
-            crash: { growth: 0.15, edge: 0.93, maxMult: 100, historyMax: 12 },
-            // CASINO STAGE 3: колесо
-            wheel: {
-                freeCdMs: 4 * 3600 * 1000,
-                adCostPrm: 50,
-                spinMs: 3600,
-                segments: [
-                    { id: 'min30m', label: 'Мин 30м',   weight: 20, type: 'min',     sec: 1800,  accent: '#E55934' },
-                    { id: 'dust1',  label: 'Пыль',      weight: 8,  type: 'none',                 accent: '#6b7280' },
-                    { id: 'prm10',  label: '+10 Крист', weight: 6,  type: 'prm', amount: 10,    accent: '#8b7bd8' },
-                    { id: 'min2h',  label: 'Мин 2ч',    weight: 8,  type: 'min',     sec: 7200,  accent: '#E55934' },
-                    { id: 'buff5',  label: 'Бафф x2',   weight: 6,  type: 'buff',    sec: 300,   accent: '#4c9a5f' },
-                    { id: 'dust2',  label: 'Пыль',      weight: 8,  type: 'none',                 accent: '#6b7280' },
-                    { id: 'sci30m', label: 'Наука 30м', weight: 8,  type: 'sci',     sec: 1800,  accent: '#4c9a5f' },
-                    { id: 'min10m', label: 'Мин 10м',   weight: 10, type: 'min',     sec: 600,   accent: '#E55934' },
-                    { id: 'prm50',  label: '+50 Крист', weight: 3,  type: 'prm', amount: 50,    accent: '#8b7bd8' },
-                    { id: 'dust3',  label: 'Пыль',      weight: 9,  type: 'none',                 accent: '#6b7280' },
-                    { id: 'buff15', label: 'Бафф x2',   weight: 4,  type: 'buff',    sec: 900,   accent: '#4c9a5f' },
-                    { id: 'jack',   label: 'ДЖЕКПОТ',   weight: 1,  type: 'jackpot', sec: 86400, accent: '#fbbf24' }
-                ]
-            }
-        };
+        // STAGE 1: казино читает централизованные параметры BALANCE.
+        const CASINO_CONFIG = BALANCE.casino;
 
         function casinoUnlocked() {
             if (window.CASINO_DEBUG === true) return true;
