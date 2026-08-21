@@ -3507,10 +3507,10 @@
                     ? 'border-green-500/40 bg-green-950/30 text-green-300'
                     : (current ? 'border-mars-400 bg-mars-900/40 text-mars-300 shadow-[0_0_18px_rgba(229,89,52,0.35)]' : 'border-white/10 bg-black/40 text-gray-500');
                 const coreLine = item.cores ? '<div class="text-[9px] text-gold-400 font-bold mt-1">+1 ядро</div>' : '';
-                return `<div class="rounded-xl border p-2 min-h-[82px] flex flex-col items-center justify-center ${classes}">
+                return `<div class="rounded-xl border p-1.5 sm:p-2 min-h-[82px] min-w-0 overflow-hidden flex flex-col items-center justify-center text-center ${classes}">
                     <div class="font-orbitron text-[10px] font-black">ДЕНЬ ${day}</div>
-                    <div class="text-[10px] mt-1 whitespace-nowrap"><span class="ico ico-mineral"></span> Доход за ${Math.round(item.incomeSeconds / 60)}м</div>
-                    <div class="text-[10px] whitespace-nowrap"><span class="ico ico-crystal"></span> +${item.crystals}</div>${coreLine}
+                    <div class="text-[9px] mt-1 leading-tight"><span class="ico ico-mineral"></span> Доход за ${Math.round(item.incomeSeconds / 60)}м</div>
+                    <div class="text-[9px] leading-tight"><span class="ico ico-crystal"></span> +${item.crystals}</div>${coreLine}
                     <div class="text-[8px] uppercase mt-1 opacity-70">${status}</div>
                 </div>`;
             }).join('');
