@@ -255,43 +255,53 @@
                     <i class="fa-solid fa-gear"></i>
                 </button>
 
-                <div id="ui-dark-matter-container" class="hidden flex-col items-center px-3 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[54px] justify-center shrink-0">
-                    <div class="text-[9px] text-white/55 font-orbitron uppercase mb-0.5 tracking-[0.08em]">Материя</div>
-                    <div class="flex items-center">
-                        <span class="ico ico-dm text-purple-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
-                        <span id="ui-res-dm" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
+                <div id="ui-dark-matter-container" class="hidden flex-col justify-center px-3 py-1.5 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[50px] shrink-0">
+                    <div class="text-[9px] text-white/55 font-orbitron uppercase tracking-[0.08em] text-center leading-none mb-1">Материя</div>
+                    <div class="flex items-center justify-between w-full whitespace-nowrap">
+                        <div class="flex items-center">
+                            <span class="ico ico-dm text-purple-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(168,85,247,0.8)]"></span>
+                            <span id="ui-res-dm" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
+                        </div>
+                        <span class="text-[10px] font-bold invisible" aria-hidden="true">+0/с</span>
                     </div>
                 </div>
                 
-                <div class="flex flex-col items-center px-3 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[54px] justify-center shrink-0">
-                    <div class="text-[9px] text-white/55 font-orbitron uppercase mb-0.5 tracking-[0.08em]">Минералы</div>
-                    <div class="flex items-center">
-                        <span class="ico ico-mineral text-mars-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(229,89,52,0.8)]"></span>
-                        <span id="ui-res-min" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
-                    </div>
-                    <div class="flex justify-between w-full mt-0.5">
-                        <span id="ui-rate-min" class="text-[10px] text-mars-400 font-bold drop-shadow-sm">+0/с</span>
-                        <span id="ui-bonus-min" class="text-[10px] text-green-400 font-bold hidden ml-2">Бонус: 0%</span>
-                    </div>
-                </div>
-                
-                <div class="flex flex-col items-center px-3 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[54px] justify-center shrink-0">
-                    <div class="text-[9px] text-white/55 font-orbitron uppercase mb-0.5 tracking-[0.08em]">Наука</div>
-                    <div class="flex items-center">
-                        <span class="ico ico-science text-sci-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]"></span>
-                        <span id="ui-res-sci" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
-                    </div>
-                    <div class="flex justify-between w-full mt-0.5">
-                        <span id="ui-rate-sci" class="text-[10px] text-sci-400 font-bold drop-shadow-sm">+0/с</span>
-                        <span id="ui-bonus-sci" class="text-[10px] text-green-400 font-bold hidden ml-2">Бонус: 0%</span>
+                <div class="flex flex-col justify-center px-3 py-1.5 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[50px] shrink-0">
+                    <div class="text-[9px] text-white/55 font-orbitron uppercase tracking-[0.08em] text-center leading-none mb-1">Минералы</div>
+                    <div class="flex items-center justify-between w-full whitespace-nowrap">
+                        <div class="flex items-center">
+                            <span class="ico ico-mineral text-mars-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(229,89,52,0.8)]"></span>
+                            <span id="ui-res-min" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span id="ui-bonus-min" class="text-[10px] text-green-400 font-bold hidden">Бонус: 0%</span>
+                            <span id="ui-rate-min" class="text-[10px] text-mars-400 font-bold drop-shadow-sm">+0/с</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="flex flex-col items-center px-3 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[54px] justify-center shrink-0">
-                    <div class="text-[9px] text-white/55 font-orbitron uppercase mb-0.5 tracking-[0.08em]">Кристаллы</div>
-                    <div class="flex items-center">
-                        <span class="ico ico-crystal text-prem-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]"></span>
-                        <span id="ui-res-prm" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
+                <div class="flex flex-col justify-center px-3 py-1.5 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[50px] shrink-0">
+                    <div class="text-[9px] text-white/55 font-orbitron uppercase tracking-[0.08em] text-center leading-none mb-1">Наука</div>
+                    <div class="flex items-center justify-between w-full whitespace-nowrap">
+                        <div class="flex items-center">
+                            <span class="ico ico-science text-sci-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(74,222,128,0.8)]"></span>
+                            <span id="ui-res-sci" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span id="ui-bonus-sci" class="text-[10px] text-green-400 font-bold hidden">Бонус: 0%</span>
+                            <span id="ui-rate-sci" class="text-[10px] text-sci-400 font-bold drop-shadow-sm">+0/с</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex flex-col justify-center px-3 py-1.5 rounded-[10px] border border-white/[0.08] bg-white/[0.04] min-w-[130px] h-[50px] shrink-0">
+                    <div class="text-[9px] text-white/55 font-orbitron uppercase tracking-[0.08em] text-center leading-none mb-1">Кристаллы</div>
+                    <div class="flex items-center justify-between w-full whitespace-nowrap">
+                        <div class="flex items-center">
+                            <span class="ico ico-crystal text-prem-400 text-sm mr-2 drop-shadow-[0_0_8px_rgba(192,132,252,0.8)]"></span>
+                            <span id="ui-res-prm" class="font-orbitron font-bold text-lg leading-none text-white">0</span>
+                        </div>
+                        <span class="text-[10px] font-bold invisible" aria-hidden="true">+0/с</span>
                     </div>
                 </div>
             </div>
@@ -1125,8 +1135,10 @@
         function updateHeaderUI() {
             document.getElementById('ui-res-min').innerText = formatNum(displayState.res.min);
             document.getElementById('ui-rate-min').innerText = "+" + formatNum(calc.rate.min) + "/с";
+            document.getElementById('ui-rate-min').classList.toggle('opacity-40', calc.rate.min <= 0);
             document.getElementById('ui-res-sci').innerText = formatNum(displayState.res.sci);
             document.getElementById('ui-rate-sci').innerText = "+" + formatNum(calc.rate.sci) + "/с";
+            document.getElementById('ui-rate-sci').classList.toggle('opacity-40', calc.rate.sci <= 0);
             document.getElementById('ui-res-prm').innerText = formatNum(Math.round(displayState.res.prm));
             
             const dmContainer = document.getElementById('ui-dark-matter-container');
