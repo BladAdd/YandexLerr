@@ -1150,8 +1150,11 @@
 
         let storageOk = true;
         try { localStorage.setItem('__mars_t', '1'); localStorage.removeItem('__mars_t'); } catch(e) { storageOk = false; }
+        // FIX: во время сброса автосейвы (beforeunload/pagehide/autosave) не должны вернуть сейв обратно.
+        let resetInProgress = false;
 
         function saveGame() {
+            if (resetInProgress) return;
             const now = Date.now();
             state.lastTick = now;
             state.sdkMeta = state.sdkMeta || {};
@@ -1268,11 +1271,13 @@
         }
 
         async function resetGame() {
+            // FIX: блокируем любые сейвы до перезагрузки, иначе beforeunload вернёт прогресс.
+            resetInProgress = true;
             localStorage.removeItem('marsMagnateSave');
             if (yPlayer && typeof yPlayer.setData === 'function') {
                 try { await yPlayer.setData({ save: '' }, true); } catch (error) { sdkLog('cloud reset failed', error); }
             }
-            setTimeout(() => location.reload(), 500);
+            location.reload();
         }
 
         function setUIMode(mode) {
