@@ -6,7 +6,6 @@
     <meta name="HandheldFriendly" content="true">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <title>Марсианский Магнат: Сингулярность</title>
-    <link rel="icon" href="assets/img/ui/hq.svg" type="image/svg+xml">
     
     <script>
         window.tailwind = {
@@ -40,9 +39,11 @@
     </script>
     <script src="lib/tailwind.js"></script>
     <script src="lib/three.min.js"></script>
-    <link href="lib/fonts/fonts.css" rel="stylesheet">
-    <link rel="stylesheet" href="lib/fa/all.min.css">
-    <script src="sdk.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="/sdk.js"></script>
 
     <style>
         body { margin: 0; overflow: hidden; background-color: #030508; color: white; user-select: none; -webkit-touch-callout: none; font-family: 'Rajdhani', sans-serif; touch-action: pan-x pan-y pinch-zoom; }
@@ -164,22 +165,22 @@
         @keyframes flashRed { 0% { box-shadow: 0 0 10px rgba(229,89,52,0.3); } 100% { box-shadow: 0 0 50px rgba(255,0,0,0.8); border-color: rgba(255,50,50,0.8); } }
         
         .skill-btn-wrapper { position: relative; width: 3.25rem; height: 3.25rem; }
-        @media (min-width: 768px) { .skill-btn-wrapper { width: 3.5rem; height: 3.5rem; } }
+        @media (min-width: 768px) { .skill-btn-wrapper { width: 100%; height: 3.25rem; } }
         
         .skill-btn { transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); background: linear-gradient(135deg, rgba(15,15,25,0.9), rgba(5,5,12,0.98)); border: 1.5px solid rgba(255,255,255,0.12); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 0.85rem; overflow: visible; box-shadow: 0 4px 12px rgba(0,0,0,0.6); position: relative; }
-        .skill-btn:hover { border-color: rgba(255,255,255,0.6); box-shadow: 0 0 20px currentColor; transform: scale(1.08); z-index: 50; }
-        .skill-btn:active:not(:disabled) { transform: scale(0.95); }
+        .skill-btn:hover { border-color: rgba(255,255,255,0.6); box-shadow: 0 0 20px currentColor; transform: scale(1.03); z-index: 50; }
+        .skill-btn:active:not(:disabled) { transform: scale(0.96); }
         
         .skill-cooldown-container { position: absolute; inset: 0; border-radius: 0.85rem; overflow: hidden; pointer-events: none; z-index: 5; }
         .skill-cooldown { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(5,8,18,0.85); transition: height 0.1s linear; border-top: 2px solid rgba(255,255,255,0.5); backdrop-filter: blur(2px); opacity: 0.95; }
         .skill-timer-overlay { text-shadow: 0 0 6px rgba(0,0,0,1), 0 2px 4px rgba(0,0,0,1); }
         
-        .skill-tooltip { visibility: hidden; opacity: 0; transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%) translateX(-8px) scale(0.95); background: linear-gradient(135deg, rgba(12,18,32,0.98), rgba(4,8,16,0.99)); border: 1px solid rgba(255,255,255,0.18); padding: 12px 14px; border-radius: 12px; width: 240px; max-width: 80vw; z-index: 9999; pointer-events: none; box-shadow: 0 16px 36px rgba(0,0,0,0.95), inset 0 1px 0 rgba(255,255,255,0.15); backdrop-filter: blur(16px); }
-        .skill-tooltip::before { content: ''; position: absolute; top: 50%; left: -6px; transform: translateY(-50%) rotate(45deg); width: 10px; height: 10px; background: rgba(12,18,32,0.98); border-left: 1px solid rgba(255,255,255,0.18); border-bottom: 1px solid rgba(255,255,255,0.18); }
-        .skill-btn:hover .skill-tooltip, .locked-skill-btn:hover .skill-tooltip, .skill-btn:focus-within .skill-tooltip, .locked-skill-btn:focus-within .skill-tooltip { visibility: visible; opacity: 1; transform: translateY(-50%) translateX(0) scale(1); }
+        .skill-tooltip { visibility: hidden; opacity: 0; transition: opacity 0.2s ease, transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); position: absolute; left: calc(100% + 14px); top: 50%; transform: translateY(-50%) translateX(-6px) scale(0.96); background: linear-gradient(135deg, rgba(12,18,32,0.98), rgba(4,8,16,0.99)); border: 1px solid rgba(255,255,255,0.2); padding: 14px 16px; border-radius: 14px; width: 260px; max-width: 80vw; z-index: 99999; pointer-events: none; box-shadow: 0 16px 40px rgba(0,0,0,0.95), 0 0 20px rgba(229,89,52,0.15), inset 0 1px 0 rgba(255,255,255,0.2); backdrop-filter: blur(20px); }
+        .skill-tooltip::before { content: ''; position: absolute; top: 50%; left: -6px; transform: translateY(-50%) rotate(45deg); width: 10px; height: 10px; background: rgba(12,18,32,0.98); border-left: 1px solid rgba(255,255,255,0.2); border-bottom: 1px solid rgba(255,255,255,0.2); }
+        .skill-btn-wrapper:hover .skill-tooltip, .skill-btn:hover .skill-tooltip, .locked-skill-btn:hover .skill-tooltip { visibility: visible; opacity: 1; transform: translateY(-50%) translateX(0) scale(1); pointer-events: auto; }
         
         .locked-skill-btn { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; border-radius: 0.85rem; background: rgba(10,12,18,0.85); border: 1.5px solid rgba(255,255,255,0.08); transition: all 0.2s; overflow: visible; }
-        .locked-skill-btn:hover { background: rgba(25,30,42,0.95); border-color: rgba(255,255,255,0.3); z-index: 50; transform: scale(1.06); }
+        .locked-skill-btn:hover { background: rgba(25,30,42,0.95); border-color: rgba(255,255,255,0.3); z-index: 50; transform: scale(1.03); }
 
         .skill-in { animation: skillIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) backwards; }
         @keyframes skillIn { 0% { opacity: 0; transform: scale(0.6) translateY(10px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
@@ -429,13 +430,14 @@
         <main id="game-main" class="flex-1 overflow-hidden relative">
             <section id="game-clicker-section" class="interactive pointer-events-none">
                 <div id="skills-drawer" class="absolute top-4 left-4 flex flex-col gap-2 pointer-events-auto z-20" aria-label="Навыки">
-                    <div class="flex items-center justify-between w-14 bg-black/50 backdrop-blur-md rounded-xl p-1 border border-white/10 shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+                    <div class="flex items-center justify-between w-14 md:w-56 bg-black/50 backdrop-blur-md rounded-xl px-2 md:px-3 py-2 border border-white/10 shadow-[0_5px_15px_rgba(0,0,0,0.5)]">
+                        <div class="hidden md:block text-xs text-gray-300 font-orbitron uppercase tracking-widest font-bold">Панель Навыков</div>
                         <button class="drawer-close md:hidden w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 hover:text-white" onclick="closeDrawers()" aria-label="Закрыть навыки"><i class="fa-solid fa-xmark text-xs"></i></button>
-                        <button onclick="toggleSkills()" class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 hover:text-white mx-auto transition-transform hover:scale-110" title="Скрыть/показать навыки">
+                        <button onclick="toggleSkills()" class="w-7 h-7 rounded-lg bg-white/5 flex items-center justify-center text-gray-400 hover:text-white mx-auto md:mx-0 transition-transform hover:scale-110" title="Скрыть/показать навыки">
                             <i class="fa-solid fa-eye-slash text-xs" id="skills-toggle-icon"></i>
                         </button>
                     </div>
-                    <div id="skills-container" class="flex flex-col w-14 transition-all gap-1.5">
+                    <div id="skills-container" class="flex flex-col w-14 md:w-56 transition-all gap-1.5">
                         <!-- JS Injects Skills Here -->
                     </div>
                 </div>
@@ -1882,12 +1884,16 @@
                 if(isUnlocked) {
                     html += `
                     <div class="skill-btn-wrapper group relative" id="skill-wrapper-${id}">
-                        <button id="skill-btn-${id}" onclick="castSkill('${id}')" class="skill-btn ${s.border} relative overflow-hidden" aria-label="${s.name}" title="${s.name}">
+                        <button id="skill-btn-${id}" onclick="castSkill('${id}')" class="skill-btn ${s.border} md:px-2.5 md:py-2 md:justify-start md:gap-3 relative" aria-label="${s.name}">
                             <div class="skill-cooldown-container">
                                 <div id="skill-cd-${id}" class="skill-cooldown" style="height: 0%"></div>
                             </div>
                             <span class="ico ${s.icon} text-xl md:text-2xl ${s.color} z-10 relative drop-shadow-[0_0_8px_currentColor] flex-shrink-0 pointer-events-none"></span>
-                            <span id="skill-timer-${id}" class="absolute inset-0 flex items-center justify-center font-orbitron font-black text-xs text-white z-20 skill-timer-overlay pointer-events-none hidden"></span>
+                            <span id="skill-timer-${id}" class="md:hidden absolute inset-0 flex items-center justify-center font-orbitron font-black text-xs text-white z-20 skill-timer-overlay pointer-events-none hidden"></span>
+                            <div class="hidden md:flex flex-col items-start z-10 text-left leading-tight pointer-events-none min-w-0 flex-1">
+                                <span class="text-xs font-bold text-white whitespace-nowrap drop-shadow-md truncate w-full">${s.name}</span>
+                                <span id="skill-status-${id}" class="text-[10px] text-emerald-400 font-bold tracking-wide">Готово</span>
+                            </div>
                             <div class="skill-tooltip">
                                 <div class="font-bold text-white text-sm mb-1.5 border-b border-white/10 pb-1.5 flex items-center justify-between gap-2">
                                     <span class="flex items-center gap-2 truncate"><span class="ico ${s.icon} ${s.color}"></span> ${s.name}</span>
@@ -1904,8 +1910,14 @@
                 } else {
                     html += `
                     <div class="skill-btn-wrapper group relative" id="skill-wrapper-${id}">
-                        <button onclick="buySkill('${id}')" class="locked-skill-btn relative overflow-hidden" aria-label="Открыть ${s.name}" title="Открыть ${s.name}">
-                            <i class="fa-solid fa-lock text-lg md:text-xl text-gray-500 z-10 relative flex-shrink-0 pointer-events-none"></i>
+                        <button onclick="buySkill('${id}')" class="locked-skill-btn md:px-2.5 md:py-2 md:justify-start md:gap-3 relative" aria-label="Открыть ${s.name}">
+                            <i class="fa-solid fa-lock text-base md:text-xl text-gray-500 z-10 relative flex-shrink-0 pointer-events-none"></i>
+                            <div class="hidden md:flex flex-col items-start z-10 text-left leading-tight pointer-events-none min-w-0 flex-1">
+                                <span class="text-xs font-bold text-gray-300 whitespace-nowrap truncate w-full">${s.name}</span>
+                                <span id="skill-price-${id}" class="text-[10px] mt-0.5 font-bold tracking-wider flex items-center gap-1 ${state.res.min >= s.cost ? 'text-mars-400' : 'text-gray-500'}">
+                                    <i class="fa-solid fa-lock text-[8px]"></i>${formatNum(s.cost)} Мин.
+                                </span>
+                            </div>
                             <div class="skill-tooltip">
                                 <div class="font-bold text-gray-200 text-sm mb-1.5 border-b border-white/10 pb-1.5 flex items-center justify-between gap-2">
                                     <span class="flex items-center gap-2 truncate"><i class="fa-solid fa-lock text-amber-400"></i> ${s.name}</span>
@@ -1961,6 +1973,10 @@
                         const can = state.res.min >= s.cost;
                         prog.style.width = Math.min(100, (state.res.min / s.cost) * 100) + '%';
                         prog.className = `h-full transition-all duration-200 ${can ? 'bg-mars-500 shadow-[0_0_8px_rgba(229,89,52,0.8)]' : 'bg-white/15'}`;
+                        const priceEl = document.getElementById(`skill-price-${id}`);
+                        if (priceEl) {
+                            priceEl.className = `text-[10px] mt-0.5 font-bold tracking-wider flex items-center gap-1 ${can ? 'text-mars-400 font-black animate-pulse' : 'text-gray-500'}`;
+                        }
                     }
                     continue;
                 }
@@ -1975,6 +1991,7 @@
                 const btn = document.getElementById(`skill-btn-${id}`);
                 const cdBar = document.getElementById(`skill-cd-${id}`);
                 const timerEl = document.getElementById(`skill-timer-${id}`);
+                const statusTxt = document.getElementById(`skill-status-${id}`);
                 const badgeEl = document.getElementById(`skill-tt-badge-${id}`);
                 
                 if (btn && cdBar) {
@@ -1986,8 +2003,12 @@
                         const remainingActive = Math.ceil((s.duration * 1000 - elapsed) / 1000);
                         if (timerEl) {
                             timerEl.classList.remove('hidden');
-                            timerEl.className = 'absolute inset-0 flex items-center justify-center font-orbitron font-black text-xs text-cyan-300 z-20 skill-timer-overlay pointer-events-none drop-shadow-[0_0_6px_rgba(34,211,238,0.9)] animate-pulse';
+                            timerEl.className = 'md:hidden absolute inset-0 flex items-center justify-center font-orbitron font-black text-xs text-cyan-300 z-20 skill-timer-overlay pointer-events-none drop-shadow-[0_0_6px_rgba(34,211,238,0.9)] animate-pulse';
                             timerEl.innerText = `${remainingActive}с`;
+                        }
+                        if (statusTxt) {
+                            statusTxt.className = 'text-[10px] font-orbitron font-bold tracking-wide text-cyan-300 animate-pulse';
+                            statusTxt.innerText = `Активен ${remainingActive}с`;
                         }
                         if (badgeEl) {
                             badgeEl.className = 'text-[9px] uppercase font-orbitron px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 font-bold';
@@ -2003,19 +2024,23 @@
                         if (remainingSec >= 3600) {
                             const h = Math.floor(remainingSec / 3600);
                             const m = Math.floor((remainingSec % 3600) / 60);
-                            timeStr = `${h}ч`;
+                            timeStr = `${h}ч ${m}м`;
                         } else if (remainingSec >= 60) {
                             const m = Math.floor(remainingSec / 60);
                             const sec = remainingSec % 60;
-                            timeStr = sec > 0 ? `${m}м` : `${m}м`;
+                            timeStr = `${m}м ${sec}с`;
                         } else {
                             timeStr = `${remainingSec}с`;
                         }
                         
                         if (timerEl) {
                             timerEl.classList.remove('hidden');
-                            timerEl.className = 'absolute inset-0 flex items-center justify-center font-orbitron font-bold text-[11px] text-white/90 z-20 skill-timer-overlay pointer-events-none drop-shadow-md';
+                            timerEl.className = 'md:hidden absolute inset-0 flex items-center justify-center font-orbitron font-bold text-[11px] text-white/90 z-20 skill-timer-overlay pointer-events-none drop-shadow-md';
                             timerEl.innerText = timeStr;
+                        }
+                        if (statusTxt) {
+                            statusTxt.className = 'text-[10px] font-orbitron font-bold tracking-wide text-gray-400';
+                            statusTxt.innerText = timeStr;
                         }
                         if (badgeEl) {
                             badgeEl.className = 'text-[9px] uppercase font-orbitron px-1.5 py-0.5 rounded bg-black/40 text-gray-400 border border-white/10 font-bold';
@@ -2028,6 +2053,10 @@
                         if (timerEl) {
                             timerEl.classList.add('hidden');
                             timerEl.innerText = '';
+                        }
+                        if (statusTxt) {
+                            statusTxt.className = 'text-[10px] font-orbitron font-bold tracking-wide text-emerald-400';
+                            statusTxt.innerText = 'Готово';
                         }
                         if (badgeEl) {
                             badgeEl.className = 'text-[9px] uppercase font-orbitron px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold';
