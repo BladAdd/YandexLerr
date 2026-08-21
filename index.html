@@ -177,6 +177,8 @@
         .shadow-glow-ufo { box-shadow: 0 0 25px rgba(34,211,238,0.6); }
         .bg-ufo-blur { background: radial-gradient(circle, rgba(34,211,238,0.35) 0%, rgba(34,211,238,0.08) 55%, transparent 75%); }
         .hover-bg-ufo-blur:hover { background: radial-gradient(circle, rgba(34,211,238,0.6) 0%, rgba(34,211,238,0.15) 55%, transparent 75%); }
+        @keyframes skillReadyPulse { 0%, 100% { box-shadow: 0 0 5px rgba(229,89,52,0.2); border-color: rgba(229,89,52,0.45); } 50% { box-shadow: 0 0 16px rgba(229,89,52,0.55); border-color: rgba(229,89,52,0.95); } }
+        .skill-ready-pulse { animation: skillReadyPulse 2s ease-in-out infinite; }
         
         .btn-shine { position: relative; overflow: hidden; }
         .btn-shine::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%); transform: skewX(-20deg); animation: shimmer 3s infinite; pointer-events: none; }
@@ -245,13 +247,13 @@
             </div>
             
             <div class="flex gap-2 flex-wrap md:flex-nowrap justify-end items-center">
-                <button onclick="toggleSound()" class="mr-1 text-gray-400 hover:text-white transition-all hover:scale-110 w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)]" title="Звук">
+                <button onclick="toggleSound()" class="mr-1 text-gray-400 hover:text-white transition-all hover:scale-110 w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.2)]" title="Звук: включить/выключить игровые эффекты">
                     <i id="sound-icon" class="fa-solid fa-volume-high"></i>
                 </button>
-                <button onclick="openAdsMarket()" class="mr-1 text-white hover:text-green-300 transition-all hover:scale-110 w-9 h-9 rounded-lg bg-gradient-to-br from-green-600/50 to-green-800/50 flex items-center justify-center border border-green-400/50 shadow-[0_0_15px_rgba(34,197,94,0.4)] animate-pulse" title="Бонусы за рекламу">
+                <button onclick="openAdsMarket()" class="mr-1 text-white hover:text-green-300 transition-all hover:scale-110 w-9 h-9 rounded-lg bg-gradient-to-br from-green-600/50 to-green-800/50 flex items-center justify-center border border-green-400/50 shadow-[0_0_15px_rgba(34,197,94,0.4)] animate-pulse" title="Маркет бонусов: награды за просмотр рекламы">
                     <i class="fa-solid fa-tv"></i>
                 </button>
-                <button onclick="openSettings()" class="mr-3 text-gray-400 hover:text-white transition-all hover:scale-110 w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10" title="Настройки">
+                <button onclick="openSettings()" class="mr-3 text-gray-400 hover:text-white transition-all hover:scale-110 w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10" title="Настройки игры">
                     <i class="fa-solid fa-gear"></i>
                 </button>
 
@@ -338,6 +340,10 @@
                         </div>
                     </div>
 
+                    <div id="combo-bar" style="opacity: 0" class="w-56 sm:w-64 md:w-80 h-[7px] rounded-full border border-white/[0.15] bg-black/40 overflow-hidden transition-opacity duration-200 pointer-events-none">
+                        <div id="combo-bar-fill" class="h-full rounded-full" style="width: 0%; background: linear-gradient(90deg, #f59e0b, #fde047);"></div>
+                    </div>
+
                     <div class="w-64 md:w-72 bg-black/80 h-4 rounded-full border-2 border-white/10 relative heat-bar-bg overflow-hidden shadow-[0_10px_20px_rgba(0,0,0,0.8)]" id="heat-bar-container">
                         <div id="heat-bar-fill" class="h-full bg-gradient-to-r from-orange-500 via-red-500 to-red-700 w-0 transition-all duration-100 relative shadow-[0_0_20px_rgba(255,0,0,0.9)]">
                             <div class="absolute inset-0 opacity-50 heat-bar-fill-texture"></div>
@@ -354,13 +360,13 @@
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span> ЯДРО
                     </button>
                     <button class="tab-btn active flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('build')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V11l7-6 7 6v10"/><path d="M9.5 21v-5h5v5"/></svg></span> БАЗА
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V11l7-6 7 6v10"/><path d="M9.5 21v-5h5v5"/></svg><span id="tab-badge-build" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> БАЗА
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('tech')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.5L4.5 19a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 9.5V2"/><path d="M8.5 2h7"/><path d="M7 15h10"/></svg></span> НАУКА
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 2v7.5L4.5 19a2 2 0 0 0 1.8 3h11.4a2 2 0 0 0 1.8-3L14 9.5V2"/><path d="M8.5 2h7"/><path d="M7 15h10"/></svg><span id="tab-badge-tech" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> НАУКА
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('crew')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> ЭКИП.
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg><span id="tab-badge-crew" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> ЭКИП.
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('hq')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21v-5a8 8 0 0 1 16 0v5"/><path d="M12 9V6"/><circle cx="12" cy="4.5" r="1.5"/></svg></span> ШТАБ
@@ -369,7 +375,7 @@
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg></span> ЗАДАЧИ
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-1 py-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('planets')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-18 12 12)"/></svg></span> КОСМОС
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-18 12 12)"/></svg><span id="tab-badge-planets" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> КОСМОС
                     </button>
                 </nav>
 
@@ -1037,8 +1043,10 @@
 
             updateHeaderUI();
             updateSkillsUI();
+            updateComboUI();
+            updateTabBadges();
             updateDynamicUI(); 
-            updateQuestsUI(); 
+            updateQuestsUI();
             
             if(Date.now() - lastUfoSpawn >= 180000) { lastUfoSpawn = Date.now(); spawnUFO(); }
             
@@ -1109,6 +1117,11 @@
                 el.classList.add('scale-110');
             } else {
                 el.style.color = '#fff';
+            }
+            const bar = document.getElementById('combo-bar');
+            if(bar) {
+                bar.style.opacity = combo > 1.0 ? '1' : '0';
+                document.getElementById('combo-bar-fill').style.width = (Math.max(0, Math.min(1, comboTimer / 1.5)) * 100) + '%';
             }
         }
 
@@ -1208,6 +1221,7 @@
                             <div class="hidden md:flex flex-col items-start z-10 text-left leading-tight pointer-events-none w-full ml-1">
                                 <span class="text-xs font-bold text-white whitespace-nowrap drop-shadow-md">${s.name}</span>
                                 <span id="skill-status-${id}" class="text-[10px] text-gray-300 font-bold tracking-wide">Готово</span>
+                                ${id === 'strike' ? '<span id="skill-hint-strike" class="hidden text-[9px] text-mars-300/90 leading-snug mt-0.5">Нажми — мгновенно +2 часа добычи</span>' : ''}
                             </div>
                             <div class="skill-tooltip">
                                 <div class="font-bold text-white text-base mb-2 border-b border-white/10 pb-2 flex items-center gap-2"><span class="ico ${s.icon} ${s.color}"></span> ${s.name}</div>
@@ -1219,16 +1233,20 @@
                 } else {
                     html += `
                     <div class="skill-btn-wrapper group">
-                        <button onclick="buySkill('${id}')" class="locked-skill-btn md:p-3 md:justify-start md:gap-3">
+                        <button onclick="buySkill('${id}')" class="locked-skill-btn md:p-3 md:justify-start md:gap-3 relative overflow-hidden">
                             <i class="fa-solid fa-lock text-lg md:text-xl text-gray-500 z-10 relative"></i>
                             <div class="hidden md:flex flex-col items-start z-10 text-left leading-tight pointer-events-none w-full ml-1">
-                                <span class="text-xs font-bold text-gray-400 whitespace-nowrap">Открыть навык</span>
-                                <span class="text-[10px] text-mars-400 font-bold tracking-widest">${formatNum(s.cost)} Мин.</span>
+                                <span class="text-xs font-bold text-gray-300 whitespace-nowrap">${s.name}</span>
+                                <span class="text-[9px] text-gray-500 leading-snug line-clamp-2">${s.desc}</span>
+                                <span id="skill-price-${id}" class="text-[10px] mt-0.5 font-bold tracking-widest flex items-center gap-1 ${state.res.min >= s.cost ? 'text-mars-400' : 'text-gray-500'}"><i class="fa-solid fa-lock text-[8px]"></i>${formatNum(s.cost)} Мин.</span>
                             </div>
                             <div class="skill-tooltip">
                                 <div class="font-bold text-gray-400 text-base mb-2 border-b border-white/10 pb-2"><i class="fa-solid fa-lock"></i> Недоступно</div>
                                 <div class="text-gray-300 text-sm my-3 leading-relaxed whitespace-normal text-left">${s.desc}</div>
                                 <div class="text-mars-400 text-xs font-bold mt-2 pt-2 border-t border-white/10 flex items-center gap-1 bg-black/50 p-2 rounded-lg border border-white/5">Цена: ${formatNum(s.cost)} Мин.</div>
+                            </div>
+                            <div class="absolute bottom-0 left-0 h-[3px] bg-white/10 z-20" style="width: 100%">
+                                <div id="skill-prog-${id}" class="h-full ${state.res.min >= s.cost ? 'bg-mars-500' : 'bg-white/15'}" style="width: ${Math.min(100, (state.res.min / s.cost) * 100)}%"></div>
                             </div>
                         </button>
                     </div>`;
@@ -1263,7 +1281,21 @@
             for(let id in SKILLS) {
                 const s = SKILLS[id];
                 const isUnlocked = state.skillsUnlocked ? state.skillsUnlocked[id] : s.unlocked;
-                if(!isUnlocked) continue;
+                if(!isUnlocked) {
+                    const prog = document.getElementById(`skill-prog-${id}`);
+                    if(prog) {
+                        const can = state.res.min >= s.cost;
+                        prog.style.width = Math.min(100, (state.res.min / s.cost) * 100) + '%';
+                        prog.classList.toggle('bg-mars-500', can);
+                        prog.classList.toggle('bg-white/15', !can);
+                        const priceEl = document.getElementById(`skill-price-${id}`);
+                        if(priceEl) {
+                            priceEl.classList.toggle('text-mars-400', can);
+                            priceEl.classList.toggle('text-gray-500', !can);
+                        }
+                    }
+                    continue;
+                }
 
                 const cdTime = s.cd * 1000;
                 const elapsed = now - (state.skills[id] || 0);
@@ -1294,6 +1326,11 @@
                         btn.classList.remove('opacity-50', 'cursor-not-allowed', 'border-white/5');
                         btn.classList.add(...s.border.split(' '));
                         statusTxt.innerText = 'Готово';
+                    }
+                    if (id === 'strike') {
+                        btn.classList.toggle('skill-ready-pulse', !onCd);
+                        const hint = document.getElementById('skill-hint-strike');
+                        if(hint) hint.classList.toggle('hidden', onCd);
                     }
                 }
             }
@@ -2126,7 +2163,7 @@
                     btnHtml = `<button onclick="travelPlanet('${id}')" class="w-full py-3 rounded-xl text-xs font-bold bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white shadow-[0_0_20px_rgba(37,99,235,0.5)] transition-all active:scale-95 btn-shine border border-blue-400 flex justify-between px-6 items-center"><span>Отправиться</span> <span class="bg-black/30 px-2 py-0.5 rounded text-[10px] shrink-0">Доход x${formatNum(p.mult)}</span></button>`;
                 } else {
                     let canAfford = (state.rebirth?.darkMatter || 0) >= p.cost;
-                    btnHtml = `<button id="btn-planet-${id}" onclick="unlockPlanet('${id}')" class="w-full py-3 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-2 ${canAfford ? 'bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.5)] btn-shine border border-purple-400' : 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/10'}" ${canAfford ? '' : 'disabled'}><i class="fa-solid fa-unlock text-[10px]"></i> Разблокировать: ${formatNum(p.cost)} ТМ</button>`;
+                    btnHtml = `<button id="btn-planet-${id}" onclick="unlockPlanet('${id}')" title="Требуется Тёмная Материя — валюта перерождений (+10% ко всей добыче за единицу)" class="w-full py-3 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center justify-center gap-2 ${canAfford ? 'bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white shadow-[0_0_20px_rgba(168,85,247,0.5)] btn-shine border border-purple-400' : 'bg-white/5 text-gray-500 cursor-not-allowed border border-white/10'}" ${canAfford ? '' : 'disabled'}><i class="fa-solid fa-unlock text-[10px]"></i> Разблокировать: ${formatNum(p.cost)} <span class="ico ico-dm text-purple-300 text-sm"></span></button>`;
                 }
 
                 html += `<div class="glass-card rounded-2xl p-5 border ${isCurrent ? 'border-green-500/50 shadow-[0_0_30px_rgba(34,197,94,0.15)] bg-green-900/10' : 'border-white/10 hover:shadow-[0_10px_20px_rgba(0,0,0,0.5)]'} transition-all duration-300 relative overflow-hidden group">
@@ -2201,6 +2238,32 @@
             if(ringsMesh) {
                 ringsMesh.material.color.setHex(atmosHex);
             }
+        }
+
+        let _badgeCache = '';
+        function updateTabBadges() {
+            let crewCostDiscount = 0;
+            CREW_DATA.forEach(c => { if(c.rarity==='rare' && c.effect.includes('Скидка')) crewCostDiscount += 0.02 * (state.crew[c.id] || 0); });
+            const cmg = Math.max(0.1, 1 - crewCostDiscount);
+            let b = false;
+            for(const id in BLD_DATA) { const d = BLD_DATA[id]; if(state.res.min >= d.base.min * Math.pow(d.costMult, state.bld[id] || 0) * cmg) { b = true; break; } }
+            let t = false;
+            for(const key in TECH_DATA) { const x = TECH_DATA[key]; if(!state.tech[key] && (!x.req || state.tech[x.req]) && state.res.sci >= x.cost) { t = true; break; } }
+            let c = false;
+            CREW_DATA.forEach(ch => {
+                const lvl = state.crew[ch.id] || 0;
+                if(lvl === 0 && state.res.prm >= ch.cost) c = true;
+                else if(lvl > 0 && state.res.sci >= lvl * 50) c = true;
+            });
+            let p = false;
+            for(const id in PLANETS) { if(!state.unlockedPlanets[id] && (state.rebirth?.darkMatter || 0) >= PLANETS[id].cost) { p = true; break; } }
+            const sig = `${b}|${t}|${c}|${p}`;
+            if(sig === _badgeCache) return;
+            _badgeCache = sig;
+            [['build', b], ['tech', t], ['crew', c], ['planets', p]].forEach(([n, v]) => {
+                const el = document.getElementById(`tab-badge-${n}`);
+                if(el) el.classList.toggle('hidden', !v);
+            });
         }
 
         function updateDynamicUI() {
