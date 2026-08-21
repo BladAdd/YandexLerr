@@ -274,6 +274,11 @@
                 <button onclick="openAdsMarket()" class="mr-1 text-white hover:text-green-300 transition-all hover:scale-110 w-9 h-9 rounded-lg bg-gradient-to-br from-green-600/50 to-green-800/50 flex items-center justify-center border border-green-400/50 shadow-[0_0_15px_rgba(34,197,94,0.4)] animate-pulse" title="Маркет бонусов: награды за просмотр рекламы">
                     <i class="fa-solid fa-tv"></i>
                 </button>
+                <!-- STAGE 5: достижения открываются из шапки; бейдж обновляется без перестройки DOM. -->
+                <button onclick="openAchievementsModal()" class="mr-1 relative text-gold-300 hover:text-white transition-all hover:scale-110 w-9 h-9 rounded-lg bg-gold-500/10 flex items-center justify-center border border-gold-400/40 hover:bg-gold-500/20" title="Достижения">
+                    <i class="fa-solid fa-trophy"></i>
+                    <span id="achievement-ready-badge" class="hidden absolute -top-2 -right-2 min-w-[19px] h-[19px] px-1 rounded-full bg-red-500 text-white text-[10px] font-black items-center justify-center border-2 border-gray-950">0</span>
+                </button>
                 <button onclick="openSettings()" class="mr-3 text-gray-400 hover:text-white transition-all hover:scale-110 w-9 h-9 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 hover:bg-white/10" title="Настройки игры">
                     <i class="fa-solid fa-gear"></i>
                 </button>
@@ -386,7 +391,7 @@
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M4 21v-5a8 8 0 0 1 16 0v5"/><path d="M12 9V6"/><circle cx="12" cy="4.5" r="1.5"/></svg></span> ШТАБ
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-2.5 py-3 md:px-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('quests')">
-                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg></span> ЗАДАЧИ
+                        <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 17 2 2 4-4"/><path d="m3 7 2 2 4-4"/><path d="M13 6h8"/><path d="M13 12h8"/><path d="M13 18h8"/></svg><span id="tab-badge-quests" class="hidden absolute -top-1 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-green-500 text-white text-[9px] items-center justify-center"></span></span> ЗАДАЧИ
                     </button>
                     <button class="tab-btn flex-1 min-w-[60px] md:min-w-0 px-2.5 py-3 md:px-3 md:py-4 font-orbitron text-[10px] sm:text-[11px] uppercase flex flex-col items-center font-bold tracking-wider" onclick="switchTab('planets')">
                         <span class="h-7 md:h-8 flex items-center justify-center mb-1.5 relative"><svg class="tab-ico w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5.5"/><ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-18 12 12)"/></svg><span id="tab-badge-planets" class="hidden absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-mars-400 shadow-[0_0_6px_rgba(229,89,52,0.9)] pointer-events-none"></span></span> КОСМОС
@@ -448,6 +453,43 @@
                     Object.freeze({ incomeSeconds: 120 * 60, minFloor: 5000, crystals: 30, cores: 0 }),
                     Object.freeze({ incomeSeconds: 180 * 60, minFloor: 10000, crystals: 50, cores: 1 })
                 ])
+            }),
+            // STAGE 5: неизменяемые каталоги достижений и ежедневных заданий.
+            achievements: Object.freeze([
+                Object.freeze({ id: 'click_1', category: 'Клики', name: 'Разведчик', type: 'clicks', target: 100, reward: 5 }),
+                Object.freeze({ id: 'click_2', category: 'Клики', name: 'Бурильщик', type: 'clicks', target: 1000, reward: 10 }),
+                Object.freeze({ id: 'click_3', category: 'Клики', name: 'Оператор ядра', type: 'clicks', target: 10000, reward: 25 }),
+                Object.freeze({ id: 'click_4', category: 'Клики', name: 'Неутомимый', type: 'clicks', target: 100000, reward: 75 }),
+                Object.freeze({ id: 'mine_1', category: 'Добыча', name: 'Первая тонна', type: 'lifetime', target: 1e4, reward: 5 }),
+                Object.freeze({ id: 'mine_2', category: 'Добыча', name: 'Промышленник', type: 'lifetime', target: 1e6, reward: 15 }),
+                Object.freeze({ id: 'mine_3', category: 'Добыча', name: 'Марсианский магнат', type: 'lifetime', target: 1e9, reward: 40 }),
+                Object.freeze({ id: 'mine_4', category: 'Добыча', name: 'Сингулярность', type: 'lifetime', target: 1e12, reward: 100 }),
+                Object.freeze({ id: 'upgrade_1', category: 'Апгрейды', name: 'Механик', type: 'upgrades', target: 5, reward: 5 }),
+                Object.freeze({ id: 'upgrade_2', category: 'Апгрейды', name: 'Инженер', type: 'upgrades', target: 25, reward: 15 }),
+                Object.freeze({ id: 'upgrade_3', category: 'Апгрейды', name: 'Архитектор', type: 'upgrades', target: 100, reward: 40 }),
+                Object.freeze({ id: 'upgrade_4', category: 'Апгрейды', name: 'Мегастроитель', type: 'upgrades', target: 500, reward: 100 }),
+                Object.freeze({ id: 'casino_1', category: 'Казино', name: 'Первый спин', type: 'casino', target: 1, reward: 5 }),
+                Object.freeze({ id: 'casino_2', category: 'Казино', name: 'Завсегдатай Фобоса', type: 'casino', target: 25, reward: 15 }),
+                Object.freeze({ id: 'casino_3', category: 'Казино', name: 'Игрок', type: 'casino', target: 100, reward: 40 }),
+                Object.freeze({ id: 'casino_4', category: 'Казино', name: 'Легенда Фобоса', type: 'casino', target: 500, reward: 100 }),
+                Object.freeze({ id: 'prestige_1', category: 'Престиж', name: 'Новый цикл', type: 'prestige', target: 1, reward: 15 }),
+                Object.freeze({ id: 'prestige_2', category: 'Престиж', name: 'Ветеран циклов', type: 'prestige', target: 3, reward: 30 }),
+                Object.freeze({ id: 'prestige_3', category: 'Престиж', name: 'Повелитель аномалий', type: 'prestige', target: 10, reward: 75 }),
+                Object.freeze({ id: 'prestige_4', category: 'Престиж', name: 'Вечная колония', type: 'prestige', target: 25, reward: 150 }),
+                Object.freeze({ id: 'combo_1', category: 'Комбо', name: 'Ритм', type: 'combo', target: 1.5, reward: 5 }),
+                Object.freeze({ id: 'combo_2', category: 'Комбо', name: 'Серия', type: 'combo', target: 2, reward: 10 }),
+                Object.freeze({ id: 'combo_3', category: 'Комбо', name: 'Перегрузка', type: 'combo', target: 2.5, reward: 20 }),
+                Object.freeze({ id: 'combo_4', category: 'Комбо', name: 'Идеальный темп', type: 'combo', target: 3, reward: 40 })
+            ]),
+            dailyTasks: Object.freeze({
+                count: 3,
+                templates: Object.freeze([
+                    Object.freeze({ type: 'clicks', label: 'Сделать клики', base: 60, scale: 0.08, min: 50, max: 5000 }),
+                    Object.freeze({ type: 'mined', label: 'Добыть минералы', incomeSeconds: 900, min: 1000, max: 1e15 }),
+                    Object.freeze({ type: 'casino', label: 'Сделать спины в казино', base: 5, scale: 0.02, min: 3, max: 30 }),
+                    Object.freeze({ type: 'upgrades', label: 'Купить апгрейды', base: 3, scale: 0.01, min: 2, max: 20 })
+                ]),
+                rewards: Object.freeze({ crystals: Object.freeze([5, 8, 12]), incomeSeconds: Object.freeze([300, 600, 900]), mineralFloor: Object.freeze([500, 1500, 5000]) })
             }),
             casino: Object.freeze({
                 unlockLifetimeMin: 100000,
@@ -603,8 +645,8 @@
             { id: 'q14', name: 'Повелитель Времени', desc: 'Собрать 1 Квинтиллион мин.', type: 'min', target: 1e18, reward: {prm: 2500} }
         ];
 
-        // STAGE 4: версия добавляет календарь ежедневных наград и его отложенный claim.
-        const SAVE_VERSION = 4;
+        // STAGE 5: версия добавляет достижения и стабильные ежедневные задания.
+        const SAVE_VERSION = 5;
         const DEFAULT_SKILLS = Object.freeze({ strike: 0, freeze: 0, swarm: 0, coolant: 0, overdrive: 0, timewarp: 0 });
         const DEFAULT_SKILLS_UNLOCKED = Object.freeze({ strike: true, freeze: false, swarm: false, coolant: false, overdrive: false, timewarp: false });
 
@@ -613,13 +655,17 @@
             res: { min: 0, sci: 0, prm: 50 },
             bld: {}, tech: {}, crew: {},
             skills: { ...DEFAULT_SKILLS },
-            stats: { totalTime: 0, clicks: 0, totalMin: 0, totalLifetime: 0 },
+            // STAGE 5: lifetime-счётчики не сбрасываются престижем и питают прогресс/дневные baseline.
+            stats: { totalTime: 0, clicks: 0, totalMin: 0, totalLifetime: 0, totalClicks: 0, upgradePurchases: 0, maxCombo: 1 },
             rebirth: { count: 0, darkMatter: 0 },
             prestige: { cores: 0, count: 0, adCoreReady: false },
             // STAGE 3: snapshot относится именно к моменту lastSavedAt; pending переживает перезагрузку до выбора.
             offline: { lastSavedAt: Date.now(), incomeSnapshot: { min: 0, sci: 0 }, pending: null },
             // STAGE 4: pending фиксирует конкретную сумму до claim; lastClaimDate блокирует повтор в тот же локальный день.
             daily: { streak: 0, lastClaimDate: null, lastClaimDay: null, currentDay: 1, pending: null },
+            // STAGE 5: отдельные поля не конфликтуют с календарём и legacy questsCompleted.
+            achievements: { claimed: {} },
+            dailyTasks: { date: null, tasks: [] },
             skillsUnlocked: { ...DEFAULT_SKILLS_UNLOCKED },
             skillsVisible: true,
             questsCompleted: {},
@@ -856,6 +902,14 @@
                     };
                     state.skillsUnlocked = { ...DEFAULT_SKILLS_UNLOCKED, ...(parsed.skillsUnlocked || {}) };
                     state.questsCompleted = { ...(parsed.questsCompleted || {}) };
+                    // STAGE 5: merge сохраняет неизвестные future/legacy achievement/task поля.
+                    const parsedAchievements = parsed.achievements || {};
+                    state.achievements = { ...defaults.achievements, ...parsedAchievements, claimed: { ...defaults.achievements.claimed, ...(parsedAchievements.claimed || {}) } };
+                    const parsedTasks = parsed.dailyTasks || {};
+                    state.dailyTasks = { ...defaults.dailyTasks, ...parsedTasks, tasks: Array.isArray(parsedTasks.tasks) ? parsedTasks.tasks : [] };
+                    state.stats.totalClicks = Math.max(Number(state.stats.totalClicks) || 0, Number(state.stats.clicks) || 0);
+                    state.stats.upgradePurchases = Math.max(0, Number(state.stats.upgradePurchases) || Object.values(state.bld).reduce((a, b) => a + (Number(b) || 0), 0));
+                    state.stats.maxCombo = Math.max(1, Number(state.stats.maxCombo) || 1);
                     state.unlockedPlanets = { mars: true, ...(parsed.unlockedPlanets || {}) };
                     const dc = defaults.casino;
                     state.casino = { ...dc, ...(parsed.casino || {}), stats: { ...dc.stats, ...((parsed.casino && parsed.casino.stats) || {}) } };
@@ -1204,6 +1258,8 @@
             casinoTick(delta);
             updateDynamicUI(); 
             updateQuestsUI();
+            // STAGE 5: только text/style updates, без перестройки списка на tick.
+            updateStage5UI();
             
             if(Date.now() - lastUfoSpawn >= 180000) { lastUfoSpawn = Date.now(); spawnUFO(); }
             
@@ -1227,10 +1283,15 @@
             recalculate();
             state.res.min += calc.clickPower;
             addLifetimeMin(calc.clickPower);
-            if(isManual) state.stats.clicks++;
+            if(isManual) {
+                state.stats.clicks++;
+                // STAGE 5: несбрасываемый счётчик нужен достижениям и baseline задания.
+                state.stats.totalClicks = (state.stats.totalClicks || 0) + 1;
+            }
 
             if(isManual) {
                 combo = Math.min(BALANCE.combo.max, combo + BALANCE.combo.gainPerClick);
+                state.stats.maxCombo = Math.max(state.stats.maxCombo || 1, combo);
                 comboTimer = BALANCE.combo.holdSeconds;
                 updateComboUI();
                 spawnFloatingText("+" + formatNum(calc.clickPower));
@@ -1917,6 +1978,8 @@
             _slotSpinning = true;
             const C = CASINO_CONFIG.slots, st = state.casino;
             st.stats.spins++; st.stats.wagered += bet;
+            // STAGE 5: обновить casino achievement/task сразу после начала спина.
+            updateStage5UI();
             let syms = [casinoWeightedPick(C.symbols), casinoWeightedPick(C.symbols), casinoWeightedPick(C.symbols)];
             let ev = casinoEvalSlots(syms);
             if (window.CASINO_DEBUG === true && !ev) { do { syms = [casinoWeightedPick(C.symbols), casinoWeightedPick(C.symbols), casinoWeightedPick(C.symbols)]; } while (!casinoEvalSlots(syms)); ev = casinoEvalSlots(syms); }
@@ -2051,6 +2114,8 @@
             if (window.CASINO_DEBUG === true) cp = Math.max(cp, 10);
             _crash = { bet, cp, t0: performance.now(), pts: [], trail: [], done: false, success: false, cashed: false, bustAnim: 0, t: 0, m: 1 };
             state.casino.stats.spins++; state.casino.stats.wagered += bet;
+            // STAGE 5: crash round участвует в casino-счётчиках.
+            updateStage5UI();
             const status = document.getElementById('crash-status');
             if (status) status.style.opacity = '0';
             casinoSFX('launch');
@@ -2286,6 +2351,9 @@
         }
         function casinoWheelDoSpin() {
             if (_wheelSpin) return;
+            // STAGE 5: колесо считается casino spin только после фактического старта.
+            state.casino.stats.spins = (state.casino.stats.spins || 0) + 1;
+            updateStage5UI();
             const segs = CASINO_CONFIG.wheel.segments;
             const seg = casinoWeightedPick(segs);
             const arc = Math.PI * 2 / segs.length;
@@ -2586,7 +2654,9 @@
             let cost = (d.base.min * Math.pow(d.costMult, lvl)) * costMultGlobal;
             if(state.res.min >= cost) { 
                 state.res.min -= cost; 
-                state.bld[id] = lvl + 1; 
+                state.bld[id] = lvl + 1;
+                // STAGE 5: единый lifetime-счётчик покупок зданий/апгрейдов.
+                state.stats.upgradePurchases = (state.stats.upgradePurchases || 0) + 1;
                 recalculate(); 
                 saveGame();
                 switchTab('build'); 
@@ -2637,7 +2707,10 @@
                 return;
             }
             if (state.res.sci >= t.cost) {
-                state.res.sci -= t.cost; state.tech[id] = true; recalculate(); saveGame(); switchTab('tech');
+                state.res.sci -= t.cost; state.tech[id] = true;
+                // STAGE 5: технологии также считаются покупками апгрейдов.
+                state.stats.upgradePurchases = (state.stats.upgradePurchases || 0) + 1;
+                recalculate(); saveGame(); switchTab('tech');
                 playSFX('buy');
             } else {
                 playSFX('error');
@@ -3372,8 +3445,138 @@
             tradeMarketCustom();
         }
 
+        // STAGE 5: прогресс достижений всегда вычисляется из сохранённой статистики.
+        function achievementProgress(a) {
+            if (a.type === 'clicks') return state.stats.totalClicks || state.stats.clicks || 0;
+            if (a.type === 'lifetime') return state.stats.totalLifetime || 0;
+            if (a.type === 'upgrades') return state.stats.upgradePurchases || 0;
+            if (a.type === 'casino') return state.casino?.stats?.spins || 0;
+            if (a.type === 'prestige') return state.prestige?.count || 0;
+            if (a.type === 'combo') return state.stats.maxCombo || 1;
+            return 0;
+        }
+
+        let achievementClaimLocked = false;
+        let achievementCategory = 'Все';
+        function readyAchievementCount() {
+            const claimed = state.achievements?.claimed || {};
+            return BALANCE.achievements.filter(a => !claimed[a.id] && achievementProgress(a) >= a.target).length;
+        }
+
+        function updateAchievementBadge() {
+            const count = readyAchievementCount();
+            const badge = document.getElementById('achievement-ready-badge');
+            if (!badge) return;
+            badge.textContent = count;
+            badge.classList.toggle('hidden', count === 0);
+            badge.classList.toggle('flex', count > 0);
+        }
+
+        function openAchievementsModal(category = achievementCategory) {
+            achievementCategory = category;
+            const modal = document.getElementById('generic-modal');
+            const content = document.getElementById('modal-content');
+            const categories = ['Все', ...new Set(BALANCE.achievements.map(a => a.category))];
+            const claimed = state.achievements?.claimed || {};
+            const items = BALANCE.achievements.filter(a => category === 'Все' || a.category === category).map(a => {
+                const progress = achievementProgress(a), done = progress >= a.target, got = !!claimed[a.id];
+                const pct = Math.min(100, progress / a.target * 100);
+                return `<div class="rounded-xl border ${done && !got ? 'border-green-500/50 bg-green-950/20' : 'border-white/10 bg-black/30'} p-3">
+                    <div class="flex items-center justify-between gap-3"><div class="min-w-0"><div class="font-bold ${got ? 'text-gray-500' : 'text-white'}">${a.name}</div><div class="text-[10px] text-gray-500 uppercase">${a.category} · ${formatNum(progress)} / ${formatNum(a.target)}</div></div>
+                    ${got ? '<span class="text-green-500 text-xs font-bold">ПОЛУЧЕНО</span>' : done ? `<button onclick="claimAchievement('${a.id}', this)" class="shrink-0 px-3 py-2 rounded-lg bg-green-600 hover:bg-green-500 text-white text-xs font-bold">Забрать +${a.reward} <span class="ico ico-crystal"></span></button>` : `<span class="text-prem-300 text-xs font-bold">+${a.reward} <span class="ico ico-crystal"></span></span>`}</div>
+                    <div class="h-1.5 rounded-full bg-black/70 mt-2 overflow-hidden"><div class="h-full ${done ? 'bg-green-500' : 'bg-gold-500'}" style="width:${pct}%"></div></div>
+                </div>`;
+            }).join('');
+            content.innerHTML = `<div class="flex justify-between items-center border-b border-white/10 pb-4 mb-3"><div><h3 class="font-orbitron font-black text-xl text-gold-300"><i class="fa-solid fa-trophy mr-2"></i>ДОСТИЖЕНИЯ</h3><div class="text-[10px] text-gray-500 uppercase">24 награды за развитие колонии</div></div><button onclick="closeModal()" class="w-10 h-10 rounded-full bg-white/5"><i class="fa-solid fa-xmark"></i></button></div>
+                <div class="flex gap-2 overflow-x-auto pb-3">${categories.map(c => `<button onclick="openAchievementsModal('${c}')" class="shrink-0 px-3 py-1.5 rounded-lg text-[10px] font-bold border ${c === category ? 'bg-gold-500/20 border-gold-400 text-gold-300' : 'bg-white/5 border-white/10 text-gray-400'}">${c}</button>`).join('')}</div>
+                <div class="overflow-y-auto pr-1 space-y-2">${items}</div>`;
+            modal.classList.remove('hidden');
+        }
+
+        function claimAchievement(id, button) {
+            if (achievementClaimLocked) return;
+            const a = BALANCE.achievements.find(x => x.id === id);
+            if (!a || state.achievements.claimed[id] || achievementProgress(a) < a.target) return;
+            achievementClaimLocked = true;
+            if (button) button.disabled = true;
+            state.achievements.claimed[id] = true;
+            state.res.prm += a.reward;
+            saveGame(); updateHeaderUI(); updateAchievementBadge(); playSFX('epic');
+            showToast(`Достижение «${a.name}»: +${a.reward} кристаллов`);
+            achievementClaimLocked = false;
+            openAchievementsModal(achievementCategory);
+        }
+
+        // STAGE 5: стабильный seeded-выбор трёх разных типов на локальную дату.
+        function stage5Hash(text) {
+            let h = 2166136261;
+            for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+            return h >>> 0;
+        }
+        function stage5Counter(type) {
+            if (type === 'clicks') return state.stats.totalClicks || 0;
+            if (type === 'mined') return state.stats.totalLifetime || 0;
+            if (type === 'casino') return state.casino?.stats?.spins || 0;
+            if (type === 'upgrades') return state.stats.upgradePurchases || 0;
+            return 0;
+        }
+        function prepareDailyTasks(now = Date.now()) {
+            const date = localDateKey(now);
+            if (!date || (state.dailyTasks?.date === date && state.dailyTasks.tasks?.length === BALANCE.dailyTasks.count)) return;
+            const templates = [...BALANCE.dailyTasks.templates];
+            let seed = stage5Hash(date);
+            for (let i = templates.length - 1; i > 0; i--) { seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0; const j = seed % (i + 1); [templates[i], templates[j]] = [templates[j], templates[i]]; }
+            const income = Math.max(1, Number(calc.rate.min) || 1);
+            const progressScale = Math.log10(Math.max(10, state.stats.totalLifetime || 10));
+            const tasks = templates.slice(0, BALANCE.dailyTasks.count).map((t, i) => {
+                let target;
+                if (t.type === 'mined') target = Math.round(Math.min(t.max, Math.max(t.min, income * t.incomeSeconds)));
+                else target = Math.round(Math.min(t.max, Math.max(t.min, t.base * (1 + progressScale * t.scale))));
+                const rewardMin = Math.round(Math.max(BALANCE.dailyTasks.rewards.mineralFloor[i], income * BALANCE.dailyTasks.rewards.incomeSeconds[i]));
+                return { id: `${date}:${t.type}`, type: t.type, label: t.label, target, baseline: stage5Counter(t.type), progress: 0, claimed: false, reward: { prm: BALANCE.dailyTasks.rewards.crystals[i], min: rewardMin } };
+            });
+            state.dailyTasks = { ...(state.dailyTasks || {}), date, tasks };
+            saveGame();
+        }
+        function dailyTaskProgress(task) { return Math.min(task.target, Math.max(task.progress || 0, stage5Counter(task.type) - task.baseline)); }
+        let dailyTaskClaimLocked = false;
+        function claimDailyTask(id, button) {
+            if (dailyTaskClaimLocked) return;
+            const task = state.dailyTasks?.tasks?.find(x => x.id === id);
+            if (!task || task.claimed || dailyTaskProgress(task) < task.target) return;
+            dailyTaskClaimLocked = true; if (button) button.disabled = true;
+            task.progress = dailyTaskProgress(task); task.claimed = true;
+            state.res.prm += task.reward.prm; state.res.min += task.reward.min; addLifetimeMin(task.reward.min);
+            saveGame(); updateHeaderUI(); updateStage5UI(true); playSFX('epic');
+            showToast(`Задание выполнено: +${task.reward.prm} крист., +${formatNum(task.reward.min)} мин.`);
+            dailyTaskClaimLocked = false;
+        }
+        function renderDailyTasks() {
+            prepareDailyTasks();
+            return `<div class="mb-6"><div class="flex justify-between items-end mb-3"><div><div class="font-orbitron font-black text-sm text-white">ЕЖЕДНЕВНЫЕ ЗАДАНИЯ</div><div class="text-[10px] text-gray-500">Новый набор после 00:00 · ${state.dailyTasks.date}</div></div></div><div class="space-y-3">${state.dailyTasks.tasks.map(task => {
+                const progress = dailyTaskProgress(task), done = progress >= task.target, pct = Math.min(100, progress / task.target * 100);
+                return `<div id="daily-task-${task.type}" class="glass-card rounded-xl p-4 border ${done && !task.claimed ? 'border-green-500/50' : 'border-white/10'}"><div class="flex justify-between gap-3"><div class="min-w-0"><div class="font-bold text-white">${task.label}: ${formatNum(task.target)}</div><div id="daily-task-progress-${task.type}" class="text-[11px] text-gray-400">${formatNum(progress)} / ${formatNum(task.target)}</div><div class="text-[10px] text-prem-300 mt-1">+${task.reward.prm} крист. · +${formatNum(task.reward.min)} мин.</div></div>${task.claimed ? '<span class="text-green-500 font-bold text-xs">ПОЛУЧЕНО</span>' : `<button id="daily-task-btn-${task.type}" onclick="claimDailyTask('${task.id}', this)" ${done ? '' : 'disabled'} class="shrink-0 px-3 py-2 rounded-lg text-xs font-bold ${done ? 'bg-green-600 text-white' : 'bg-white/5 text-gray-600'}">Забрать</button>`}</div><div class="h-1.5 rounded-full bg-black/60 overflow-hidden mt-3"><div id="daily-task-bar-${task.type}" class="h-full bg-gradient-to-r from-green-600 to-green-400" style="width:${pct}%"></div></div></div>`;
+            }).join('')}</div></div>`;
+        }
+        function updateStage5UI(force = false) {
+            prepareDailyTasks(); updateAchievementBadge();
+            const tasks = state.dailyTasks?.tasks || [];
+            let ready = 0;
+            tasks.forEach(task => {
+                const progress = dailyTaskProgress(task), done = progress >= task.target;
+                // STAGE 5: snapshot progress сохраняется вместе с baseline/claimed/date на ближайшем autosave.
+                task.progress = progress;
+                if (done && !task.claimed) ready++;
+                const text = document.getElementById(`daily-task-progress-${task.type}`); if (text) text.textContent = `${formatNum(progress)} / ${formatNum(task.target)}`;
+                const bar = document.getElementById(`daily-task-bar-${task.type}`); if (bar) bar.style.width = Math.min(100, progress / task.target * 100) + '%';
+                const btn = document.getElementById(`daily-task-btn-${task.type}`); if (btn) { btn.disabled = !done; btn.className = `shrink-0 px-3 py-2 rounded-lg text-xs font-bold ${done ? 'bg-green-600 text-white' : 'bg-white/5 text-gray-600'}`; }
+            });
+            const badge = document.getElementById('tab-badge-quests'); if (badge) { badge.textContent = ready; badge.classList.toggle('hidden', ready === 0); badge.classList.toggle('flex', ready > 0); }
+            if (force && currentTab === 'quests') switchTab('quests');
+        }
+
         function renderQuests(container) {
-            let html = '<div class="text-xs text-gray-400 mb-4 font-orbitron font-bold tracking-widest uppercase border-b border-white/10 pb-2">Система Достижений</div><div class="flex flex-col gap-3">';
+            let html = renderDailyTasks() + '<div class="text-xs text-gray-400 mb-4 font-orbitron font-bold tracking-widest uppercase border-b border-white/10 pb-2">Legacy достижения</div><div class="flex flex-col gap-3">';
             
             if (!state.questsCompleted) state.questsCompleted = {};
 
@@ -4143,6 +4346,9 @@
             recalculate();
             // STAGE 4: offline имеет приоритет; daily создаётся заранее и показывается после него.
             prepareDailyReward(Date.now());
+            // STAGE 5: набор заданий генерируется после recalculate и затем замораживается.
+            prepareDailyTasks(Date.now());
+            updateStage5UI();
             scheduleStartupModal();
             
             if ((document.body.clientWidth < 768 && state.uiMode === 'auto') || state.uiMode === 'mobile') {
@@ -4165,6 +4371,9 @@
             } else {
                 prepareOfflineReward(Date.now());
                 prepareDailyReward(Date.now());
+                // STAGE 5: resume проверяет локальный rollover.
+                prepareDailyTasks(Date.now());
+                updateStage5UI();
                 scheduleStartupModal();
                 lastFrame = performance.now();
                 if (ysdk && ysdk.gameplayStart) { try { ysdk.gameplayStart(); } catch(e) {} }
